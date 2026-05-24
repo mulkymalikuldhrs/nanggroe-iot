@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 1200px;
+    padding: 40px 48px;
+  }
+  .title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 36px;
+    letter-spacing: 0.5px;
+  }
+  .diagram {
+    position: relative;
+    width: 1104px;
+    margin: 0 auto;
+  }
+
+  /* Human Operator */
+  .human-box {
+    background: #F8FAFC;
+    border: 2px solid #CBD5E1;
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    width: 280px;
+    margin: 0 auto;
+  }
+  .human-icon { font-size: 28px; margin-bottom: 4px; }
+  .human-title { font-size: 16px; font-weight: 700; color: #334155; }
+  .human-sub { font-size: 11px; color: #64748b; }
+
+  /* Agent cards */
+  .agents-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0;
+    gap: 40px;
+  }
+  .agent-card {
+    border-radius: 12px;
+    padding: 20px 24px;
+    width: 480px;
+    border: 1.5px solid rgba(0,0,0,0.06);
+  }
+  .agent-card.hermes { background: #FFF7ED; border-color: #FDBA74; }
+  .agent-card.picoclaw { background: #EFF6FF; border-color: #93C5FD; }
+
+  .agent-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .agent-model { font-size: 11px; margin-bottom: 12px; }
+  .hermes .agent-name { color: #9a3412; }
+  .hermes .agent-model { color: #c2410c; }
+  .picoclaw .agent-name { color: #1e40af; }
+  .picoclaw .agent-model { color: #2563eb; }
+
+  .resp-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; color: #64748b; }
+  .resp-list { list-style: none; padding: 0; }
+  .resp-list li {
+    font-size: 12px;
+    padding: 5px 10px;
+    margin-bottom: 4px;
+    border-radius: 5px;
+  }
+  .hermes .resp-list li { background: #FFEDD5; color: #7c2d12; }
+  .picoclaw .resp-list li { background: #DBEAFE; color: #1e3a8a; }
+
+  /* Bottom hardware */
+  .hw-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 0;
+  }
+  .hw-box {
+    background: #F0FDF4;
+    border: 1.5px solid #86EFAC;
+    border-radius: 10px;
+    padding: 14px 28px;
+    text-align: center;
+  }
+  .hw-title { font-size: 14px; font-weight: 700; color: #166534; }
+  .hw-sub { font-size: 11px; color: #15803d; }
+
+  /* Sensors */
+  .sensors-box {
+    background: #FDF2F8;
+    border: 1.5px solid #F9A8D4;
+    border-radius: 10px;
+    padding: 14px 28px;
+    text-align: center;
+  }
+  .sensors-title { font-size: 14px; font-weight: 700; color: #9d174d; }
+  .sensors-sub { font-size: 11px; color: #be185d; }
+
+  /* Arrow containers */
+  .arrow-down {
+    display: flex;
+    justify-content: center;
+    height: 44px;
+    position: relative;
+  }
+  .arrow-label {
+    position: absolute;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="title">Arsitektur Multi-Agen Hermes — PicoClaw</div>
+
+<div class="diagram">
+
+  <!-- Human Operator -->
+  <div class="human-box">
+    <div class="human-icon">&#9775;</div>
+    <div class="human-title">Operator Manusia</div>
+    <div class="human-sub">Perintah bahasa alami / GUI</div>
+  </div>
+
+  <!-- Arrow Human → Hermes -->
+  <div class="arrow-down">
+    <svg width="200" height="44" viewBox="0 0 200 44">
+      <defs><marker id="ad1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94a3b8"/></marker></defs>
+      <line x1="100" y1="4" x2="100" y2="38" stroke="#94a3b8" stroke-width="2" marker-end="url(#ad1)"/>
+    </svg>
+    <span class="arrow-label" style="left:56%; top:14px;">instruksi</span>
+  </div>
+
+  <!-- Hermes + PicoClaw row -->
+  <div class="agents-row">
+    <div class="agent-card hermes">
+      <div class="agent-name">Agen Hermes</div>
+      <div class="agent-model">AI Strategis — 4B LLM</div>
+      <div class="resp-label">Tanggung Jawab</div>
+      <ul class="resp-list">
+        <li>Interpretasi bahasa alami</li>
+        <li>Perencanaan misi</li>
+        <li>Generasi rencana penerbangan</li>
+        <li>Koordinasi komunikasi</li>
+      </ul>
+    </div>
+    <div class="agent-card picoclaw">
+      <div class="agent-name">Agen PicoClaw</div>
+      <div class="agent-model">AI Taktis — 0.8B LLM</div>
+      <div class="resp-label">Tanggung Jawab</div>
+      <ul class="resp-list">
+        <li>Monitoring telemetri real-time</li>
+        <li>Deteksi rintangan</li>
+        <li>Aksi darurat</li>
+        <li>Koreksi instan</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Arrow Hermes → PicoClaw (horizontal, shown between cards) -->
+  <!-- Arrow Agents → Hardware -->
+  <div class="arrow-down" style="height: 48px;">
+    <svg width="1104" height="48" viewBox="0 0 1104 48">
+      <!-- Hermes down -->
+      <line x1="260" y1="4" x2="360" y2="42" stroke="#94a3b8" stroke-width="2" marker-end="url(#ad1)"/>
+      <!-- PicoClaw down -->
+      <line x1="844" y1="4" x2="744" y2="42" stroke="#94a3b8" stroke-width="2" marker-end="url(#ad1)"/>
+      <!-- Hermes → PicoClaw horizontal -->
+      <defs><marker id="arh" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f97316"/></marker></defs>
+      <line x1="500" y1="10" x2="604" y2="10" stroke="#f97316" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#arh)"/>
+      <text x="552" y="7" font-size="9" fill="#f97316" text-anchor="middle" font-family="sans-serif" font-weight="600">rencana</text>
+    </svg>
+  </div>
+
+  <!-- Bottom row: Hardware + Sensors -->
+  <div class="hw-row">
+    <div class="hw-box">
+      <div class="hw-title">Pixhawk Flight Controller</div>
+      <div class="hw-sub">Kendali Deterministik</div>
+    </div>
+    <div class="hw-box">
+      <div class="hw-title">Arduino Mega 2560</div>
+      <div class="hw-sub">Kendali Deterministik</div>
+    </div>
+    <div class="sensors-box">
+      <div class="sensors-title">Sensor Array</div>
+      <div class="sensors-sub">GPS, IMU, Baro, LiDAR, Kamera</div>
+    </div>
+  </div>
+
+  <!-- Arrow Sensors → PicoClaw -->
+  <div style="position:relative; height: 0;">
+    <svg width="1104" height="60" viewBox="0 0 1104 60" style="position:relative; top:-56px; pointer-events:none;">
+      <defs><marker id="arss" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ec4899"/></marker></defs>
+      <!-- Sensors → PicoClaw (going up) -->
+      <line x1="950" y1="8" x2="880" y2="50" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arss)"/>
+      <text x="930" y="35" font-size="9" fill="#ec4899" font-family="sans-serif" font-weight="500">telemetri</text>
+    </svg>
+  </div>
+
+</div>
+
+</body>
+</html>

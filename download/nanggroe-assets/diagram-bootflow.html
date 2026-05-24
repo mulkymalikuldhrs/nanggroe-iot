@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 1200px;
+    padding: 44px 48px;
+  }
+  .title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 36px;
+    letter-spacing: 0.5px;
+  }
+  .flow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+  }
+  .stage {
+    width: 196px;
+    text-align: center;
+    position: relative;
+  }
+  .stage-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .stage-num { font-size: 18px; font-weight: 800; }
+  .stage-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .stage-sub {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 10px;
+  }
+  .stage-items {
+    text-align: left;
+    display: inline-block;
+  }
+  .stage-item {
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+  }
+
+  /* Arrow between stages */
+  .arrow-col {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    width: 28px;
+    margin-top: 0;
+  }
+
+  /* Colors per stage */
+  .s1 .stage-circle { background: #3B82F6; }
+  .s1 .stage-title { color: #1e40af; }
+  .s1 .stage-item { background: #DBEAFE; color: #1e3a8a; }
+
+  .s2 .stage-circle { background: #F59E0B; }
+  .s2 .stage-title { color: #92400e; }
+  .s2 .stage-item { background: #FEF3C7; color: #78350f; }
+
+  .s3 .stage-circle { background: #10B981; }
+  .s3 .stage-title { color: #065f46; }
+  .s3 .stage-item { background: #D1FAE5; color: #064e3b; }
+
+  .s4 .stage-circle { background: #8B5CF6; }
+  .s4 .stage-title { color: #5b21b6; }
+  .s4 .stage-item { background: #EDE9FE; color: #4c1d95; }
+
+  .s5 .stage-circle { background: #EF4444; }
+  .s5 .stage-title { color: #991b1b; }
+  .s5 .stage-item { background: #FEE2E2; color: #7f1d1d; }
+
+  /* Progress bar */
+  .progress-bar {
+    margin: 28px auto 0;
+    width: 1000px;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #3B82F6, #F59E0B, #10B981, #8B5CF6, #EF4444);
+  }
+</style>
+</head>
+<body>
+
+<div class="title">Alur Boot Sistem Nanggroe</div>
+
+<div class="flow">
+
+  <!-- Stage 1 -->
+  <div class="stage s1">
+    <div class="stage-circle"><span class="stage-num">1</span></div>
+    <div class="stage-title">Inisialisasi</div>
+    <div class="stage-sub">Tahap 1</div>
+    <div class="stage-items">
+      <div class="stage-item">Load configs</div>
+      <div class="stage-item">Logger</div>
+      <div class="stage-item">Memory</div>
+      <div class="stage-item">Plugin Manager</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="28" height="48" viewBox="0 0 28 48">
+      <defs><marker id="af1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94a3b8"/></marker></defs>
+      <line x1="4" y1="24" x2="20" y2="24" stroke="#94a3b8" stroke-width="2" marker-end="url(#af1)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 2 -->
+  <div class="stage s2">
+    <div class="stage-circle"><span class="stage-num">2</span></div>
+    <div class="stage-title">Penemuan Hardware</div>
+    <div class="stage-sub">Tahap 2</div>
+    <div class="stage-items">
+      <div class="stage-item">Scan USB</div>
+      <div class="stage-item">Serial, I2C</div>
+      <div class="stage-item">Camera handshake</div>
+      <div class="stage-item">Sensor enumeration</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="28" height="48" viewBox="0 0 28 48">
+      <line x1="4" y1="24" x2="20" y2="24" stroke="#94a3b8" stroke-width="2" marker-end="url(#af1)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 3 -->
+  <div class="stage s3">
+    <div class="stage-circle"><span class="stage-num">3</span></div>
+    <div class="stage-title">Startup Agen</div>
+    <div class="stage-sub">Tahap 3</div>
+    <div class="stage-items">
+      <div class="stage-item">Start Hermes</div>
+      <div class="stage-item">Start PicoClaw</div>
+      <div class="stage-item">Load memory context</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="28" height="48" viewBox="0 0 28 48">
+      <line x1="4" y1="24" x2="20" y2="24" stroke="#94a3b8" stroke-width="2" marker-end="url(#af1)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 4 -->
+  <div class="stage s4">
+    <div class="stage-circle"><span class="stage-num">4</span></div>
+    <div class="stage-title">Startup Interface</div>
+    <div class="stage-sub">Tahap 4</div>
+    <div class="stage-items">
+      <div class="stage-item">Init FastAPI</div>
+      <div class="stage-item">WebSocket</div>
+      <div class="stage-item">Map layer</div>
+    </div>
+  </div>
+
+  <div class="arrow-col">
+    <svg width="28" height="48" viewBox="0 0 28 48">
+      <line x1="4" y1="24" x2="20" y2="24" stroke="#94a3b8" stroke-width="2" marker-end="url(#af1)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 5 -->
+  <div class="stage s5">
+    <div class="stage-circle"><span class="stage-num">5</span></div>
+    <div class="stage-title">Kesiapan Misi</div>
+    <div class="stage-sub">Tahap 5</div>
+    <div class="stage-items">
+      <div class="stage-item">Wait for prompt</div>
+      <div class="stage-item">Validate hardware</div>
+      <div class="stage-item">Execute</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Progress bar -->
+<div class="progress-bar">
+  <div class="progress-fill" style="width: 100%;"></div>
+</div>
+
+</body>
+</html>

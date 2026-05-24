@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 1200px;
+    padding: 40px 48px;
+  }
+  .title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: 0.5px;
+  }
+  .layer {
+    border-radius: 10px;
+    padding: 18px 24px 16px;
+    position: relative;
+    margin-bottom: 0;
+  }
+  .layer-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+  .layer-items {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .layer-item {
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 160px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px;
+  }
+  .arrow-row svg { display: block; }
+
+  /* Layer colors */
+  .l1 { background: #EFF6FF; }
+  .l1 .layer-title { color: #1e40af; }
+  .l1 .layer-item { background: #DBEAFE; color: #1e3a8a; }
+
+  .l2 { background: #F0FDF4; }
+  .l2 .layer-title { color: #166534; }
+  .l2 .layer-item { background: #DCFCE7; color: #14532d; }
+
+  .l3 { background: #FFF7ED; }
+  .l3 .layer-title { color: #9a3412; }
+  .l3 .layer-item { background: #FFEDD5; color: #7c2d12; }
+
+  .l4 { background: #FDF2F8; }
+  .l4 .layer-title { color: #9d174d; }
+  .l4 .layer-item { background: #FCE7F3; color: #831843; }
+
+  .l5 { background: #EEF2FF; }
+  .l5 .layer-title { color: #3730a3; }
+  .l5 .layer-item { background: #E0E7FF; color: #312e81; }
+
+  .l6 { background: #F0FDFA; }
+  .l6 .layer-title { color: #115e59; }
+  .l6 .layer-item { background: #CCFBF1; color: #134e4a; }
+</style>
+</head>
+<body>
+
+<div class="title">Arsitektur Sistem Nanggroe — Lapisan</div>
+
+<!-- Layer 1 -->
+<div class="layer l1">
+  <div class="layer-title">1. Presentasi</div>
+  <div class="layer-items">
+    <div class="layer-item">Web Dashboard</div>
+    <div class="layer-item">Android</div>
+    <div class="layer-item">Telegram Bot</div>
+    <div class="layer-item">Voice Interface</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-row">
+  <svg width="1200" height="32" viewBox="0 0 1200 32">
+    <defs><marker id="ah1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker></defs>
+    <line x1="600" y1="2" x2="600" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="350" y1="2" x2="350" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="850" y1="2" x2="850" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+  </svg>
+</div>
+
+<!-- Layer 2 -->
+<div class="layer l2">
+  <div class="layer-title">2. Orkestrasi</div>
+  <div class="layer-items">
+    <div class="layer-item">Mission Engine</div>
+    <div class="layer-item">Agent Engine</div>
+    <div class="layer-item">Plugin Manager</div>
+    <div class="layer-item">Memory Manager</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-row">
+  <svg width="1200" height="32" viewBox="0 0 1200 32">
+    <line x1="600" y1="2" x2="600" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="350" y1="2" x2="350" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="850" y1="2" x2="850" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+  </svg>
+</div>
+
+<!-- Layer 3 -->
+<div class="layer l3">
+  <div class="layer-title">3. Inteligensia</div>
+  <div class="layer-items">
+    <div class="layer-item">Hermes — AI Strategis</div>
+    <div class="layer-item">PicoClaw — AI Taktis</div>
+    <div class="layer-item">LLM Lokal</div>
+    <div class="layer-item">Vision Models</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-row">
+  <svg width="1200" height="32" viewBox="0 0 1200 32">
+    <line x1="600" y1="2" x2="600" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="350" y1="2" x2="350" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="850" y1="2" x2="850" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+  </svg>
+</div>
+
+<!-- Layer 4 -->
+<div class="layer l4">
+  <div class="layer-title">4. Abstraksi Perangkat Keras / HAL</div>
+  <div class="layer-items">
+    <div class="layer-item">Hardware Profiles</div>
+    <div class="layer-item">Adapters</div>
+    <div class="layer-item">Driver Bridges</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-row">
+  <svg width="1200" height="32" viewBox="0 0 1200 32">
+    <line x1="600" y1="2" x2="600" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="350" y1="2" x2="350" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="850" y1="2" x2="850" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+  </svg>
+</div>
+
+<!-- Layer 5 -->
+<div class="layer l5">
+  <div class="layer-title">5. Kendali Perangkat</div>
+  <div class="layer-items">
+    <div class="layer-item">Firmware Communication</div>
+    <div class="layer-item">Telemetry I/O</div>
+    <div class="layer-item">Actuator Control</div>
+    <div class="layer-item">Sensor Collection</div>
+  </div>
+</div>
+
+<!-- Arrow -->
+<div class="arrow-row">
+  <svg width="1200" height="32" viewBox="0 0 1200 32">
+    <line x1="600" y1="2" x2="600" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="350" y1="2" x2="350" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="850" y1="2" x2="850" y2="26" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+  </svg>
+</div>
+
+<!-- Layer 6 -->
+<div class="layer l6">
+  <div class="layer-title">6. Basis Data</div>
+  <div class="layer-items">
+    <div class="layer-item">Logs</div>
+    <div class="layer-item">Mission History</div>
+    <div class="layer-item">Calibration Data</div>
+    <div class="layer-item">Sync Queue</div>
+  </div>
+</div>
+
+</body>
+</html>
