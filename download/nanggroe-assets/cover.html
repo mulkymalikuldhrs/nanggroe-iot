@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nanggroe OS AI — Cover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@page {
+  size: 794px 1123px;
+  margin: 0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 794px;
+  height: 1123px;
+  font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  background: #f7f8f9;
+}
+
+/* ── Background grid pattern ── */
+.bg-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 794px;
+  height: 1123px;
+  opacity: 0.02;
+  background-image:
+    linear-gradient(to right, #1e2022 1px, transparent 1px),
+    linear-gradient(to bottom, #1e2022 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── Left vertical anchor line ── */
+.anchor-line {
+  position: absolute;
+  left: 95px;
+  top: 112px;
+  width: 6px;
+  height: 899px;
+  background: #3e5c6b;
+}
+
+/* ── Small decorative tick marks on anchor line ── */
+.anchor-tick-top {
+  position: absolute;
+  left: 89px;
+  top: 112px;
+  width: 18px;
+  height: 2px;
+  background: #3e5c6b;
+}
+
+.anchor-tick-bottom {
+  position: absolute;
+  left: 89px;
+  top: 1009px;
+  width: 18px;
+  height: 2px;
+  background: #3e5c6b;
+}
+
+/* ── Content area ── */
+.content {
+  position: absolute;
+  left: 135px;
+  top: 0;
+  width: 600px;
+  height: 1123px;
+}
+
+/* ── Kicker ── */
+.kicker {
+  position: absolute;
+  top: 148px;
+  left: 0;
+  font-size: 16pt;
+  font-weight: 700;
+  letter-spacing: 3pt;
+  text-transform: uppercase;
+  color: #3e5c6b;
+  opacity: 0.6;
+  line-height: 1.4;
+}
+
+/* ── Hero title ── */
+.hero-title {
+  position: absolute;
+  top: 210px;
+  left: 0;
+  font-size: 50pt;
+  font-weight: 900;
+  color: #1e2022;
+  line-height: 1.1;
+  letter-spacing: -0.5pt;
+}
+
+/* ── Subtitle ── */
+.subtitle {
+  position: absolute;
+  top: 320px;
+  left: 0;
+  font-size: 24pt;
+  font-weight: 400;
+  color: #3e5c6b;
+  line-height: 1.35;
+}
+
+/* ── Decorative divider ── */
+.divider {
+  position: absolute;
+  top: 420px;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: #3e5c6b;
+}
+
+/* ── Summary ── */
+.summary {
+  position: absolute;
+  top: 455px;
+  left: 0;
+  width: 60%;
+  font-size: 16pt;
+  font-weight: 400;
+  color: #1e2022;
+  opacity: 0.85;
+  line-height: 1.6;
+}
+
+/* ── Meta ── */
+.meta {
+  position: absolute;
+  top: 680px;
+  left: 0;
+  font-size: 20pt;
+  font-weight: 600;
+  color: #1e2022;
+  opacity: 0.7;
+}
+
+/* ── HUD decorative elements ── */
+.hud-corner-tl {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  border-top: 2px solid #3e5c6b;
+  border-right: 2px solid #3e5c6b;
+  opacity: 0.25;
+}
+
+.hud-corner-br {
+  position: absolute;
+  bottom: 100px;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  border-bottom: 2px solid #3e5c6b;
+  border-left: 2px solid #3e5c6b;
+  opacity: 0.25;
+}
+
+/* ── Data readout decoration ── */
+.data-readout {
+  position: absolute;
+  top: 62px;
+  right: 36px;
+  font-size: 8pt;
+  font-family: 'Noto Sans SC', monospace, sans-serif;
+  color: #3e5c6b;
+  opacity: 0.3;
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+.footer {
+  position: absolute;
+  bottom: 50px;
+  left: 135px;
+  font-size: 16pt;
+  font-weight: 700;
+  color: #1e2022;
+  opacity: 0.6;
+  letter-spacing: 2pt;
+  text-transform: uppercase;
+}
+
+/* ── Screen auto-scale for browser preview ── */
+@media screen {
+  html {
+    height: auto;
+    display: flex;
+    justify-content: center;
+    background: #f7f8f9;
+  }
+  body {
+    transform-origin: top center;
+    scale: min(1, calc(100vh / 1123));
+    margin: 0 auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Background grid -->
+<div class="bg-grid"></div>
+
+<!-- Left anchor line -->
+<div class="anchor-line"></div>
+<div class="anchor-tick-top"></div>
+<div class="anchor-tick-bottom"></div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- HUD corner decorations -->
+  <div class="hud-corner-tl"></div>
+  <div class="hud-corner-br"></div>
+
+  <!-- Data readout -->
+  <div class="data-readout">
+    SYS.NANGGROE-OS-AI<br>
+    VER 1.0 // BUILD 2026.05<br>
+    STATUS: PRODUCTION-READY
+  </div>
+
+  <!-- Kicker -->
+  <div class="kicker">BLUEPRINT IMPLEMENTASI PRODUCTION-READY</div>
+
+  <!-- Hero title -->
+  <div class="hero-title">Nanggroe OS AI</div>
+
+  <!-- Subtitle -->
+  <div class="subtitle">Platform Robotika Otonom, Drone Pertanian Presisi, dan AI Voice Agent</div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+
+  <!-- Summary -->
+  <div class="summary">Dokumen teknis komprehensif yang mengintegrasikan arsitektur sistem operasi robotika modular, desain drone tricopter amfibi, implementasi MVP pemetaan otonom di Aceh Utara, dan strategi AI Voice Agent untuk manajemen properti.</div>
+
+  <!-- Meta -->
+  <div class="meta">Versi 1.0 | Mei 2026</div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">NANGGROE OS AI PROJECT</div>
+
+</body>
+</html>
