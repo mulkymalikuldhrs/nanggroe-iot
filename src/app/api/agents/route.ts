@@ -1,0 +1,141 @@
+// ============================================================
+// NANGGROE OS AI - Agent Communication API
+// GET  /api/agents — Get agent messages
+// POST /api/agents — Send message to agent
+// ============================================================
+
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const agent = searchParams.get('agent')
+    const missionId = searchParams.get('missionId')
+    const role = searchParams.get('role')
+    const limit = parseInt(searchParams.get('limit') || '50')
+
+    const where: Record<string, unknown> = {}
+    if (agent) where.agent = agent
+    if (missionId) where.missionId = missionId
+    if (role) where.role = role
+
+    const messages = await db.agentMessage.findMany({
+      where,
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+    })
+
+    // Get agent status summary
+    const agentStatus = {
+      hermes: {
+        enabled: true,
+        status: 'online',
+        lastMessage: await db.agentMessage.findFirst({
+          where: { agent: 'hermes' },
+          orderBy: { timestamp: 'desc' },
+        }),
+      },
+      picoclaw: {
+        enabled: true,
+        status: 'online',
+        lastMessage: await db.agentMessage.findFirst({
+          where: { agent: 'picoclaw' },
+          orderBy: { timestamp: 'desc' },
+        }),
+      },
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        messages,
+        agentStatus,
+      },
+    })
+  } catch (error) {
+    console.error('[Agents API] GET error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to retrieve agent messages' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { agent, role, content, missionId, metadata } = body as {
+      agent: string
+      role?: string
+      content: string
+      missionId?: string
+      metadata?: Record<string, unknown>
+    }
+
+    if (!agent || !content) {
+      return NextResponse.json(
+        { success: false, error: 'agent and content are required' },
+        { status: 400 }
+      )
+    }
+
+    // Store the operator message
+    const message = await db.agentMessage.create({
+      data: {
+        missionId: missionId || null,
+        agent,
+        role: role || 'command',
+        content,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+      },
+    })
+
+    // If sending to PicoClaw, run a safety check and respond
+    if (agent === 'picoclaw') {
+      const { generateTelemetrySnapshot } = await import('@/lib/simulator')
+      const { picoclawCheck } = await import('@/lib/agents')
+
+      const snapshot = generateTelemetrySnapshot(true)
+      const safetyResult = picoclawCheck(snapshot)
+
+      const picoclawResponse = await db.agentMessage.create({
+        data: {
+          missionId: missionId || null,
+          agent: 'picoclaw',
+          role: 'response',
+          content: safetyResult.safe
+            ? `All systems nominal. ${safetyResult.alerts.length} minor alerts detected. No action required.`
+            : `SAFETY ALERT: ${safetyResult.alerts.filter(a => a.level === 'critical').length} critical and ${safetyResult.alerts.filter(a => a.level === 'warning').length} warning conditions detected. Recommended actions: ${safetyResult.actions.map(a => a.type).join(', ')}`,
+          metadata: JSON.stringify({
+            safetyResult: {
+              safe: safetyResult.safe,
+              alertCount: safetyResult.alerts.length,
+              actionCount: safetyResult.actions.length,
+            },
+          }),
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          sent: message,
+          response: picoclawResponse,
+        },
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { sent: message },
+      message: 'Message sent to agent',
+    })
+  } catch (error) {
+    console.error('[Agents API] POST error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to send agent message' },
+      { status: 500 }
+    )
+  }
+}

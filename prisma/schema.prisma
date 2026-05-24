@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// System Configuration
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("general") // general, hardware, agent, mission, network
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Hardware Devices
+model HardwareDevice {
+  id           String   @id @default(cuid())
+  name         String
+  deviceType   String   // flight_controller, companion_computer, gps, camera, sensor, radio, battery, motor, servo, esc
+  protocol     String   // usb, i2c, spi, uart, gpio, can, adc
+  status       String   @default("unknown") // unknown, detected, initialized, active, error, offline
+  vendorId     String?  // USB VID
+  productId    String?  // USB PID
+  port         String?  // /dev/ttyUSB0, i2c-1, etc
+  address      String?  // I2C address like 0x68
+  capabilities String?  // JSON string of capabilities
+  firmware     String?
+  lastSeen     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  profiles     HardwareProfile[]
+  telemetry    TelemetryReading[]
+}
+
+// Hardware Profiles (HAL adapter configs)
+model HardwareProfile {
+  id          String   @id @default(cuid())
+  deviceId    String
+  device      HardwareDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  adapterName String   // pixhawk, raspberry_pi, bme280, mpu6050, etc
+  config      String   // JSON config for the adapter
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Telemetry Readings
+model TelemetryReading {
+  id         String   @id @default(cuid())
+  deviceId   String?
+  device     HardwareDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  metric     String   // battery_voltage, gps_lat, gps_lng, altitude, signal_strength, temperature, humidity, pressure, heading, speed, roll, pitch, yaw
+  value      Float
+  unit       String?  // V, m, %, dBm, C, hPa, deg, m/s
+  source     String   @default("sensor") // sensor, simulated, manual
+  timestamp  DateTime @default(now())
+}
+
+// Missions
+model Mission {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  type          String   @default("mapping") // mapping, survey, delivery, patrol, inspection, agriculture
+  status        String   @default("draft") // draft, planned, active, paused, completed, failed, aborted
+  prompt        String?  // Natural language prompt that generated this mission
+  waypoints     String   // JSON array of waypoints [{lat, lng, alt, action}]
+  parameters    String?  // JSON mission parameters
+  areaPolygon   String?  // JSON polygon coordinates for mapping area
+  altitude      Float    @default(50)
+  speed         Float    @default(5)
+  overlapFront  Float    @default(75)
+  overlapSide   Float    @default(65)
+  gsd           Float?   // Ground Sampling Distance in cm/pixel
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  logs          MissionLog[]
+  agentMessages AgentMessage[]
+}
+
+// Mission Logs
+model MissionLog {
+  id        String   @id @default(cuid())
+  missionId String
+  mission   Mission  @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  level     String   @default("info") // debug, info, warning, error, critical
+  source    String   // system, hermes, picoclaw, autopilot, sensor, operator
+  message   String
+  data      String?  // JSON additional data
+  timestamp DateTime @default(now())
+}
+
+// Agent Messages (Hermes & PicoClaw communication)
+model AgentMessage {
+  id        String   @id @default(cuid())
+  missionId String?
+  mission   Mission? @relation(fields: [missionId], references: [id], onDelete: SetNull)
+  agent     String   // hermes, picoclaw, operator, system
+  role      String   // command, response, alert, recommendation, status
+  content   String
+  metadata  String?  // JSON metadata
+  timestamp DateTime @default(now())
+}
+
+// Sessions
+model Session {
+  id          String   @id @default(cuid())
+  name        String?
+  mode        String   @default("discovery") // discovery, planning, build, debug, optimize
+  status      String   @default("active") // active, closed, archived
+  config      String?  // JSON session config
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Calibration Records
+model Calibration {
+  id           String   @id @default(cuid())
+  deviceType   String   // compass, accelerometer, gyro, esc, radio
+  deviceId     String?
+  status       String   @default("pending") // pending, in_progress, completed, failed
+  parameters   String?  // JSON calibration parameters
+  results      String?  // JSON calibration results
+  performedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Sync Queue (for cloud sync)
+model SyncQueue {
+  id         String   @id @default(cuid())
+  entityType String   // mission, telemetry, log, calibration, config
+  entityId   String
+  action     String   // create, update, delete
+  data       String   // JSON snapshot of the entity
+  status     String   @default("pending") // pending, synced, failed
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  syncedAt   DateTime?
+}
+
+// Alerts & Notifications
+model Alert {
+  id         String   @id @default(cuid())
+  level      String   @default("info") // info, warning, critical
+  source     String   // system, picoclaw, hermes, sensor, battery, gps
+  title      String
+  message    String
+  category   String   // safety, hardware, mission, system, communication
+  isRead     Boolean  @default(false)
+  isResolved Boolean  @default(false)
+  timestamp  DateTime @default(now())
+}
