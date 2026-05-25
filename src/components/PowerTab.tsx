@@ -4,11 +4,16 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Battery, Sun, Radio, Usb, Zap, AlertTriangle, Thermometer,
+  RefreshCw, Loader2, Power, PowerOff,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface PowerSource {
   id: string
@@ -49,9 +54,14 @@ const STATUS_LABELS: Record<string, string> = {
 export function PowerTab() {
   const [sources, setSources] = useState<PowerSource[]>([])
   const [status, setStatus] = useState<PowerStatus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [togglingSource, setTogglingSource] = useState<string | null>(null)
+  const [sourceEnabledMap, setSourceEnabledMap] = useState<Record<string, boolean>>({})
 
   const fetchPower = useCallback(async () => {
     try {
+      setError(null)
       const res = await fetch('/api/power')
       const data = await res.json()
       if (data.success) {
@@ -60,33 +70,126 @@ export function PowerTab() {
       }
     } catch (err) {
       console.error('Failed to fetch power data:', err)
+      setError('Gagal memuat data daya. Periksa koneksi server.')
+      toast.error('Gagal memuat data power')
     }
   }, [])
 
   useEffect(() => {
     let cancelled = false
     const load = async () => {
+      setLoading(true)
       try {
+        setError(null)
         const res = await fetch('/api/power')
         const data = await res.json()
         if (!cancelled && data.success) {
           setSources(data.data.sources)
           setStatus(data.data.status)
+          // Initialize enabled map — all sources enabled by default
+          const enabledMap: Record<string, boolean> = {}
+          data.data.sources.forEach((s: PowerSource) => {
+            enabledMap[s.id] = s.status !== 'offline'
+          })
+          setSourceEnabledMap(enabledMap)
         }
       } catch (err) {
         console.error('Failed to fetch power data:', err)
+        if (!cancelled) {
+          setError('Gagal memuat data daya. Periksa koneksi server.')
+          toast.error('Gagal memuat data power')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
       }
     }
     load()
-    const interval = setInterval(load, 5000)
+    const interval = setInterval(fetchPower, 5000)
     return () => { cancelled = true; clearInterval(interval) }
   }, [])
 
+  const toggleSource = async (sourceId: string, enable: boolean) => {
+    setTogglingSource(sourceId)
+    try {
+      const res = await fetch('/api/power', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceId,
+          reading: { status: enable ? 'unknown' : 'offline' },
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSourceEnabledMap(prev => ({ ...prev, [sourceId]: enable }))
+        toast.success(enable ? 'Sumber daya diaktifkan' : 'Sumber daya dinonaktifkan')
+        fetchPower()
+      } else {
+        toast.error('Gagal mengubah status sumber daya')
+      }
+    } catch (err) {
+      console.error('Failed to toggle power source:', err)
+      toast.error('Gagal mengubah status sumber daya')
+    } finally {
+      setTogglingSource(null)
+    }
+  }
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-56 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-10 w-28" />
+        </div>
+        <Skeleton className="h-32 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-36 rounded-xl" />
+          ))}
+        </div>
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error && !status) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Power Management</h2>
+          <p className="text-sm text-slate-400 mt-1">Baterai, Panel Surya, GSM - monitoring daya real-time</p>
+        </div>
+        <Card className="bg-red-900/20 border-red-500/30">
+          <CardContent className="p-6 flex flex-col items-center gap-3 text-center">
+            <AlertTriangle className="w-10 h-10 text-red-400" />
+            <p className="text-sm text-red-300">{error}</p>
+            <Button variant="outline" size="sm" onClick={fetchPower} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white">Power Management</h2>
-        <p className="text-sm text-slate-400 mt-1">Baterai, Panel Surya, GSM - monitoring daya real-time</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Power Management</h2>
+          <p className="text-sm text-slate-400 mt-1">Baterai, Panel Surya, GSM - monitoring daya real-time</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={fetchPower} className="border-slate-700 text-slate-400">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
       </div>
 
       {/* Emergency Mode Banner */}
@@ -137,17 +240,38 @@ export function PowerTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sources.map((source) => {
           const IconComp = SOURCE_ICONS[source.type] || Battery
+          const isEnabled = sourceEnabledMap[source.id] !== false
+          const isToggling = togglingSource === source.id
           return (
-            <Card key={source.id} className="bg-slate-900/50 border-slate-700/50">
+            <Card key={source.id} className={`bg-slate-900/50 border-slate-700/50 transition-opacity ${!isEnabled ? 'opacity-60' : ''}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <IconComp className="w-5 h-5 text-teal-400" />
                     <CardTitle className="text-sm text-white">{source.name}</CardTitle>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">
-                    {STATUS_LABELS[source.status] || source.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px]">
+                      {STATUS_LABELS[source.status] || source.status}
+                    </Badge>
+                    {/* Toggle control */}
+                    <button
+                      onClick={() => toggleSource(source.id, !isEnabled)}
+                      disabled={isToggling}
+                      className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50"
+                      style={{ backgroundColor: isEnabled ? '#14b8a6' : '#475569' }}
+                    >
+                      {isToggling ? (
+                        <Loader2 className="w-3 h-3 text-white absolute left-1/2 -translate-x-1/2 animate-spin" />
+                      ) : (
+                        <span
+                          className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                            isEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
@@ -174,6 +298,28 @@ export function PowerTab() {
                       <span className="text-white">{source.capacity}mAh</span>
                     </div>
                   )}
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleSource(source.id, true)}
+                    disabled={isEnabled || isToggling}
+                    className="flex-1 text-[10px] h-7 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                  >
+                    <Power className="w-3 h-3 mr-1" />
+                    Enable
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleSource(source.id, false)}
+                    disabled={!isEnabled || isToggling}
+                    className="flex-1 text-[10px] h-7 border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  >
+                    <PowerOff className="w-3 h-3 mr-1" />
+                    Disable
+                  </Button>
                 </div>
               </CardContent>
             </Card>

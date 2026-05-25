@@ -13,6 +13,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: stats })
     }
 
+    if (searchParams.get('syncStatus') === 'true') {
+      const status = await service.getSyncStatus()
+      return NextResponse.json({ success: true, data: status })
+    }
+
     const entries = await service.search(
       category as 'conversation' | 'decision' | 'learning' | 'pattern' | 'preference' | undefined,
       query || undefined
@@ -33,6 +38,16 @@ export async function POST(request: NextRequest) {
 
     if (body.action === 'sync') {
       const result = await service.syncToCloud()
+      return NextResponse.json({ success: true, data: result })
+    }
+
+    if (body.action === 'pull') {
+      const result = await service.pullFromCloud()
+      return NextResponse.json({ success: true, data: result })
+    }
+
+    if (body.action === 'retryFailed') {
+      const result = await service.retryFailedSyncs()
       return NextResponse.json({ success: true, data: result })
     }
 

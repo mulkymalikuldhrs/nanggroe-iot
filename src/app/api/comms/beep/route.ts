@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const service = CommunicationService.getInstance()
     const result = await service.sendBeep(body.pattern || 'warning')
-    return NextResponse.json({ success: result.sent, data: result })
+    return NextResponse.json({ success: result.played, data: result })
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },

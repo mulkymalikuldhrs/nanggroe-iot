@@ -21,6 +21,8 @@ import {
   MessageSquare,
   Navigation,
   Battery,
+  Brain,
+  Eye,
 } from 'lucide-react'
 import { OverviewTab } from './OverviewTab'
 import { TelemetryTab } from './TelemetryTab'
@@ -40,6 +42,8 @@ import { RobotBuilderTab } from './RobotBuilderTab'
 import { CommsTab } from './CommsTab'
 import { NavigationTab } from './NavigationTab'
 import { PowerTab } from './PowerTab'
+import { SelfLearnTab } from './SelfLearnTab'
+import { FaceTrackingTab } from './FaceTrackingTab'
 
 const NAV_ITEMS = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
@@ -60,6 +64,8 @@ const NAV_ITEMS = [
   { id: 'comms' as const, label: 'Communications', icon: MessageSquare },
   { id: 'navigation' as const, label: 'Navigation', icon: Navigation },
   { id: 'power' as const, label: 'Power', icon: Battery },
+  { id: 'self-learn' as const, label: 'Self-Learn', icon: Brain },
+  { id: 'face-tracking' as const, label: 'Face Tracking', icon: Eye },
 ]
 
 type TabId = (typeof NAV_ITEMS)[number]['id']
@@ -105,6 +111,10 @@ export function Dashboard() {
         return <NavigationTab />
       case 'power':
         return <PowerTab />
+      case 'self-learn':
+        return <SelfLearnTab />
+      case 'face-tracking':
+        return <FaceTrackingTab />
       default:
         return <OverviewTab />
     }

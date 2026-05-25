@@ -374,16 +374,73 @@ const ASSEMBLY_STEPS: AssemblyStep[] = [
   },
 ]
 
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    data: {
-      steps: ASSEMBLY_STEPS,
-      totalSteps: ASSEMBLY_STEPS.length,
-      droneModel: 'Nanggroe OS AI Tricopter',
-      region: 'Aceh Utara',
-    },
-  })
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const templateId = searchParams.get('templateId')
+
+    // Try to fetch assembly steps from RobotTemplate DB
+    let steps: AssemblyStep[] = ASSEMBLY_STEPS
+    let droneModel = 'Nanggroe OS AI Tricopter'
+    let source = 'fallback'
+
+    try {
+      const { db } = await import('@/lib/db')
+
+      if (templateId) {
+        // Fetch specific template
+        const template = await db.robotTemplate.findUnique({
+          where: { id: templateId },
+        })
+        if (template?.assemblyGuide) {
+          const parsed = JSON.parse(template.assemblyGuide)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            steps = parsed as AssemblyStep[]
+            droneModel = template.name
+            source = 'database'
+          }
+        }
+      } else {
+        // Fetch the official Nanggroe OS AI template or the first available
+        const template = await db.robotTemplate.findFirst({
+          where: {
+            OR: [
+              { isOfficial: true },
+              { name: { contains: 'Nanggroe' } },
+            ],
+          },
+          orderBy: { isOfficial: 'desc' },
+        })
+        if (template?.assemblyGuide) {
+          const parsed = JSON.parse(template.assemblyGuide)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            steps = parsed as AssemblyStep[]
+            droneModel = template.name
+            source = 'database'
+          }
+        }
+      }
+    } catch (dbError) {
+      console.warn('[Assembly API] Could not fetch from DB, using fallback steps:', dbError)
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        steps,
+        totalSteps: steps.length,
+        droneModel,
+        region: 'Aceh Utara',
+        source,
+      },
+    })
+  } catch (error) {
+    console.error('[Assembly API] GET error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to retrieve assembly instructions' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function POST(request: NextRequest) {

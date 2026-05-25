@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Card,
   CardContent,
@@ -11,6 +11,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Wrench,
   ChevronDown,
@@ -62,33 +69,66 @@ interface TroubleshootingResult {
   relatedSteps: number[]
 }
 
+interface TemplateOption {
+  id: string
+  name: string
+}
+
+const STORAGE_KEY = 'nanggroe-assembly-completed'
+
 export function AssemblyTab() {
   const [assemblyData, setAssemblyData] = useState<AssemblyData | null>(null)
   const [loading, setLoading] = useState(true)
   const [expandedStep, setExpandedStep] = useState<number | null>(null)
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+  const [storedCompleted, setStoredCompleted] = useState<number[]>(() => {
+    if (typeof window === 'undefined') return []
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        return JSON.parse(stored) as number[]
+      }
+    } catch {
+      // ignore
+    }
+    return []
+  })
+  const completedSteps = useMemo(() => new Set(storedCompleted), [storedCompleted])
   const [errorDescription, setErrorDescription] = useState('')
   const [diagnosing, setDiagnosing] = useState(false)
   const [troubleshooting, setTroubleshooting] = useState<TroubleshootingResult | null>(null)
+  const [templates, setTemplates] = useState<TemplateOption[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
 
-  const fetchAssembly = useCallback(async () => {
-    try {
-      const res = await fetch('/api/assembly')
-      const json = await res.json()
-      if (json.success) {
-        setAssemblyData(json.data)
+  // Load templates list for dropdown
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const res = await fetch('/api/robot-templates')
+        const data = await res.json()
+        if (data.success) {
+          const tplOptions = data.data.map((t: { id: string; name: string }) => ({
+            id: t.id,
+            name: t.name,
+          }))
+          setTemplates(tplOptions)
+        }
+      } catch {
+        // templates list is optional
       }
-    } catch {
-      // silent
     }
-    setLoading(false)
+    loadTemplates()
   }, [])
 
+  // Load assembly data
   useEffect(() => {
     let cancelled = false
     const load = async () => {
+      setLoading(true)
       try {
-        const res = await fetch('/api/assembly')
+        const url = selectedTemplateId
+          ? `/api/assembly?templateId=${selectedTemplateId}`
+          : '/api/assembly'
+        const res = await fetch(url)
         const json = await res.json()
         if (!cancelled && json.success) {
           setAssemblyData(json.data)
@@ -100,21 +140,30 @@ export function AssemblyTab() {
     }
     load()
     return () => { cancelled = true }
-  }, [])
+  }, [selectedTemplateId])
+
+  // Persist completed steps to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedCompleted))
+    } catch {
+      // ignore
+    }
+  }, [storedCompleted])
 
   const toggleStep = (step: number) => {
     setExpandedStep(expandedStep === step ? null : step)
   }
 
   const toggleCompleted = (step: number) => {
-    setCompletedSteps(prev => {
-      const next = new Set(prev)
-      if (next.has(step)) {
-        next.delete(step)
+    setStoredCompleted(prev => {
+      const set = new Set(prev)
+      if (set.has(step)) {
+        set.delete(step)
       } else {
-        next.add(step)
+        set.add(step)
       }
-      return next
+      return Array.from(set)
     })
   }
 
@@ -161,7 +210,7 @@ export function AssemblyTab() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      {/* Header with progress */}
+      {/* Header with progress and template selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
@@ -172,9 +221,26 @@ export function AssemblyTab() {
             {assemblyData.region} region • {assemblyData.totalSteps} steps
           </p>
         </div>
-        <div className="flex items-center gap-3 min-w-[200px]">
-          <Progress value={progressPercent} className="h-2 bg-white/5 [&>div]:bg-teal-500 flex-1" />
-          <span className="text-xs text-slate-400 font-mono w-10 text-right">{progressPercent}%</span>
+        <div className="flex items-center gap-3">
+          {/* Template Selector */}
+          {templates.length > 0 && (
+            <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+              <SelectTrigger className="w-[200px] bg-slate-800 border-slate-700 text-white text-xs h-8">
+                <SelectValue placeholder="Pilih Template..." />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700">
+                {templates.map((tpl) => (
+                  <SelectItem key={tpl.id} value={tpl.id} className="text-white text-xs">
+                    {tpl.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <div className="flex items-center gap-3 min-w-[200px]">
+            <Progress value={progressPercent} className="h-2 bg-white/5 [&>div]:bg-teal-500 flex-1" />
+            <span className="text-xs text-slate-400 font-mono w-10 text-right">{progressPercent}%</span>
+          </div>
         </div>
       </div>
 

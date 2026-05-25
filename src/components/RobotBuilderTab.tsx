@@ -1,19 +1,29 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Bot, CheckCircle2, Circle, AlertTriangle, Plus,
   Scan, ChevronRight, Package, Wrench, Upload,
+  Loader2, AlertCircle, RefreshCw, Filter,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Template {
   id: string
@@ -90,38 +100,25 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   advanced: 'bg-red-500/20 text-red-400 border-red-500/30',
 }
 
+const CATEGORY_FILTERS = ['all', 'drone', 'rover', 'boat', 'arm', 'custom', 'amphibious']
+
 export function RobotBuilderTab() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDetail | null>(null)
   const [showDetail, setShowDetail] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
   const [scanResult, setScanResult] = useState<{ detected: number; missing: number } | null>(null)
-
-  const fetchTemplates = useCallback(async () => {
-    try {
-      const res = await fetch('/api/robot-templates')
-      const data = await res.json()
-      if (data.success) setTemplates(data.data)
-    } catch (err) {
-      console.error('Failed to fetch templates:', err)
-    }
-  }, [])
-
-  const fetchProjects = useCallback(async () => {
-    try {
-      const res = await fetch('/api/projects')
-      const data = await res.json()
-      if (data.success) setProjects(data.data)
-    } catch (err) {
-      console.error('Failed to fetch projects:', err)
-    }
-  }, [])
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [creating, setCreating] = useState(false)
 
   useEffect(() => {
     let active = true
     const load = async () => {
+      setLoading(true)
+      setError(null)
       try {
         const [tplRes, projRes] = await Promise.all([
           fetch('/api/robot-templates'),
@@ -135,11 +132,33 @@ export function RobotBuilderTab() {
         }
       } catch (err) {
         console.error('Failed to load data:', err)
+        if (active) {
+          setError('Gagal memuat data robot builder. Periksa koneksi server.')
+          toast.error('Gagal memuat data robot builder')
+        }
+      } finally {
+        if (active) setLoading(false)
       }
     }
     load()
     return () => { active = false }
   }, [])
+
+  const refreshData = async () => {
+    try {
+      const [tplRes, projRes] = await Promise.all([
+        fetch('/api/robot-templates'),
+        fetch('/api/projects'),
+      ])
+      const tplData = await tplRes.json()
+      const projData = await projRes.json()
+      if (tplData.success) setTemplates(tplData.data)
+      if (projData.success) setProjects(projData.data)
+    } catch (err) {
+      console.error('Failed to refresh data:', err)
+      toast.error('Gagal memuat ulang data')
+    }
+  }
 
   const fetchTemplateDetail = async (id: string) => {
     try {
@@ -148,17 +167,23 @@ export function RobotBuilderTab() {
       if (data.success) {
         setSelectedTemplate(data.data)
         setShowDetail(true)
+      } else {
+        toast.error('Gagal memuat detail template')
       }
     } catch (err) {
       console.error('Failed to fetch template detail:', err)
+      toast.error('Gagal memuat detail template')
     }
   }
 
   const createProject = async (templateId: string) => {
     const template = templates.find(t => t.id === templateId)
-    if (!template) return
+    if (!template) {
+      toast.error('Template tidak ditemukan')
+      return
+    }
 
-    setLoading(true)
+    setCreating(true)
     try {
       const res = await fetch('/api/projects', {
         method: 'POST',
@@ -171,12 +196,17 @@ export function RobotBuilderTab() {
       })
       const data = await res.json()
       if (data.success) {
-        fetchProjects()
+        toast.success(`Project "${template.name}" berhasil dibuat`)
+        refreshData()
+      } else {
+        toast.error(data.error || 'Gagal membuat project')
       }
     } catch (err) {
       console.error('Failed to create project:', err)
+      toast.error('Gagal membuat project')
+    } finally {
+      setCreating(false)
     }
-    setLoading(false)
   }
 
   const scanHardware = async () => {
@@ -193,11 +223,71 @@ export function RobotBuilderTab() {
           detected: data.data.detected.length,
           missing: data.data.missing.length,
         })
+        toast.success(`Scan selesai: ${data.data.detected.length} hardware terdeteksi`)
+      } else {
+        toast.error('Hardware scan gagal')
       }
     } catch (err) {
       console.error('Hardware scan failed:', err)
+      toast.error('Hardware scan gagal')
+    } finally {
+      setScanning(false)
     }
-    setScanning(false)
+  }
+
+  // Filter templates by category
+  const filteredTemplates = categoryFilter === 'all'
+    ? templates
+    : templates.filter(t => t.category === categoryFilter)
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-28" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {[...Array(7)].map((_, i) => (
+            <Skeleton key={i} className="h-7 w-16 rounded-full" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-48 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error && templates.length === 0) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Robot Builder</h2>
+          <p className="text-sm text-slate-400 mt-1">Pilih template, auto-detect hardware, dan build robot Anda</p>
+        </div>
+        <Card className="bg-red-900/20 border-red-500/30">
+          <CardContent className="p-6 flex flex-col items-center gap-3 text-center">
+            <AlertCircle className="w-10 h-10 text-red-400" />
+            <p className="text-sm text-red-300">{error}</p>
+            <Button variant="outline" size="sm" onClick={refreshData} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Coba Lagi
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -213,10 +303,19 @@ export function RobotBuilderTab() {
             <Scan className="w-4 h-4 mr-2" />
             {scanning ? 'Scanning...' : 'Scan Hardware'}
           </Button>
-          <Button size="sm" className="bg-teal-600 hover:bg-teal-700" onClick={() => {
-            createProject(templates[0]?.id)
-          }} disabled={loading || templates.length === 0}>
-            <Plus className="w-4 h-4 mr-2" />
+          <Button
+            size="sm"
+            className="bg-teal-600 hover:bg-teal-700"
+            onClick={() => {
+              if (templates.length > 0) {
+                createProject(templates[0].id)
+              } else {
+                toast.error('Tidak ada template tersedia')
+              }
+            }}
+            disabled={creating || templates.length === 0}
+          >
+            {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
             Quick Create
           </Button>
         </div>
@@ -242,44 +341,77 @@ export function RobotBuilderTab() {
         </Card>
       )}
 
+      {/* Category Filter */}
+      <div className="flex items-center gap-2">
+        <Filter className="w-4 h-4 text-slate-500" />
+        {CATEGORY_FILTERS.map(cat => (
+          <Button
+            key={cat}
+            size="sm"
+            variant={categoryFilter === cat ? 'default' : 'outline'}
+            className={`text-xs h-7 rounded-full ${
+              categoryFilter === cat
+                ? 'bg-teal-600 hover:bg-teal-700 text-white'
+                : 'border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
+            }`}
+            onClick={() => setCategoryFilter(cat)}
+          >
+            {cat === 'all' ? 'All' : CATEGORY_LABELS[cat] || cat}
+          </Button>
+        ))}
+      </div>
+
       {/* Templates Grid */}
       <div>
         <h3 className="text-lg font-semibold text-white mb-3">Template Robot</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template) => (
-            <Card
-              key={template.id}
-              className="bg-slate-900/50 border-slate-700/50 hover:border-teal-500/50 transition-colors cursor-pointer"
-              onClick={() => fetchTemplateDetail(template.id)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="text-3xl">{template.icon}</div>
-                    <div>
-                      <CardTitle className="text-base text-white">{template.name}</CardTitle>
-                      <CardDescription className="text-xs text-slate-400">
-                        {CATEGORY_LABELS[template.category] || template.category}
-                      </CardDescription>
+        {filteredTemplates.length === 0 ? (
+          <Card className="bg-slate-900/50 border-slate-700/50">
+            <CardContent className="p-8 text-center">
+              <Bot className="w-10 h-10 text-slate-500 mx-auto mb-3" />
+              <p className="text-sm text-slate-400">
+                {categoryFilter === 'all'
+                  ? 'Belum ada template robot tersedia'
+                  : `Tidak ada template untuk kategori "${CATEGORY_LABELS[categoryFilter] || categoryFilter}"`}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredTemplates.map((template) => (
+              <Card
+                key={template.id}
+                className="bg-slate-900/50 border-slate-700/50 hover:border-teal-500/50 transition-colors cursor-pointer"
+                onClick={() => fetchTemplateDetail(template.id)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{template.icon}</div>
+                      <div>
+                        <CardTitle className="text-base text-white">{template.name}</CardTitle>
+                        <CardDescription className="text-xs text-slate-400">
+                          {CATEGORY_LABELS[template.category] || template.category}
+                        </CardDescription>
+                      </div>
                     </div>
+                    {template.isOfficial && (
+                      <Badge variant="outline" className="text-[10px] border-teal-500/50 text-teal-400">Official</Badge>
+                    )}
                   </div>
-                  {template.isOfficial && (
-                    <Badge variant="outline" className="text-[10px] border-teal-500/50 text-teal-400">Official</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs text-slate-400 line-clamp-2 mb-3">{template.description}</p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={DIFFICULTY_COLORS[template.difficulty] || ''}>
-                    {template.difficulty}
-                  </Badge>
-                  <span className="text-[10px] text-slate-500">{template.estimatedBuildHours}h build</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-xs text-slate-400 line-clamp-2 mb-3">{template.description}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={DIFFICULTY_COLORS[template.difficulty] || ''}>
+                      {template.difficulty}
+                    </Badge>
+                    <span className="text-[10px] text-slate-500">{template.estimatedBuildHours}h build</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Existing Projects */}
@@ -424,9 +556,9 @@ export function RobotBuilderTab() {
                     createProject(selectedTemplate.id)
                     setShowDetail(false)
                   }}
-                  disabled={loading}
+                  disabled={creating}
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
                   Buat Project
                 </Button>
                 <Button
@@ -436,7 +568,7 @@ export function RobotBuilderTab() {
                   }}
                   disabled={scanning}
                 >
-                  <Scan className="w-4 h-4 mr-2" />
+                  {scanning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Scan className="w-4 h-4 mr-2" />}
                   Scan
                 </Button>
               </div>

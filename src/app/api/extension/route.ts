@@ -244,7 +244,7 @@ export async function PUT(request: NextRequest) {
         )
       }
 
-      const connection = bridge.authenticate(apiKey)
+      const connection = await bridge.authenticate(apiKey)
 
       if (!connection) {
         return NextResponse.json(
