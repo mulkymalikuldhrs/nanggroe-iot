@@ -62,7 +62,7 @@ export type TelemetryMetric =
   | 'motor_rpm_3'
   | 'current_draw'
 
-export type TelemetrySource = 'sensor' | 'simulated' | 'manual'
+export type TelemetrySource = 'sensor' | 'manual'
 
 export interface TelemetryReading {
   id: string

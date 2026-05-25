@@ -93,7 +93,7 @@ export async function hermesRespond(
   context?: SystemContext
 ): Promise<HermesResponse> {
   try {
-    const zai = new ZAI()
+    const zai = await ZAI.create()
 
     // Build context message
     let contextMessage = ''

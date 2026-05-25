@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useSSE } from '@/hooks/use-sse'
 import {
   Card,
   CardContent,
@@ -19,7 +20,6 @@ import {
   Signal,
   Mountain,
   AlertTriangle,
-  Radio,
   Wifi,
   Play,
   Zap,
@@ -96,6 +96,28 @@ export function OverviewTab() {
   const [telemetry, setTelemetry] = useState<TelemetrySnapshot | null>(null)
   const [alerts, setAlerts] = useState<AlertData[]>([])
   const [loading, setLoading] = useState(true)
+  const [liveConnected, setLiveConnected] = useState(false)
+
+  // SSE real-time telemetry stream
+  const { connected: sseConnected } = useSSE<{
+    type: string
+    snapshot: TelemetrySnapshot
+    timestamp: string
+  }>({
+    url: '/api/stream/telemetry',
+    enabled: true,
+    onMessage: (data) => {
+      if (data.type === 'telemetry' && data.snapshot) {
+        setTelemetry(data.snapshot)
+        setLiveConnected(true)
+      }
+    },
+  })
+
+  // Sync live connection state
+  useEffect(() => {
+    setLiveConnected(sseConnected)
+  }, [sseConnected])
 
   const fetchSystem = useCallback(async () => {
     try {
@@ -139,19 +161,6 @@ export function OverviewTab() {
       fetchSystem()
       fetchTelemetry()
       fetchAlerts()
-    } catch {
-      // silent
-    }
-  }
-
-  const handleSimulateTelemetry = async () => {
-    try {
-      await fetch('/api/telemetry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ simulate: true }),
-      })
-      fetchTelemetry()
     } catch {
       // silent
     }
@@ -207,15 +216,7 @@ export function OverviewTab() {
           <Zap className="w-3.5 h-3.5 mr-1.5" />
           Seed Database
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleSimulateTelemetry}
-          className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5"
-        >
-          <Radio className="w-3.5 h-3.5 mr-1.5" />
-          Generate Telemetry
-        </Button>
+
       </div>
 
       {/* System Mode + Quick Stats */}

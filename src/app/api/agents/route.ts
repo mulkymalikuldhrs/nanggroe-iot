@@ -6,6 +6,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
+import { picoclawCheck } from '@/lib/agents'
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,29 +93,37 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // If sending to PicoClaw, run a safety check and respond
+    // If sending to PicoClaw, run a safety check using real telemetry data and respond
     if (agent === 'picoclaw') {
-      const { generateTelemetrySnapshot } = await import('@/lib/simulator')
-      const { picoclawCheck } = await import('@/lib/agents')
+      const telemetrySnapshot = await getLatestTelemetrySnapshot()
 
-      const snapshot = generateTelemetrySnapshot(true)
-      const safetyResult = picoclawCheck(snapshot)
+      let picoclawResponseContent: string
+      let safetyMeta: Record<string, unknown>
+
+      if (telemetrySnapshot) {
+        const safetyResult = picoclawCheck(telemetrySnapshot)
+        picoclawResponseContent = safetyResult.safe
+          ? `All systems nominal. ${safetyResult.alerts.length} minor alerts detected. No action required.`
+          : `SAFETY ALERT: ${safetyResult.alerts.filter(a => a.level === 'critical').length} critical and ${safetyResult.alerts.filter(a => a.level === 'warning').length} warning conditions detected. Recommended actions: ${safetyResult.actions.map(a => a.type).join(', ')}`
+        safetyMeta = {
+          safetyResult: {
+            safe: safetyResult.safe,
+            alertCount: safetyResult.alerts.length,
+            actionCount: safetyResult.actions.length,
+          },
+        }
+      } else {
+        picoclawResponseContent = 'No telemetry data available. Please ensure sensors are connected and sending data.'
+        safetyMeta = { safetyResult: { safe: false, alertCount: 0, actionCount: 0, noData: true } }
+      }
 
       const picoclawResponse = await db.agentMessage.create({
         data: {
           missionId: missionId || null,
           agent: 'picoclaw',
           role: 'response',
-          content: safetyResult.safe
-            ? `All systems nominal. ${safetyResult.alerts.length} minor alerts detected. No action required.`
-            : `SAFETY ALERT: ${safetyResult.alerts.filter(a => a.level === 'critical').length} critical and ${safetyResult.alerts.filter(a => a.level === 'warning').length} warning conditions detected. Recommended actions: ${safetyResult.actions.map(a => a.type).join(', ')}`,
-          metadata: JSON.stringify({
-            safetyResult: {
-              safe: safetyResult.safe,
-              alertCount: safetyResult.alerts.length,
-              actionCount: safetyResult.actions.length,
-            },
-          }),
+          content: picoclawResponseContent,
+          metadata: JSON.stringify(safetyMeta),
         },
       })
 

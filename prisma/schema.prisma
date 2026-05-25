@@ -57,7 +57,7 @@ model TelemetryReading {
   metric     String   // battery_voltage, gps_lat, gps_lng, altitude, signal_strength, temperature, humidity, pressure, heading, speed, roll, pitch, yaw
   value      Float
   unit       String?  // V, m, %, dBm, C, hPa, deg, m/s
-  source     String   @default("sensor") // sensor, simulated, manual
+  source     String   @default("sensor") // sensor, manual
   timestamp  DateTime @default(now())
 }
 

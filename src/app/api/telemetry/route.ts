@@ -1,13 +1,14 @@
 // ============================================================
 // NANGGROE OS AI - Telemetry API
 // GET  /api/telemetry — Get latest telemetry readings
-// POST /api/telemetry — Add new telemetry reading
+// POST /api/telemetry — Add new telemetry reading (sensor/manual)
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { generateTelemetrySnapshot, generateTelemetryReadings } from '@/lib/simulator'
+import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
 import { picoclawCheck } from '@/lib/agents'
+import type { PicoClawCheckResult } from '@/lib/types'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,14 +20,12 @@ export async function GET(request: NextRequest) {
     const snapshot = searchParams.get('snapshot') === 'true'
     const safetyCheck = searchParams.get('safety') === 'true'
 
-    // If snapshot requested, generate a full telemetry snapshot
+    // If snapshot requested, read the latest telemetry from the database
     if (snapshot) {
-      const activeMission = await db.mission.findFirst({ where: { status: 'active' } })
-      const isInFlight = !!activeMission
-      const telemetrySnapshot = generateTelemetrySnapshot(isInFlight)
+      const telemetrySnapshot = await getLatestTelemetrySnapshot()
 
-      let safetyResult = null
-      if (safetyCheck) {
+      let safetyResult: PicoClawCheckResult | null = null
+      if (safetyCheck && telemetrySnapshot) {
         safetyResult = picoclawCheck(telemetrySnapshot)
 
         // Create alerts for any critical/warning issues found
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
         data: {
           snapshot: telemetrySnapshot,
           safety: safetyResult,
-          inFlight: isInFlight,
+          inFlight: !!(await db.mission.findFirst({ where: { status: 'active' } })),
           timestamp: new Date().toISOString(),
         },
       })
@@ -95,7 +94,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { readings, simulate, deviceId } = body as {
+    const { readings } = body as {
       readings?: Array<{
         deviceId?: string
         metric: string
@@ -103,62 +102,12 @@ export async function POST(request: NextRequest) {
         unit?: string
         source?: string
       }>
-      simulate?: boolean
-      deviceId?: string
     }
 
-    // If simulate flag, generate telemetry data
-    if (simulate) {
-      const activeMission = await db.mission.findFirst({ where: { status: 'active' } })
-      const isInFlight = !!activeMission
-      const snapshot = generateTelemetrySnapshot(isInFlight)
-      const simReadings = generateTelemetryReadings(snapshot, deviceId, 'simulated')
-
-      const created = []
-      for (const r of simReadings) {
-        const reading = await db.telemetryReading.create({
-          data: {
-            deviceId: r.deviceId || null,
-            metric: r.metric,
-            value: r.value,
-            unit: r.unit,
-            source: r.source,
-          },
-        })
-        created.push(reading)
-      }
-
-      // Run PicoClaw safety check on the snapshot
-      const safetyResult = picoclawCheck(snapshot)
-
-      // Create alerts for any issues
-      for (const alert of safetyResult.alerts) {
-        await db.alert.create({
-          data: {
-            level: alert.level,
-            source: 'picoclaw',
-            title: `${alert.metric} ${alert.level}`,
-            message: alert.message,
-            category: 'safety',
-            isRead: false,
-          },
-        })
-      }
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          readings: created,
-          snapshot,
-          safety: safetyResult,
-        },
-        message: `Generated ${created.length} telemetry readings`,
-      })
-    }
-
-    // Manual reading submission
+    // Accept real sensor or manual telemetry readings only
     if (readings && Array.isArray(readings)) {
-      const created = []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const created: any[] = []
       for (const r of readings) {
         const reading = await db.telemetryReading.create({
           data: {
@@ -166,7 +115,7 @@ export async function POST(request: NextRequest) {
             metric: r.metric,
             value: r.value,
             unit: r.unit || null,
-            source: r.source || 'manual',
+            source: r.source || 'sensor',
           },
         })
         created.push(reading)
@@ -180,7 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Provide readings array or simulate=true' },
+      { success: false, error: 'Provide readings array with sensor or manual data' },
       { status: 400 }
     )
   } catch (error) {

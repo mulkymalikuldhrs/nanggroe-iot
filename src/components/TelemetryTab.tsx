@@ -18,11 +18,11 @@ import {
   Compass,
   Activity,
   RotateCw,
-  Radio,
   TrendingUp,
   TrendingDown,
   Minus,
   RefreshCw,
+  Radio,
 } from 'lucide-react'
 import { TELEMETRY_LABELS, TELEMETRY_UNITS, SAFETY_THRESHOLDS } from '@/lib/constants'
 
@@ -134,19 +134,19 @@ const METRIC_CARDS: MetricCardConfig[] = [
   },
   {
     key: 'motor_rpm_1',
-    icon: Radio,
+    icon: Activity,
     format: (v) => v.toFixed(0),
     colorFn: () => 'text-teal-400',
   },
   {
     key: 'motor_rpm_2',
-    icon: Radio,
+    icon: Activity,
     format: (v) => v.toFixed(0),
     colorFn: () => 'text-teal-400',
   },
   {
     key: 'motor_rpm_3',
-    icon: Radio,
+    icon: Activity,
     format: (v) => v.toFixed(0),
     colorFn: () => 'text-teal-400',
   },
@@ -226,19 +226,6 @@ export function TelemetryTab() {
     setTimeout(() => setRefreshing(false), 600)
   }
 
-  const handleSimulate = async () => {
-    try {
-      await fetch('/api/telemetry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ simulate: true }),
-      })
-      refresh()
-    } catch {
-      // silent
-    }
-  }
-
   return (
     <div className="p-4 md:p-6 space-y-4">
       {/* Header */}
@@ -269,15 +256,6 @@ export function TelemetryTab() {
           >
             <RefreshCw className={`w-3 h-3 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleSimulate}
-            className="border-teal-500/30 text-teal-400 hover:bg-teal-500/10 h-7 text-xs"
-          >
-            <Radio className="w-3 h-3 mr-1" />
-            Generate
           </Button>
         </div>
       </div>
