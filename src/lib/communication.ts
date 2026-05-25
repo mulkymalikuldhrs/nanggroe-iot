@@ -80,7 +80,7 @@ export class CommunicationService {
             config = JSON.stringify({
               enabled: true,
               volume: 80,
-              patterns: DEFAULT_BEEP_PATTERNS,
+              patterns: [...DEFAULT_BEEP_PATTERNS],
             } as BeepConfig)
             name = 'Beeper / Alert Sound'
             break

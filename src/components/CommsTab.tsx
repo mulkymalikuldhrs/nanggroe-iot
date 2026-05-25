@@ -57,18 +57,18 @@ export function CommsTab() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
+    let active = true
     const load = async () => {
       try {
         const res = await fetch('/api/comms')
         const data = await res.json()
-        if (!cancelled && data.success) setChannels(data.data)
+        if (active && data.success) setChannels(data.data)
       } catch (err) {
         console.error('Failed to fetch channels:', err)
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => { active = false }
   }, [])
 
   const toggleChannel = async (channelId: string, enable: boolean) => {
