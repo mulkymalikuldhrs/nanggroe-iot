@@ -8,11 +8,23 @@
 // ============================================================
 
 import { db } from './db'
-import { DEFAULT_CONFIG, DEFAULT_HARDWARE } from './constants'
+import {
+  DEFAULT_CONFIG,
+  DEFAULT_HARDWARE,
+  BUILTIN_ROBOT_TEMPLATES,
+  COMM_CHANNEL_TYPES,
+  COMM_CHANNEL_LABELS,
+  COMM_CHANNEL_ICONS,
+  POWER_SOURCE_TYPES,
+  POWER_SOURCE_LABELS,
+} from './constants'
 
 export async function seedDatabase(): Promise<{
   configs: number
   devices: number
+  templates: number
+  channels: number
+  powerSources: number
   session: string
 }> {
   console.log('[Seed] Starting NANGGROE OS AI database seeding...')
@@ -83,7 +95,99 @@ export async function seedDatabase(): Promise<{
   }
   console.log(`[Seed] Created ${deviceCount} hardware devices`)
 
-  // 3. Create initial session
+  // 3. Seed robot templates from BUILTIN_ROBOT_TEMPLATES
+  let templateCount = 0
+  for (const tmpl of BUILTIN_ROBOT_TEMPLATES) {
+    const existing = await db.robotTemplate.findFirst({
+      where: { name: tmpl.name, category: tmpl.category },
+    })
+    if (!existing) {
+      await db.robotTemplate.create({
+        data: {
+          name: tmpl.name,
+          description: tmpl.description,
+          category: tmpl.category,
+          icon: tmpl.icon,
+          requiredHardware: JSON.stringify(tmpl.requiredHardware),
+          requiredFirmware: JSON.stringify(tmpl.requiredFirmware),
+          capabilities: JSON.stringify(tmpl.capabilities),
+          autoConfig: JSON.stringify({ autoDetect: true, autoCalibrate: true }),
+          assemblyGuide: JSON.stringify(tmpl.assemblyGuide),
+          wiringDiagram: JSON.stringify(tmpl.wiringDiagram),
+          difficulty: tmpl.difficulty,
+          estimatedBuildHours: tmpl.estimatedBuildHours,
+          isOfficial: tmpl.isOfficial,
+          version: '1.0.0',
+        },
+      })
+      templateCount++
+    }
+  }
+  console.log(`[Seed] Created ${templateCount} robot templates`)
+
+  // 4. Seed default communication channels
+  let channelCount = 0
+  const defaultChannelConfigs: Record<string, Record<string, unknown>> = {
+    telegram: { botToken: '', chatId: '', commands: ['/status', '/arm', '/disarm', '/rth', '/land', '/help'] },
+    voice: { language: 'id', ttsEnabled: true, sttEnabled: true, wakeWord: 'nanggroe' },
+    android: { port: 8081, authRequired: true, joystickEnabled: true },
+    beep: { pin: 18, patterns: ['startup', 'warning', 'critical', 'success', 'land', 'rth', 'arm', 'disarm'] },
+    gsm: { serialPort: '/dev/ttyUSB2', baudRate: 115200, emergencyNumber: '', apn: '' },
+    radio: { frequency: '433MHz', protocol: 'mavlink', baudRate: 57600 },
+  }
+  for (const type of COMM_CHANNEL_TYPES) {
+    const existing = await db.communicationChannel.findFirst({
+      where: { type: type, name: COMM_CHANNEL_LABELS[type] ?? type },
+    })
+    if (!existing) {
+      await db.communicationChannel.create({
+        data: {
+          type: type,
+          name: COMM_CHANNEL_LABELS[type] ?? type,
+          config: JSON.stringify(defaultChannelConfigs[type] ?? {}),
+          status: 'disconnected',
+          isEnabled: type === 'radio', // Only radio is enabled by default
+        },
+      })
+      channelCount++
+    }
+  }
+  console.log(`[Seed] Created ${channelCount} communication channels`)
+
+  // 5. Seed default power sources
+  let powerSourceCount = 0
+  const defaultPowerConfigs: Record<string, Record<string, unknown>> = {
+    battery: { chemistry: 'LiPo', cellCount: 4, maxVoltage: 16.8, minVoltage: 12.6, nominalVoltage: 14.8, capacityMah: 4000 },
+    solar: { wattage: 5, voltage: 5, chargingMode: 'emergency', chargeController: 'PWM' },
+    gsm: { batteryType: 'Li-Ion', capacityMah: 1200, voltage: 3.7, purpose: 'GSM module backup' },
+    usb: { voltage: 5, maxCurrent: 3, purpose: 'Development power' },
+  }
+  for (const type of POWER_SOURCE_TYPES) {
+    const existing = await db.powerSource.findFirst({
+      where: { type: type, name: POWER_SOURCE_LABELS[type] ?? type },
+    })
+    if (!existing) {
+      const batteryDefaults = type === 'battery'
+        ? { capacity: 4000, voltage: 14.8, current: 0, currentLevel: 100, temperature: 25 }
+        : type === 'solar'
+          ? { capacity: 5000, voltage: 0, current: 0, currentLevel: 0, temperature: 25 }
+          : { capacity: 0, voltage: 0, current: 0, currentLevel: 0, temperature: 0 }
+
+      await db.powerSource.create({
+        data: {
+          type: type,
+          name: POWER_SOURCE_LABELS[type] ?? type,
+          status: type === 'battery' ? 'full' : type === 'solar' ? 'offline' : 'unknown',
+          config: JSON.stringify(defaultPowerConfigs[type] ?? {}),
+          ...batteryDefaults,
+        },
+      })
+      powerSourceCount++
+    }
+  }
+  console.log(`[Seed] Created ${powerSourceCount} power sources`)
+
+  // 6. Create initial session
   const existingSession = await db.session.findFirst({ where: { status: 'active' } })
   let sessionId: string
   if (!existingSession) {
@@ -106,7 +210,7 @@ export async function seedDatabase(): Promise<{
     console.log(`[Seed] Active session already exists: ${existingSession.id}`)
   }
 
-  // 4. Create initial system alerts
+  // 7. Create initial system alerts
   const existingAlerts = await db.alert.count()
   if (existingAlerts === 0) {
     await db.alert.createMany({
@@ -144,6 +248,9 @@ export async function seedDatabase(): Promise<{
   return {
     configs: configCount,
     devices: deviceCount,
+    templates: templateCount,
+    channels: channelCount,
+    powerSources: powerSourceCount,
     session: sessionId,
   }
 }

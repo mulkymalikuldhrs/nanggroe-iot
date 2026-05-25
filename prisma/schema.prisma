@@ -160,3 +160,130 @@ model Alert {
   isResolved Boolean  @default(false)
   timestamp  DateTime @default(now())
 }
+
+// Robot Project Templates
+model RobotTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  category    String   // drone, rover, boat, amphibious, arm, custom
+  icon        String   @default("🤖")
+  requiredHardware String // JSON array of required device types and specs
+  requiredFirmware String // JSON array of required firmware
+  capabilities String  // JSON array of capabilities
+  autoConfig  String   // JSON auto-configuration template
+  assemblyGuide String // JSON step-by-step assembly instructions
+  wiringDiagram String // JSON wiring diagram data
+  codeTemplate String? // JSON starter code templates
+  difficulty  String   @default("intermediate") // beginner, intermediate, advanced
+  estimatedBuildHours Float @default(8)
+  tags        String?  // JSON array of tags
+  isOfficial  Boolean  @default(false)
+  version     String   @default("1.0.0")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  projects    RobotProject[]
+}
+
+// Robot Projects (user creates from templates)
+model RobotProject {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  templateId   String?
+  template     RobotTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  status       String   @default("draft") // draft, building, configured, ready, active, error
+  config       String   // JSON project configuration
+  hardwareList String   // JSON array of hardware in this project
+  firmwareList String   // JSON array of firmware needed
+  capabilities String   // JSON capabilities enabled
+  buildProgress Float  @default(0) // 0-100 percentage
+  currentStep  String?  // Current build step
+  steps        String   // JSON array of build steps with status
+  memoryData   String?  // JSON memory/local data for offline AI
+  isOffline    Boolean  @default(true)
+  lastSyncAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Communication Channels
+model CommunicationChannel {
+  id          String   @id @default(cuid())
+  type        String   // telegram, voice, android, beep, gsm, radio
+  name        String
+  config      String   // JSON channel configuration
+  status      String   @default("disconnected") // disconnected, connecting, connected, error
+  lastMessage String?  // JSON last message data
+  credentials String?  // JSON encrypted credentials (bot token, etc)
+  isEnabled   Boolean  @default(false)
+  projectId   String?  // Optional link to robot project
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Navigation Plans
+model NavigationPlan {
+  id            String   @id @default(cuid())
+  name          String
+  type          String   // gps_track, autopilot, rth, field_mapping, survey, delivery
+  status        String   @default("idle") // idle, active, paused, completed, aborted
+  waypoints     String   // JSON array of navigation waypoints
+  homePosition  String?  // JSON {lat, lng, alt}
+  geofence      String?  // JSON polygon for geofence
+  areaPolygon   String?  // JSON polygon for mapping area
+  parameters    String?  // JSON navigation parameters
+  results       String?  // JSON navigation results (area measured, photos taken, etc)
+  projectId     String?  // Optional link to robot project
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Power Management
+model PowerSource {
+  id           String   @id @default(cuid())
+  type         String   // battery, solar, gsm, usb
+  name         String
+  status       String   @default("unknown") // unknown, charging, discharging, full, error, offline
+  capacity     Float    @default(0) // mAh or mW
+  currentLevel Float    @default(0) // percentage or voltage
+  voltage      Float    @default(0)
+  current      Float    @default(0) // amps
+  temperature  Float    @default(0)
+  config       String?  // JSON power source configuration
+  projectId    String?  // Optional link to robot project
+  lastReading  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// AI Memory & Sync
+model AiMemory {
+  id          String   @id @default(cuid())
+  category    String   // conversation, decision, learning, pattern, preference
+  key         String
+  value       String   // JSON value
+  context     String?  // JSON additional context
+  confidence  Float    @default(1.0) // 0-1 confidence score
+  accessCount Int      @default(0)
+  isSynced    Boolean  @default(false)
+  projectId   String?  // Optional link to robot project
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  accessedAt  DateTime @default(now())
+}
+
+// Voice Logs
+model VoiceLog {
+  id          String   @id @default(cuid())
+  direction   String   // input, output
+  transcript  String
+  audioPath   String?  // Path to audio file if stored
+  language    String   @default("id") // ISO 639-1
+  duration    Float    @default(0) // seconds
+  agentSource String?  // hermes, picoclaw, system
+  projectId   String?  // Optional link to robot project
+  createdAt   DateTime @default(now())
+}
