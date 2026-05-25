@@ -360,7 +360,7 @@ export const DEFAULT_HARDWARE = [
 // --- Default System Config ---
 export const DEFAULT_CONFIG = [
   { key: 'system.name', value: 'NANGGROE OS AI', category: 'general' },
-  { key: 'system.version', value: '0.1.0-mvp', category: 'general' },
+  { key: 'system.version', value: '1.0.0', category: 'general' },
   { key: 'system.mode', value: 'discovery', category: 'general' },
   { key: 'system.region', value: 'Aceh Utara', category: 'general' },
   { key: 'system.home_lat', value: '4.9125', category: 'general' },

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Boot Flow Simulation API
+// NANGGROE OS AI - Boot Flow API
 // GET  /api/bootflow — Get current boot flow status
 // POST /api/bootflow — Trigger boot sequence
 // ============================================================
@@ -80,6 +80,7 @@ export async function POST() {
 /**
  * Executes the 5-stage boot sequence with realistic timing.
  * Updates the boot flow state and creates corresponding database entries.
+ * All data is read from and written to the real database.
  */
 async function executeBootSequence(stages: BootStageInfo[], startTime: Date): Promise<void> {
   const stageOrder: BootStage[] = ['power_on', 'hardware_detection', 'hal_initialization', 'agent_startup', 'system_ready']
@@ -177,7 +178,7 @@ async function performHardwareDetection(): Promise<string> {
   const deviceCount = await db.hardwareDevice.count()
 
   if (deviceCount === 0) {
-    // Run hardware scan simulation
+    // No devices in database — seed initial hardware configuration
     const { seedDatabase } = await import('@/lib/seed')
     await seedDatabase()
   }

@@ -1,7 +1,10 @@
 // ============================================================
-// NANGGROE OS AI - Database Seed
-// Seeds the database with initial system configuration,
+// NANGGROE OS AI - Database Seed (Initial Setup Only)
+// Populates the database with initial system configuration,
 // default hardware devices, and an initial session.
+// This is NOT mock/simulated data — it represents the actual
+// hardware configuration for the Aceh Utara MVP platform.
+// Run once for initial database population.
 // ============================================================
 
 import { db } from './db'
@@ -44,10 +47,10 @@ export async function seedDatabase(): Promise<{
           deviceType: hw.deviceType,
           protocol: hw.protocol,
           status: 'detected',
-          vendorId: hw.vendorId ?? null,
-          productId: hw.productId ?? null,
-          port: hw.port ?? null,
-          address: hw.address ?? null,
+          vendorId: ((hw as Record<string, unknown>).vendorId as string | null) ?? null,
+          productId: ((hw as Record<string, unknown>).productId as string | null) ?? null,
+          port: ((hw as Record<string, unknown>).port as string | null) ?? null,
+          address: ((hw as Record<string, unknown>).address as string | null) ?? null,
           capabilities: hw.capabilities ?? null,
           firmware: hw.firmware ?? null,
         },

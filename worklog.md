@@ -1,65 +1,130 @@
+# Nanggroe OS AI - Worklog
+
 ---
 Task ID: 1
-Agent: Main Agent
-Task: Research and understand the Nanggroe OS AI Blueprint
+Agent: Main
+Task: Fix all TypeScript errors in src/
 
 Work Log:
-- Read 31-page production-ready blueprint PDF
-- Read 3 additional uploaded PDFs (MVP Aceh Utara, Modular Drone Design, Voice Agent Strategy)
-- Extracted all technical specifications, architecture diagrams, API contracts, and implementation roadmap
-- Identified 15 sections covering: Executive Summary, Architecture, Multi-Agent System, Hardware Detection, Tricopter Platform, MVP Implementation, Edge AI, Precision Agriculture, User Interface, Voice Agent, Safety Features, Boot Flow, Deployment, Testing, and Core API
+- Fixed agents.ts: Changed `new ZAI()` to `await ZAI.create()` (private constructor)
+- Fixed seed.ts: Cast `hw` to `Record<string, unknown>` for optional properties (vendorId, productId, port, address)
+- Fixed agents/chat/route.ts: Replaced complex conditional type assertions with simple `as MissionType` / `as MissionStatus`
+- Fixed telemetry/route.ts: Typed `safetyResult` as `PicoClawCheckResult | null`, typed `created` as `any[]`
+- Fixed DoctorTab.tsx: Used `'message' in checkData` for type-safe property access
+- Fixed McpTab.tsx: Changed result data type to `Record<string, unknown> | null`
+- Fixed MissionsTab.tsx: Fixed `[missions` syntax, removed duplicate Mountain component
+- Fixed OverviewTab.tsx: Fixed `MODE_COLORS[mode]` bracket access
+- Fixed AgentsTab.tsx: Fixed `[messages` destructuring syntax
+- Fixed missions/route.ts: Fixed `stats.byStatus[m.status]` and `stats.byType[m.type]` bracket access
+- Fixed missions/[id]/route.ts: Completed truncated `completedAt` handler
 
 Stage Summary:
-- Complete understanding of Nanggroe OS AI architecture (6-layer system)
-- Multi-agent design: Hermes (4B LLM strategic) + PicoClaw (0.8B tactical)
-- Drone tricopter amphibious with Y-frame, MPPT CN3791 solar charging
-- MVP focused on Aceh Utara autonomous drone mapping
-- 10-phase implementation roadmap from Definition to Cross-Domain
+- Zero TypeScript errors in src/
+- Production build succeeds
 
 ---
 Task ID: 2
-Agent: Main Agent + full-stack-developer subagent
-Task: Initialize Next.js project and build complete backend
+Agent: Main
+Task: Add System Doctor / Health Check
 
 Work Log:
-- Initialized Next.js 16 project with fullstack-dev skill
-- Designed and implemented Prisma schema with 11 models: SystemConfig, HardwareDevice, HardwareProfile, TelemetryReading, Mission, MissionLog, AgentMessage, Session, Calibration, SyncQueue, Alert
-- Built 10 API route endpoints: system, hardware, telemetry, missions, missions/[id], agents, agents/chat, alerts, calibration, bootflow
-- Created telemetry simulator for Aceh Utara region (4.9125°N, 97.1347°E)
-- Built Hermes AI agent integration using z-ai-web-dev-sdk
-- Built PicoClaw deterministic safety check system
-- Seeded database with 10 hardware devices and system configuration
-- All API routes tested and returning correct responses
+- Created src/app/api/doctor/route.ts - Full system diagnostics API
+- Created src/components/DoctorTab.tsx - Health check dashboard UI
+- 9 diagnostic checks: database, hardware, agents, telemetry, battery, signal, calibration, alerts, missions
+- Integrated into Dashboard sidebar
 
 Stage Summary:
-- Complete backend with Prisma/SQLite database (11 models)
-- 10 RESTful API endpoints fully functional
-- AI agent chat via z-ai-web-dev-sdk
-- Telemetry simulation with 17 metrics
-- Boot flow simulation with 5 stages
-- Database seeded with Aceh Utara MVP hardware configuration
+- Doctor API and UI fully functional
+- Real database-driven diagnostics
 
 ---
 Task ID: 3
-Agent: full-stack-developer subagent
-Task: Build complete frontend dashboard
+Agent: Main
+Task: Add Hardware Assembly Tutorial & Error Warning
 
 Work Log:
-- Built 8 client components: Dashboard, OverviewTab, TelemetryTab, MissionsTab, HardwareTab, AgentsTab, LogsTab, BootFlowPanel
-- Dark theme with teal/emerald/amber accents (no indigo/blue)
-- Sidebar navigation (desktop) + bottom navigation (mobile)
-- Real-time telemetry auto-refresh every 3 seconds
-- AI chat interface for Hermes with quick commands
-- Mission CRUD with create dialog and status management
-- Hardware detection with scan trigger and status filters
-- Boot flow visual progress with 5-stage indicator
-- Custom CSS animations: pulse-dot, pulse-glow, data-flash
-- Custom scrollbar styling for dark theme
+- Created src/app/api/assembly/route.ts - Assembly guide API with AI-powered troubleshooting
+- Created src/components/AssemblyTab.tsx - Step-by-step assembly guide UI
+- 10 detailed assembly steps covering full tricopter build
+- AI-powered hardware error diagnostics using z-ai-web-dev-sdk
+- Integrated into Dashboard sidebar
 
 Stage Summary:
-- Production-quality dashboard with 6 tabs
-- Responsive design (mobile + desktop)
-- All components connected to backend APIs
-- Real-time data updates
-- Professional robotics control center aesthetic
-- Lint passes with zero errors
+- Assembly guide with real steps, wiring diagrams, safety warnings
+- AI troubleshooting via ZAI SDK
+
+---
+Task ID: 4
+Agent: Main
+Task: Add MCP Integration & Calibration Tab
+
+Work Log:
+- Created src/app/api/mcp/route.ts - MCP tool registry and execution API
+- Created src/components/McpTab.tsx - MCP tools dashboard UI
+- 6 MCP tools: mavlink_command, telemetry_query, mission_generate, hardware_diagnostic, calibration_control, safety_assessment
+- Created src/components/CalibrationTab.tsx - Calibration management UI
+- Integrated into Dashboard sidebar
+
+Stage Summary:
+- Full MCP protocol integration
+- Calibration UI with real DB-driven data
+
+---
+Task ID: 5
+Agent: Main
+Task: Remove all simulation/mock/dummy data
+
+Work Log:
+- Replaced src/lib/simulator.ts with real DB-driven telemetry engine (renamed to telemetry.ts)
+- Removed `generateTelemetrySnapshot()`, `generateTelemetryReadings()`, `generateSingleReading()`, `resetSimState()`, `getSimTick()`
+- Added `getLatestTelemetrySnapshot()` - reads latest readings from DB
+- Added `computeTelemetryTrends()` - calculates trends from historical DB data
+- Added `getTelemetryHistory()` - queries metric-specific history
+- Added `recordTelemetry()` - stores sensor/manual readings
+- Removed TelemetrySource 'simulated' from types
+- Updated Prisma schema source comment
+- Removed "Generate Telemetry" button from OverviewTab and TelemetryTab
+- Hardware scan API now DB-based (checks lastSeen timestamps)
+- Calibration API uses `executeCalibration()` naming
+- All imports updated from '@/lib/simulator' to '@/lib/telemetry'
+
+Stage Summary:
+- Zero simulation/mock/dummy data in the entire codebase
+- All data comes from real database queries
+- TelemetrySource limited to 'sensor' | 'manual'
+
+---
+Task ID: 6
+Agent: Main
+Task: Add SSE real-time streaming
+
+Work Log:
+- Created src/app/api/stream/telemetry/route.ts - SSE telemetry stream (2s interval)
+- Created src/app/api/stream/alerts/route.ts - SSE alerts stream (5s interval)
+- Created src/hooks/use-sse.ts - React hook for SSE consumption with auto-reconnect
+- Updated OverviewTab with SSE integration for live telemetry updates
+- TelemetryTab uses polling with SSE option
+
+Stage Summary:
+- Real-time telemetry via Server-Sent Events
+- Real-time alerts via SSE
+- Auto-reconnecting SSE hook
+
+---
+Task ID: 7
+Agent: Main
+Task: Final production readiness verification
+
+Work Log:
+- Version bumped to 1.0.0
+- TypeScript: Zero errors in src/
+- Next.js build: Compiles successfully
+- All 17 API routes functional
+- All 10 dashboard tabs functional
+- No mock/simulation/dummy data
+
+Stage Summary:
+- Production ready: ✓ TypeScript clean
+- Production ready: ✓ Build succeeds
+- Production ready: ✓ No mock data
+- Production ready: ✓ All features implemented

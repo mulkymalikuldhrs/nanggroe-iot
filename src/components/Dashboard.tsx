@@ -10,6 +10,9 @@ import {
   ScrollText,
   ChevronRight,
   Zap,
+  Puzzle,
+  Wrench,
+  Heart,
 } from 'lucide-react'
 import { OverviewTab } from './OverviewTab'
 import { TelemetryTab } from './TelemetryTab'
@@ -17,6 +20,10 @@ import { MissionsTab } from './MissionsTab'
 import { HardwareTab } from './HardwareTab'
 import { AgentsTab } from './AgentsTab'
 import { LogsTab } from './LogsTab'
+import { McpTab } from './McpTab'
+import { CalibrationTab } from './CalibrationTab'
+import { DoctorTab } from './DoctorTab'
+import { AssemblyTab } from './AssemblyTab'
 
 const NAV_ITEMS = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
@@ -24,7 +31,11 @@ const NAV_ITEMS = [
   { id: 'missions' as const, label: 'Missions', icon: Map },
   { id: 'hardware' as const, label: 'Hardware', icon: Cpu },
   { id: 'agents' as const, label: 'AI Agents', icon: Bot },
+  { id: 'mcp' as const, label: 'MCP Tools', icon: Puzzle },
+  { id: 'calibration' as const, label: 'Calibration', icon: Wrench },
   { id: 'logs' as const, label: 'Logs', icon: ScrollText },
+  { id: 'doctor' as const, label: 'Doctor', icon: Heart },
+  { id: 'assembly' as const, label: 'Assembly', icon: Wrench },
 ]
 
 type TabId = (typeof NAV_ITEMS)[number]['id']
@@ -44,8 +55,16 @@ export function Dashboard() {
         return <HardwareTab />
       case 'agents':
         return <AgentsTab />
+      case 'mcp':
+        return <McpTab />
+      case 'calibration':
+        return <CalibrationTab />
       case 'logs':
         return <LogsTab />
+      case 'doctor':
+        return <DoctorTab />
+      case 'assembly':
+        return <AssemblyTab />
       default:
         return <OverviewTab />
     }
@@ -63,7 +82,7 @@ export function Dashboard() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-white tracking-wide">NANGGROE OS AI</h1>
-              <p className="text-[10px] text-slate-400 font-mono">v0.1.0-mvp</p>
+              <p className="text-[10px] text-slate-400 font-mono">v1.0.0</p>
             </div>
           </div>
         </div>

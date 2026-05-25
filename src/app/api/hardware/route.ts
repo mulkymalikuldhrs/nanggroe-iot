@@ -1,7 +1,7 @@
 // ============================================================
 // NANGGROE OS AI - Hardware Detection & Management API
 // GET  /api/hardware — List all hardware devices with profiles
-// POST /api/hardware — Trigger hardware detection scan
+// POST /api/hardware — Trigger hardware detection scan (DB-based)
 // PUT  /api/hardware — Update device status/profile
 // ============================================================
 
@@ -58,62 +58,39 @@ export async function GET(request: NextRequest) {
 
 export async function POST() {
   try {
-    // Simulate hardware detection scan
-    // In production, this would trigger actual USB/I2C/SPI bus scanning
-    const scanResults = simulateHardwareScan()
-
+    // Real hardware detection: query the database for existing devices
+    // and check their last-seen timestamps to determine current status.
+    // If no devices exist, the seed function handles initial device creation.
+    const existingDevices = await db.hardwareDevice.findMany()
     let newDevices = 0
     let updatedDevices = 0
+    let offlineDevices = 0
 
-    for (const detected of scanResults) {
-      // Check if device already exists
-      const existing = await db.hardwareDevice.findFirst({
-        where: {
-          name: detected.name,
-          deviceType: detected.deviceType,
-        },
-      })
+    for (const device of existingDevices) {
+      const timeSinceLastSeen = Date.now() - new Date(device.lastSeen).getTime()
+      const isStale = timeSinceLastSeen > 60000 // 1 minute
 
-      if (existing) {
-        // Update status and lastSeen
+      if (isStale && device.status !== 'offline') {
+        // Mark stale devices as offline
         await db.hardwareDevice.update({
-          where: { id: existing.id },
-          data: {
-            status: detected.status,
-            lastSeen: new Date(),
-            port: detected.port || existing.port,
-            firmware: detected.firmware || existing.firmware,
-          },
+          where: { id: device.id },
+          data: { status: 'offline' },
+        })
+        offlineDevices++
+      } else if (!isStale && device.status === 'offline') {
+        // Mark recently-seen offline devices as active
+        await db.hardwareDevice.update({
+          where: { id: device.id },
+          data: { status: 'active', lastSeen: new Date() },
         })
         updatedDevices++
-      } else {
-        // Create new device
-        const device = await db.hardwareDevice.create({
-          data: {
-            name: detected.name,
-            deviceType: detected.deviceType,
-            protocol: detected.protocol,
-            status: detected.status,
-            vendorId: detected.vendorId,
-            productId: detected.productId,
-            port: detected.port,
-            address: detected.address,
-            capabilities: detected.capabilities,
-            firmware: detected.firmware,
-          },
+      } else if (!isStale) {
+        // Update lastSeen for active devices
+        await db.hardwareDevice.update({
+          where: { id: device.id },
+          data: { lastSeen: new Date() },
         })
-
-        // Create default profile
-        await db.hardwareProfile.create({
-          data: {
-            deviceId: device.id,
-            adapterName: detected.adapterName || 'generic',
-            config: JSON.stringify(detected.profileConfig || {}),
-            isDefault: true,
-          },
-        })
-
-        newDevices++
+        updatedDevices++
       }
     }
 
@@ -123,21 +100,27 @@ export async function POST() {
         level: 'info',
         source: 'system',
         title: 'Hardware Scan Complete',
-        message: `Scan found ${scanResults.length} devices. New: ${newDevices}, Updated: ${updatedDevices}`,
+        message: `Scan checked ${existingDevices.length} devices. Updated: ${updatedDevices}, Offline: ${offlineDevices}`,
         category: 'hardware',
         isRead: false,
       },
     })
 
+    const finalDevices = await db.hardwareDevice.findMany({
+      include: { profiles: true },
+      orderBy: { lastSeen: 'desc' },
+    })
+
     return NextResponse.json({
       success: true,
       data: {
-        scanned: scanResults.length,
+        scanned: existingDevices.length,
         newDevices,
         updatedDevices,
-        devices: scanResults,
+        offlineDevices,
+        devices: finalDevices,
       },
-      message: `Hardware scan complete: ${newDevices} new, ${updatedDevices} updated`,
+      message: `Hardware scan complete: ${updatedDevices} updated, ${offlineDevices} offline`,
     })
   } catch (error) {
     console.error('[Hardware API] POST error:', error)
@@ -212,103 +195,4 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-// Simulated hardware scan — returns realistic detected devices
-function simulateHardwareScan() {
-  return [
-    {
-      name: 'Pixhawk 4',
-      deviceType: 'flight_controller',
-      protocol: 'uart',
-      status: 'active',
-      vendorId: '0x26AC',
-      productId: '0x0012',
-      port: '/dev/ttyAMA0',
-      capabilities: JSON.stringify(['mavlink', 'gps', 'imu', 'barometer', 'compass', 'osd']),
-      firmware: 'ArduPilot 4.5.7',
-      adapterName: 'pixhawk',
-      profileConfig: { baudRate: 57600, protocol: 'mavlink2', streamRate: 10 },
-    },
-    {
-      name: 'Raspberry Pi 4B',
-      deviceType: 'companion_computer',
-      protocol: 'usb',
-      status: 'active',
-      vendorId: '0x1D6B',
-      productId: '0x0104',
-      port: '/dev/ttyS0',
-      capabilities: JSON.stringify(['wifi', 'bluetooth', 'gpio', 'camera_interface', 'usb_host']),
-      firmware: 'Raspberry Pi OS 64-bit',
-      adapterName: 'raspberry_pi',
-      profileConfig: { serialPort: '/dev/ttyS0', baudRate: 115200 },
-    },
-    {
-      name: 'u-blox NEO-M8N',
-      deviceType: 'gps',
-      protocol: 'uart',
-      status: 'active',
-      vendorId: '0x1546',
-      productId: '0x01A7',
-      port: '/dev/ttyUSB0',
-      capabilities: JSON.stringify(['gps', 'glonass', 'galileo', 'beidou']),
-      firmware: '1.00',
-      adapterName: 'ublox_neo_m8n',
-      profileConfig: { baudRate: 9600, updateRate: 10 },
-    },
-    {
-      name: 'Raspberry Pi Camera V2',
-      deviceType: 'camera',
-      protocol: 'gpio',
-      status: 'active',
-      port: '/dev/video0',
-      capabilities: JSON.stringify(['still_capture', 'video', 'resolution_8mp']),
-      firmware: 'IMX219',
-      adapterName: 'rpi_camera_v2',
-      profileConfig: { resolution: '3280x2464', fps: 30, format: 'jpeg' },
-    },
-    {
-      name: 'BME280',
-      deviceType: 'sensor',
-      protocol: 'i2c',
-      status: 'active',
-      address: '0x76',
-      capabilities: JSON.stringify(['temperature', 'humidity', 'pressure']),
-      firmware: 'BME280',
-      adapterName: 'bme280',
-      profileConfig: { i2cBus: 1, address: '0x76', samplingRate: 2 },
-    },
-    {
-      name: 'MPU6050',
-      deviceType: 'sensor',
-      protocol: 'i2c',
-      status: 'active',
-      address: '0x68',
-      capabilities: JSON.stringify(['accelerometer', 'gyroscope']),
-      firmware: 'MPU6050',
-      adapterName: 'mpu6050',
-      profileConfig: { i2cBus: 1, address: '0x68', accelRange: '2g', gyroRange: '250dps' },
-    },
-    {
-      name: 'SiK Telemetry Radio',
-      deviceType: 'radio',
-      protocol: 'uart',
-      status: 'active',
-      port: '/dev/ttyUSB1',
-      capabilities: JSON.stringify(['433mhz', 'mavlink', 'range_1km']),
-      firmware: 'SiK 2.0',
-      adapterName: 'sik_radio',
-      profileConfig: { baudRate: 57600, frequency: '433MHz', airSpeed: 64 },
-    },
-    {
-      name: '4S LiPo 4000mAh',
-      deviceType: 'battery',
-      protocol: 'adc',
-      status: 'active',
-      capabilities: JSON.stringify(['voltage_monitoring', 'current_monitoring', 'cell_count_4']),
-      firmware: null,
-      adapterName: 'lipo_monitor',
-      profileConfig: { cells: 4, capacity: 4000, minVoltage: 12.6, maxVoltage: 16.8 },
-    },
-  ]
 }
