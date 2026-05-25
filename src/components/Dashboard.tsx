@@ -13,6 +13,10 @@ import {
   Puzzle,
   Wrench,
   Heart,
+  HardDrive,
+  Upload,
+  TestTube,
+  Plug,
 } from 'lucide-react'
 import { OverviewTab } from './OverviewTab'
 import { TelemetryTab } from './TelemetryTab'
@@ -24,6 +28,10 @@ import { McpTab } from './McpTab'
 import { CalibrationTab } from './CalibrationTab'
 import { DoctorTab } from './DoctorTab'
 import { AssemblyTab } from './AssemblyTab'
+import { DriversTab } from './DriversTab'
+import { FlashTab } from './FlashTab'
+import { TestingTab } from './TestingTab'
+import { ExtensionTab } from './ExtensionTab'
 
 const NAV_ITEMS = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
@@ -36,6 +44,10 @@ const NAV_ITEMS = [
   { id: 'logs' as const, label: 'Logs', icon: ScrollText },
   { id: 'doctor' as const, label: 'Doctor', icon: Heart },
   { id: 'assembly' as const, label: 'Assembly', icon: Wrench },
+  { id: 'drivers' as const, label: 'Drivers', icon: HardDrive },
+  { id: 'flash' as const, label: 'Flash', icon: Upload },
+  { id: 'testing' as const, label: 'Testing', icon: TestTube },
+  { id: 'extension' as const, label: 'Extension', icon: Plug },
 ]
 
 type TabId = (typeof NAV_ITEMS)[number]['id']
@@ -65,6 +77,14 @@ export function Dashboard() {
         return <DoctorTab />
       case 'assembly':
         return <AssemblyTab />
+      case 'drivers':
+        return <DriversTab />
+      case 'flash':
+        return <FlashTab />
+      case 'testing':
+        return <TestingTab />
+      case 'extension':
+        return <ExtensionTab />
       default:
         return <OverviewTab />
     }
@@ -82,7 +102,7 @@ export function Dashboard() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-white tracking-wide">NANGGROE OS AI</h1>
-              <p className="text-[10px] text-slate-400 font-mono">v1.0.0</p>
+              <p className="text-[10px] text-slate-400 font-mono">v2.0.0</p>
             </div>
           </div>
         </div>

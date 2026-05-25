@@ -106,8 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Accept real sensor or manual telemetry readings only
     if (readings && Array.isArray(readings)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const created: any[] = []
+      const created: unknown[] = []
       for (const r of readings) {
         const reading = await db.telemetryReading.create({
           data: {
