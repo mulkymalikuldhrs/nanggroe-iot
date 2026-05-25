@@ -14,9 +14,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nanggroe OS AI - Autonomous Robotics Operating System",
-  description: "Modular autonomous robotics operating system with multi-agent AI (Hermes & PicoClaw), drone tricopter control, mission planning, and telemetry for Aceh Utara region",
-  keywords: ["Nanggroe OS AI", "autonomous robotics", "drone", "tricopter", "Hermes", "PicoClaw", "mission planning", "telemetry", "Aceh Utara"],
+  title: "Nanggroe OS AI — Autonomous Robotics Platform",
+  description:
+    "Modular autonomous robotics operating system with AI agents, hardware auto-detection, and multi-project support for Arduino, Raspberry Pi, and more.",
+  authors: [{ name: "Mulky Malikul Dhaher", url: "mailto:mulkymalikuldhaher@email.com" }],
+  creator: "Mulky Malikul Dhaher",
+  keywords: [
+    "Nanggroe OS AI",
+    "autonomous robotics",
+    "AI agents",
+    "hardware auto-detection",
+    "Arduino",
+    "Raspberry Pi",
+    "drone",
+    "rover",
+    "mission planning",
+    "telemetry",
+  ],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },

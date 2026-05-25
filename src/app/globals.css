@@ -180,3 +180,34 @@
 .animate-data-flash {
   animation: data-flash 0.6s ease-out;
 }
+
+/* Slide-up animation for mobile bottom sheet panels */
+@keyframes slide-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Safe area padding for Capacitor native apps */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Capacitor-specific touch optimizations */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .capacitor-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .capacitor-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
