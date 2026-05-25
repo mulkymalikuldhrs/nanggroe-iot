@@ -399,3 +399,220 @@ export const CALIBRATION_TYPE_LABELS: Record<string, string> = {
   esc: 'ESC',
   radio: 'Radio',
 }
+
+// --- Robot Template Constants ---
+export const ROBOT_CATEGORIES = ['drone', 'rover', 'boat', 'amphibious', 'arm', 'custom'] as const
+export const ROBOT_CATEGORY_LABELS: Record<string, string> = {
+  drone: 'Drone / UAV',
+  rover: 'Rover / UGV',
+  boat: 'Boat / USV',
+  amphibious: 'Amphibious',
+  arm: 'Robotic Arm',
+  custom: 'Custom Build',
+}
+
+export const ROBOT_CATEGORY_ICONS: Record<string, string> = {
+  drone: '🚁',
+  rover: '🚗',
+  boat: '🚤',
+  amphibious: '🦆',
+  arm: '🦾',
+  custom: '🛠️',
+}
+
+export const BUILD_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const
+export const BUILD_DIFFICULTY_LABELS: Record<string, string> = {
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+}
+
+// --- Pre-built Robot Templates ---
+export const BUILTIN_ROBOT_TEMPLATES = [
+  {
+    name: 'Drone Tricopter 3-Baling (Arduino)',
+    description: 'Tricopter drone amfibi dengan 3 baling-baling, Arduino-compatible flight controller, mampu terbang, mengapung di air, dan berjalan di darat. Dilengkapi face tracking, autopilot, GPS return-to-home, dan payload delivery.',
+    category: 'amphibious' as const,
+    icon: '🚁',
+    difficulty: 'intermediate' as const,
+    estimatedBuildHours: 16,
+    isOfficial: true,
+    requiredHardware: [
+      { deviceType: 'flight_controller', name: 'Pixhawk 4 / Arduino Mega 2560', protocol: 'uart', required: true, alternatives: ['Pixhawk 6C', 'Cube Orange'], notes: 'Flight controller utama untuk kontrol penerbangan' },
+      { deviceType: 'companion_computer', name: 'Raspberry Pi 4B', protocol: 'usb', required: true, alternatives: ['Raspberry Pi 5', 'Jetson Nano'], notes: 'Companion computer untuk AI dan pemrosesan' },
+      { deviceType: 'gps', name: 'u-blox NEO-M8N', protocol: 'uart', required: true, alternatives: ['NEO-M9N', 'M10'], notes: 'GPS untuk navigasi dan return-to-home' },
+      { deviceType: 'camera', name: 'Raspberry Pi Camera V2 / USB Camera', protocol: 'usb', required: true, alternatives: ['Arducam IMX477', 'ESP32-CAM'], notes: 'Kamera untuk face tracking dan mapping' },
+      { deviceType: 'motor', name: 'SunnySky V2216 x3', protocol: 'esc', required: true, alternatives: ['T-Motor MN2214', 'EMax RS2205'], notes: '3 motor brushless untuk tricopter' },
+      { deviceType: 'esc', name: 'ESC 30A BLHeli_S x3', protocol: 'pwm', required: true, alternatives: ['DShot600 ESC'], notes: '3 ESC untuk kontrol motor' },
+      { deviceType: 'servo', name: 'Servo MG996R (yaw tail)', protocol: 'pwm', required: true, notes: 'Servo untuk yaw pada baling ketiga tricopter' },
+      { deviceType: 'battery', name: '4S LiPo 4000mAh', protocol: 'adc', required: true, alternatives: ['4S LiPo 6000mAh'], notes: 'Baterai utama, minimal 4000mAh' },
+      { deviceType: 'radio', name: 'SiK Telemetry Radio 433MHz', protocol: 'uart', required: true, notes: 'Radio telemetry untuk koneksi ground station' },
+      { deviceType: 'sensor', name: 'BME280', protocol: 'i2c', required: true, notes: 'Sensor suhu, kelembaban, tekanan' },
+      { deviceType: 'sensor', name: 'MPU6050', protocol: 'i2c', required: true, notes: 'IMU accelerometer + gyroscope' },
+      { deviceType: 'sensor', name: 'HC-SR04 Ultrasonic', protocol: 'gpio', required: false, alternatives: ['TF-Luna LiDAR'], notes: 'Sensor jarak untuk obstacle avoidance dan altimeter' },
+    ],
+    requiredFirmware: [
+      { target: 'pixhawk', version: 'ArduPilot 4.5.7 Tricopter', url: 'firmware/pixhawk/ardupilot-tri-4.5.7.px4' },
+      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'esc', version: 'BLHeli_S 16.7', url: 'firmware/esc/blheli_s-16.7.hex' },
+      { target: 'radio', version: 'SiK 2.0', url: 'firmware/radio/sik-2.0.hex' },
+    ],
+    capabilities: [
+      'face_tracking', 'autopilot', 'return_to_home', 'obstacle_avoidance',
+      'payload_delivery', 'field_mapping', 'aerial_photography',
+      'amphibious_float', 'land_drive', 'gps_navigation',
+      'voice_control', 'telegram_control', 'android_control',
+      'ai_assisted', 'solar_emergency', 'gsm_connectivity',
+      'local_llm', 'offline_memory', 'beep_alerts',
+    ],
+    assemblyGuide: [
+      { step: 1, title: 'Siapkan Frame Tricopter', description: 'Rakit frame tricopter dari carbon fiber atau aluminium. Pastikan 3 arm membentuk sudut 120°. Arm belakang untuk servo yaw.', duration: '2 jam', tools: ['Obeng set', 'Allen key'], parts: ['Frame kit', 'Motor mount x3', 'Landing gear'], warnings: ['Pastikan semua sekrup kencang', 'Periksa balance frame'] },
+      { step: 2, title: 'Pasang Motor & ESC', description: 'Pasang 3 motor brushless pada arm. Hubungkan ESC ke setiap motor. Pasang servo yaw pada arm belakang.', duration: '1.5 jam', tools: ['Solder', 'Heat shrink'], parts: ['Motor x3', 'ESC x3', 'Servo yaw x1', 'Propeller x3 (2 CW, 1 CCW)'], warnings: ['Perhatikan arah putaran motor', 'Solder semua koneksi ESC'] },
+      { step: 3, title: 'Pasang Flight Controller', description: 'Mount Pixhawk/Arduino di tengah frame. Hubungkan ke ESC, servo, GPS, dan radio. Pasang dengan vibration dampening.', duration: '1.5 jam', tools: ['Kabel ties', 'Double-sided tape'], parts: ['Pixhawk 4', 'GPS mast', 'Telemetry radio'], warnings: ['Arah panah Pixhawk harus menghadap depan', 'Gunakan foam mounting untuk anti-vibrasi'] },
+      { step: 4, title: 'Pasang Companion Computer', description: 'Mount Raspberry Pi 4B. Hubungkan ke Pixhawk via UART. Pasang kamera ke CSI port.', duration: '1 jam', tools: ['USB cable', 'UART cable'], parts: ['Raspberry Pi 4B', 'MicroSD 32GB', 'Pi Camera V2'], warnings: ['Pastikan UART baud rate sama (921600)', 'Kamera harus terhubung sebelum power on'] },
+      { step: 5, title: 'Pasang Sensor & GPS', description: 'Hubungkan BME280 dan MPU6050 ke I2C bus. Pasang GPS pada mast di atas frame. Hubungkan ultrasonic sensor untuk obstacle avoidance.', duration: '1 jam', tools: ['Jumper wires', 'Breadboard/PCB'], parts: ['BME280', 'MPU6050', 'GPS NEO-M8N', 'HC-SR04'], warnings: ['I2C address tidak boleh konflik', 'GPS harus di posisi tertinggi'] },
+      { step: 6, title: 'Pasang Sistem Daya', description: 'Hubungkan baterai LiPo ke power distribution board. Pasang solar panel darurat. Hubungkan voltage/current sensor ke Pixhawk.', duration: '1 jam', tools: ['Solder', 'Multimeter'], parts: ['4S LiPo 4000mAh', 'Power distribution board', 'Solar panel 5W', 'XT60 connector'], warnings: ['PERIKSA POLARITAS SEBELUM POWER ON', 'Baterai harus di-charge penuh sebelum test'] },
+      { step: 7, title: 'Pasang Sistem Amfibi', description: 'Pasang styrofoam float untuk mengapung di air. Hubungkan servo fin untuk kontrol di air. Pasang roda untuk mode darat.', duration: '1.5 jam', tools: ['Cable ties', 'Waterproof tape'], parts: ['Styrofoam float x2', 'Servo fin x2', 'Wheel x2', 'Wheel motor'], warnings: ['Pastikan semua komponen waterproof', 'Test float di air tenang dulu'] },
+      { step: 8, title: 'Pasang Payload & Fitur Tambahan', description: 'Hubungkan servo/relay untuk payload drop mechanism, buzzer untuk alert, dan GSM module untuk komunikasi darurat.', duration: '1 jam', tools: ['Solder', 'Cable ties'], parts: ['Servo MG996R (payload)', 'Buzzer 5V', 'SIM800L GSM module'], warnings: ['Payload drop servo harus di-test di darat dulu', 'GSM module butuh antenna yang benar'] },
+      { step: 9, title: 'Flash Firmware', description: 'Flash ArduPilot ke Pixhawk. Flash Nanggroe OS ke Raspberry Pi. Flash BLHeli_S ke ESC. Flash SiK ke radio.', duration: '1 jam', tools: ['USB cable', 'Computer'], parts: ['MicroSD card reader'], warnings: ['Jangan matikan power saat flashing', 'Backup firmware lama jika ada'] },
+      { step: 10, title: 'Kalibrasi & Test', description: 'Lakukan kalibrasi compass, accelerometer, gyro, ESC, dan radio. Test motor spin, GPS lock, kamera, dan semua sensor.', duration: '2 jam', tools: ['Computer dengan Mission Planner/QGC'], parts: [], warnings: ['LEPAS PROPELLER saat test motor', 'Kalibrasi compass jauh dari logam'] },
+    ],
+    wiringDiagram: {
+      pixhawk: { uart0: 'Raspberry Pi', uart1: 'GPS NEO-M8N', uart2: 'SiK Radio', i2c: 'BME280 + MPU6050', pwm: 'ESC x3 + Servo Yaw', adc: 'Voltage/Current Sensor' },
+      raspberry_pi: { uart: 'Pixhawk', i2c: 'BME280 + MPU6050 (shared)', csi: 'Pi Camera V2', usb: 'GSM Module', gpio: 'Buzzer + Ultrasonic' },
+      power: { lipo: 'Power Distribution Board → Pixhawk + ESC + Raspberry Pi', solar: 'Charge Controller → LiPo (emergency)', gsm: 'Separate 3.7V LiPo or buck converter' },
+    },
+  },
+  {
+    name: 'Rover Darat 4 Roda',
+    description: 'Rover 4 roda untuk survei darat, patroli, dan pengiriman. Dilengkapi kamera, GPS, obstacle avoidance, dan kontrol Android.',
+    category: 'rover' as const,
+    icon: '🚗',
+    difficulty: 'beginner' as const,
+    estimatedBuildHours: 10,
+    isOfficial: true,
+    requiredHardware: [
+      { deviceType: 'flight_controller', name: 'Pixhawk 4', protocol: 'uart', required: true, notes: 'Flight controller untuk rover mode' },
+      { deviceType: 'companion_computer', name: 'Raspberry Pi 4B', protocol: 'usb', required: true, notes: 'Companion computer' },
+      { deviceType: 'gps', name: 'u-blox NEO-M8N', protocol: 'uart', required: true, notes: 'GPS untuk navigasi' },
+      { deviceType: 'camera', name: 'USB Camera', protocol: 'usb', required: true, notes: 'Kamera untuk visi' },
+      { deviceType: 'motor', name: 'DC Motor + Encoder x4', protocol: 'pwm', required: true, notes: '4 motor DC dengan encoder' },
+      { deviceType: 'esc', name: 'Sabertooth 2x32A Motor Driver', protocol: 'uart', required: true, notes: 'Motor driver untuk rover' },
+      { deviceType: 'battery', name: '3S LiPo 5000mAh', protocol: 'adc', required: true, notes: 'Baterai rover' },
+      { deviceType: 'sensor', name: 'HC-SR04 x3 (front/side)', protocol: 'gpio', required: false, notes: 'Obstacle avoidance' },
+    ],
+    requiredFirmware: [
+      { target: 'pixhawk', version: 'ArduPilot 4.5.7 Rover', url: 'firmware/pixhawk/ardupilot-rover-4.5.7.px4' },
+      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+    ],
+    capabilities: ['gps_navigation', 'obstacle_avoidance', 'patrol', 'delivery', 'field_mapping', 'android_control', 'ai_assisted', 'beep_alerts'],
+    assemblyGuide: [],
+    wiringDiagram: {},
+  },
+  {
+    name: 'Kapal Amfibi USV',
+    description: 'Kapal permukaan tanpa awak untuk survei sungai, pemetaan pesisir, dan monitoring perairan. Bisa mengapung dan berlayar otomatis.',
+    category: 'boat' as const,
+    icon: '🚤',
+    difficulty: 'intermediate' as const,
+    estimatedBuildHours: 14,
+    isOfficial: true,
+    requiredHardware: [
+      { deviceType: 'flight_controller', name: 'Pixhawk 4', protocol: 'uart', required: true, notes: 'FC dalam housing waterproof' },
+      { deviceType: 'companion_computer', name: 'Raspberry Pi 4B', protocol: 'usb', required: true, notes: 'Dalam housing waterproof' },
+      { deviceType: 'gps', name: 'u-blox NEO-M8N', protocol: 'uart', required: true, notes: 'GPS di atas deck' },
+      { deviceType: 'motor', name: 'Brushless Motor + Propeller x2', protocol: 'esc', required: true, notes: 'Dual motor untuk kemudi' },
+      { deviceType: 'esc', name: 'ESC 40A x2', protocol: 'pwm', required: true, notes: 'Waterproof ESC' },
+      { deviceType: 'battery', name: '4S LiPo 6000mAh', protocol: 'adc', required: true, notes: 'Baterai besar untuk jangka panjang' },
+      { deviceType: 'sensor', name: 'Water temperature sensor DS18B20', protocol: 'gpio', required: false, notes: 'Monitoring suhu air' },
+    ],
+    requiredFirmware: [
+      { target: 'pixhawk', version: 'ArduPilot 4.5.7 Boat', url: 'firmware/pixhawk/ardupilot-boat-4.5.7.px4' },
+      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+    ],
+    capabilities: ['gps_navigation', 'water_survey', 'coastal_mapping', 'amphibious_float', 'solar_charging', 'gsm_connectivity', 'ai_assisted'],
+    assemblyGuide: [],
+    wiringDiagram: {},
+  },
+] as const
+
+// --- Communication Channel Constants ---
+export const COMM_CHANNEL_TYPES = ['telegram', 'voice', 'android', 'beep', 'gsm', 'radio'] as const
+export const COMM_CHANNEL_LABELS: Record<string, string> = {
+  telegram: 'Telegram Bot',
+  voice: 'Voice / TTS',
+  android: 'Android Control',
+  beep: 'Beeper / Alert',
+  gsm: 'GSM Module',
+  radio: 'Radio Telemetry',
+}
+
+export const COMM_CHANNEL_ICONS: Record<string, string> = {
+  telegram: '📨',
+  voice: '🎤',
+  android: '📱',
+  beep: '🔔',
+  gsm: '📡',
+  radio: '📻',
+}
+
+// --- Navigation Constants ---
+export const NAVIGATION_TYPES = ['gps_track', 'autopilot', 'rth', 'field_mapping', 'survey', 'delivery'] as const
+export const NAVIGATION_TYPE_LABELS: Record<string, string> = {
+  gps_track: 'GPS Tracking',
+  autopilot: 'Autopilot',
+  rth: 'Return to Home',
+  field_mapping: 'Field Mapping',
+  survey: 'Survey',
+  delivery: 'Delivery',
+}
+
+// --- Power Source Constants ---
+export const POWER_SOURCE_TYPES = ['battery', 'solar', 'gsm', 'usb'] as const
+export const POWER_SOURCE_LABELS: Record<string, string> = {
+  battery: 'Battery',
+  solar: 'Solar Panel',
+  gsm: 'GSM Power',
+  usb: 'USB Power',
+}
+
+export const DEFAULT_BEEP_PATTERNS = [
+  { name: 'startup', pattern: [100, 50, 100, 50, 200], frequency: 2000 },
+  { name: 'warning', pattern: [200, 100, 200], frequency: 1500 },
+  { name: 'critical', pattern: [500, 200, 500, 200, 500], frequency: 3000 },
+  { name: 'success', pattern: [100, 50, 100, 50, 400], frequency: 2500 },
+  { name: 'land', pattern: [300, 300, 300], frequency: 1000 },
+  { name: 'rth', pattern: [200, 100, 200, 100, 200, 100, 400], frequency: 1800 },
+  { name: 'arm', pattern: [100, 50, 200], frequency: 2200 },
+  { name: 'disarm', pattern: [200, 50, 100], frequency: 1200 },
+] as const
+
+// --- AI Memory Constants ---
+export const AI_MEMORY_CATEGORIES = ['conversation', 'decision', 'learning', 'pattern', 'preference'] as const
+export const AI_MEMORY_CATEGORY_LABELS: Record<string, string> = {
+  conversation: 'Conversation',
+  decision: 'Decision',
+  learning: 'Learning',
+  pattern: 'Pattern',
+  preference: 'Preference',
+}
+
+// --- Local LLM Constants ---
+export const LOCAL_LLM_MODELS = [
+  { name: 'TinyLlama 1.1B', size: '700MB', ram: '2GB', description: 'Model kecil untuk Pi 4B, respons cepat', suitable: ['pi4', 'pi5'] },
+  { name: 'Phi-2 2.7B', size: '1.8GB', ram: '4GB', description: 'Model menengah, keseimbangan kecepatan & kualitas', suitable: ['pi5', 'jetson'] },
+  { name: 'Llama-3.2-1B', size: '800MB', ram: '2GB', description: 'Meta Llama 3.2 compact, multilingual', suitable: ['pi4', 'pi5'] },
+  { name: 'Gemma-2-2B', size: '1.4GB', ram: '3GB', description: 'Google Gemma 2, efisien untuk edge', suitable: ['pi4', 'pi5'] },
+  { name: 'Qwen2.5-1.5B', size: '1.0GB', ram: '2.5GB', description: 'Alibaba Qwen, bagus untuk multi-bahasa termasuk Indonesian', suitable: ['pi4', 'pi5'] },
+] as const
+
+// --- Autopilot Modes ---
+export const AUTOPILOT_MODES = ['stabilize', 'alt_hold', 'loiter', 'auto', 'rtl', 'land'] as const
+export const AUTOPILOT_MODE_LABELS: Record<string, string> = {
+  stabilize: 'Stabilize',
+  alt_hold: 'Altitude Hold',
+  loiter: 'Loiter (GPS Hold)',
+  auto: 'Auto (Waypoint)',
+  rtl: 'Return to Launch',
+  land: 'Land',
+}

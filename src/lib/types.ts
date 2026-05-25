@@ -288,3 +288,290 @@ export interface SystemConfigEntry {
   value: string
   category: ConfigCategory
 }
+
+// --- Robot Template Types ---
+export type RobotCategory = 'drone' | 'rover' | 'boat' | 'amphibious' | 'arm' | 'custom'
+export type RobotProjectStatus = 'draft' | 'building' | 'configured' | 'ready' | 'active' | 'error'
+export type BuildDifficulty = 'beginner' | 'intermediate' | 'advanced'
+
+export interface RobotTemplateSummary {
+  id: string
+  name: string
+  description: string
+  category: RobotCategory
+  icon: string
+  difficulty: BuildDifficulty
+  estimatedBuildHours: number
+  isOfficial: boolean
+  version: string
+}
+
+export interface RobotTemplateDetail extends RobotTemplateSummary {
+  requiredHardware: HardwareRequirement[]
+  requiredFirmware: FirmwareRequirement[]
+  capabilities: string[]
+  autoConfig: Record<string, unknown>
+  assemblyGuide: AssemblyStep[]
+  wiringDiagram: Record<string, unknown>
+  codeTemplate?: string | null
+  tags?: string[] | null
+}
+
+export interface HardwareRequirement {
+  deviceType: string
+  name: string
+  protocol: string
+  required: boolean
+  alternatives?: string[]
+  notes?: string
+}
+
+export interface FirmwareRequirement {
+  target: string
+  version: string
+  url: string
+}
+
+export interface AssemblyStep {
+  step: number
+  title: string
+  description: string
+  duration: string
+  tools: string[]
+  parts: string[]
+  warnings: string[]
+  images?: string[]
+  completed?: boolean
+}
+
+export interface RobotProjectSummary {
+  id: string
+  name: string
+  description?: string | null
+  templateId?: string | null
+  status: RobotProjectStatus
+  config: Record<string, unknown>
+  hardwareList: HardwareRequirement[]
+  buildProgress: number
+  currentStep?: string | null
+  isOffline: boolean
+  lastSyncAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+// --- Communication Types ---
+export type CommChannelType = 'telegram' | 'voice' | 'android' | 'beep' | 'gsm' | 'radio'
+export type CommChannelStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
+export interface CommChannelSummary {
+  id: string
+  type: CommChannelType
+  name: string
+  status: CommChannelStatus
+  isEnabled: boolean
+  lastMessage?: string | null
+  createdAt: string
+}
+
+export interface TelegramConfig {
+  botToken: string
+  chatId: string
+  allowedUsers: string[]
+  commands: string[]
+  webhookUrl?: string
+}
+
+export interface VoiceConfig {
+  language: string
+  ttsEngine: string
+  sttEngine: string
+  wakeWord?: string
+  volume: number
+  rate: number
+}
+
+export interface AndroidConfig {
+  deviceId: string
+  appName: string
+  connectionType: 'wifi' | 'bluetooth' | 'usb'
+  ip?: string
+  port?: number
+}
+
+export interface BeepConfig {
+  enabled: boolean
+  volume: number
+  patterns: BeepPattern[]
+}
+
+export interface BeepPattern {
+  name: string
+  pattern: number[] // durations in ms
+  frequency: number // Hz
+}
+
+export interface GsmConfig {
+  apn: string
+  pin?: string
+  phoneNumber?: string
+  dataEnabled: boolean
+  smsEnabled: boolean
+}
+
+// --- Navigation Types ---
+export type NavigationType = 'gps_track' | 'autopilot' | 'rth' | 'field_mapping' | 'survey' | 'delivery'
+export type NavigationStatus = 'idle' | 'active' | 'paused' | 'completed' | 'aborted'
+
+export interface NavigationPlanSummary {
+  id: string
+  name: string
+  type: NavigationType
+  status: NavigationStatus
+  waypoints: Waypoint[]
+  homePosition?: { lat: number; lng: number; alt: number } | null
+  startedAt?: string | null
+  completedAt?: string | null
+  createdAt: string
+}
+
+export interface FieldMappingResult {
+  areaHectares: number
+  photosTaken: number
+  gsdCmPerPixel: number
+  overlapPercent: number
+  flightTime: number
+  coveragePercent: number
+}
+
+export interface DeliveryTask {
+  pickupPoint: { lat: number; lng: number; alt: number }
+  dropPoint: { lat: number; lng: number; alt: number }
+  payloadWeight: number
+  dropCommand: 'servo' | 'relay' | 'magnet'
+}
+
+// --- Power Types ---
+export type PowerSourceType = 'battery' | 'solar' | 'gsm' | 'usb'
+export type PowerSourceStatus = 'unknown' | 'charging' | 'discharging' | 'full' | 'error' | 'offline'
+
+export interface PowerSourceSummary {
+  id: string
+  type: PowerSourceType
+  name: string
+  status: PowerSourceStatus
+  capacity: number
+  currentLevel: number
+  voltage: number
+  current: number
+  temperature: number
+  lastReading: string
+}
+
+export interface SolarConfig {
+  panelWattage: number
+  chargeControllerType: string
+  batteryType: string
+  emergencyOnly: boolean
+  minVoltageThreshold: number
+}
+
+// --- AI Memory Types ---
+export type AiMemoryCategory = 'conversation' | 'decision' | 'learning' | 'pattern' | 'preference'
+
+export interface AiMemoryEntry {
+  id: string
+  category: AiMemoryCategory
+  key: string
+  value: unknown
+  context?: string | null
+  confidence: number
+  accessCount: number
+  isSynced: boolean
+  createdAt: string
+  accessedAt: string
+}
+
+// --- Voice Log Types ---
+export interface VoiceLogEntry {
+  id: string
+  direction: 'input' | 'output'
+  transcript: string
+  audioPath?: string | null
+  language: string
+  duration: number
+  agentSource?: string | null
+  createdAt: string
+}
+
+// --- Auto-Detect Types ---
+export interface HardwareScanResult {
+  timestamp: string
+  totalScanned: number
+  detected: DetectedDevice[]
+  missing: HardwareRequirement[]
+  suggestions: HardwareSuggestion[]
+}
+
+export interface DetectedDevice {
+  deviceType: string
+  name: string
+  protocol: string
+  port: string
+  vendorId?: string
+  productId?: string
+  address?: string
+  status: string
+  autoConfigAvailable: boolean
+}
+
+export interface HardwareSuggestion {
+  deviceType: string
+  reason: string
+  suggestedModels: string[]
+  connectionGuide: string
+  priority: 'required' | 'recommended' | 'optional'
+}
+
+// --- Payload Types ---
+export interface PayloadConfig {
+  type: 'servo' | 'relay' | 'magnet' | 'mechanical'
+  pin: number
+  triggerCommand: string
+  releaseCommand: string
+  maxWeight: number
+  currentPayload: number
+}
+
+// --- Face Tracking Types ---
+export interface FaceTrackingConfig {
+  enabled: boolean
+  modelPath: string
+  confidenceThreshold: number
+  trackingMode: 'follow' | 'detect' | 'identify'
+  maxFaces: number
+  followDistance: number
+}
+
+// --- Autopilot & Safety Types ---
+export interface AutopilotConfig {
+  enabled: boolean
+  mode: 'stabilize' | 'alt_hold' | 'loiter' | 'auto' | 'rtl' | 'land'
+  failsafeAction: 'rth' | 'land' | 'hover'
+  geofenceEnabled: boolean
+  maxAltitude: number
+  maxDistance: number
+  obstacleAvoidance: boolean
+  returnToHomeAlt: number
+}
+
+// --- Amphibious Types ---
+export interface AmphibiousConfig {
+  waterDetection: boolean
+  floatMode: 'auto' | 'manual'
+  finEnabled: boolean
+  finPin: number
+  wheelEnabled: boolean
+  wheelMode: 'drive' | 'idle'
+  transitionMode: 'auto' | 'manual'
+}

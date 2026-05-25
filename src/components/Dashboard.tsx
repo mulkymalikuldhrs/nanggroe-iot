@@ -17,6 +17,10 @@ import {
   Upload,
   TestTube,
   Plug,
+  Rocket,
+  MessageSquare,
+  Navigation,
+  Battery,
 } from 'lucide-react'
 import { OverviewTab } from './OverviewTab'
 import { TelemetryTab } from './TelemetryTab'
@@ -32,6 +36,10 @@ import { DriversTab } from './DriversTab'
 import { FlashTab } from './FlashTab'
 import { TestingTab } from './TestingTab'
 import { ExtensionTab } from './ExtensionTab'
+import { RobotBuilderTab } from './RobotBuilderTab'
+import { CommsTab } from './CommsTab'
+import { NavigationTab } from './NavigationTab'
+import { PowerTab } from './PowerTab'
 
 const NAV_ITEMS = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
@@ -48,6 +56,10 @@ const NAV_ITEMS = [
   { id: 'flash' as const, label: 'Flash', icon: Upload },
   { id: 'testing' as const, label: 'Testing', icon: TestTube },
   { id: 'extension' as const, label: 'Extension', icon: Plug },
+  { id: 'robot-builder' as const, label: 'Robot Builder', icon: Rocket },
+  { id: 'comms' as const, label: 'Communications', icon: MessageSquare },
+  { id: 'navigation' as const, label: 'Navigation', icon: Navigation },
+  { id: 'power' as const, label: 'Power', icon: Battery },
 ]
 
 type TabId = (typeof NAV_ITEMS)[number]['id']
@@ -85,6 +97,14 @@ export function Dashboard() {
         return <TestingTab />
       case 'extension':
         return <ExtensionTab />
+      case 'robot-builder':
+        return <RobotBuilderTab />
+      case 'comms':
+        return <CommsTab />
+      case 'navigation':
+        return <NavigationTab />
+      case 'power':
+        return <PowerTab />
       default:
         return <OverviewTab />
     }
