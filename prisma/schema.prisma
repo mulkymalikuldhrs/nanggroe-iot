@@ -287,3 +287,61 @@ model VoiceLog {
   projectId   String?  // Optional link to robot project
   createdAt   DateTime @default(now())
 }
+
+// Face Profiles for Face Tracking
+model FaceProfile {
+  id            String   @id @default(cuid())
+  name          String
+  label         String
+  encoding      String   // JSON array of face encoding vector
+  photoPath     String?  // Path to reference photo
+  metadata      String?  // JSON additional metadata
+  sightingCount Int      @default(0)
+  confidence    Float    @default(0.8)
+  lastSeen      DateTime @default(now())
+  projectId     String?  // Optional link to robot project
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Hardware Bus State for Hardware Bridge
+model HardwareBusState {
+  id          String   @id @default(cuid())
+  busType     String   // serial, i2c, spi, gpio, adc
+  busPath     String   // /dev/ttyUSB0, /dev/i2c-1, etc
+  status      String   @default("unknown") // unknown, available, busy, error
+  deviceId    String?  // Connected device ID if any
+  config      String?  // JSON bus configuration
+  lastScanned DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Extension Connections (persisted)
+model ExtensionConnection {
+  id              String   @id @default(cuid())
+  name            String
+  type            String   // vscode, cursor, neovim, jetbrains, custom
+  status          String   @default("disconnected") // connected, disconnected
+  apiKey          String   @unique
+  capabilities    String   // JSON array of capabilities
+  lastHeartbeat   DateTime @default(now())
+  connectedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Self-Learning Records
+model LearningRecord {
+  id            String   @id @default(cuid())
+  category      String   // pattern, decision, performance, suggestion, auto_tune
+  key           String
+  value         String   // JSON value
+  confidence    Float    @default(1.0)
+  source        String   // hermes, picoclaw, system, operator
+  projectId     String?  // Optional link to robot project
+  isApplied     Boolean  @default(false)
+  appliedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

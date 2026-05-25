@@ -575,3 +575,257 @@ export interface AmphibiousConfig {
   wheelMode: 'drive' | 'idle'
   transitionMode: 'auto' | 'manual'
 }
+
+// --- Self-Learning Types ---
+export type LearningCategory = 'pattern' | 'decision' | 'performance' | 'suggestion' | 'auto_tune'
+export type LearningSource = 'hermes' | 'picoclaw' | 'system' | 'operator'
+
+export interface PatternDetection {
+  id: string
+  name: string
+  description: string
+  pattern: string
+  frequency: number
+  confidence: number
+  firstSeen: string
+  lastSeen: string
+  relatedMetrics: string[]
+  suggestedAction?: string
+}
+
+export interface DecisionRecord {
+  id: string
+  agent: LearningSource
+  context: string
+  decision: string
+  reasoning: string
+  outcome?: 'success' | 'failure' | 'pending'
+  confidence: number
+  timestamp: string
+  projectId?: string
+}
+
+export interface PerformanceMetric {
+  metric: string
+  currentValue: number
+  previousValue: number
+  changePercent: number
+  trend: 'improving' | 'stable' | 'degrading'
+  target?: number
+  unit: string
+}
+
+export interface LearningSuggestion {
+  id: string
+  category: LearningCategory
+  title: string
+  description: string
+  confidence: number
+  impact: 'low' | 'medium' | 'high'
+  source: LearningSource
+  isApplied: boolean
+  appliedAt?: string
+  createdAt: string
+}
+
+export interface AutoTuneResult {
+  parameter: string
+  oldValue: number
+  newValue: number
+  improvement: number
+  timestamp: string
+}
+
+export interface LearningReport {
+  totalPatterns: number
+  totalDecisions: number
+  totalSuggestions: number
+  appliedSuggestions: number
+  autoTuneCount: number
+  topPatterns: PatternDetection[]
+  recentDecisions: DecisionRecord[]
+  pendingSuggestions: LearningSuggestion[]
+  performanceMetrics: PerformanceMetric[]
+  generatedAt: string
+}
+
+export interface LearningRecordEntry {
+  id: string
+  category: LearningCategory
+  key: string
+  value: unknown
+  confidence: number
+  source: LearningSource
+  projectId?: string | null
+  isApplied: boolean
+  appliedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+// --- Face Tracking Types (Extended) ---
+export type FaceTrackingMode = 'follow' | 'detect' | 'identify'
+export type FaceDetectionStatus = 'detected' | 'tracking' | 'lost' | 'identified'
+
+export interface FaceDetection {
+  id: string
+  profileId?: string
+  label?: string
+  confidence: number
+  boundingBox: { x: number; y: number; width: number; height: number }
+  landmarks?: FaceLandmark[]
+  encoding?: number[]
+  timestamp: string
+}
+
+export interface FaceLandmark {
+  point: string // 'left_eye', 'right_eye', 'nose_tip', 'mouth_left', 'mouth_right', etc.
+  x: number
+  y: number
+}
+
+export interface FaceProfileEntry {
+  id: string
+  name: string
+  label: string
+  encoding: number[]
+  photoPath?: string | null
+  metadata?: Record<string, unknown> | null
+  sightingCount: number
+  confidence: number
+  lastSeen: string
+  projectId?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface FaceTrackingState {
+  isTracking: boolean
+  mode: FaceTrackingMode
+  detections: FaceDetection[]
+  trackedFaceId?: string
+  fps: number
+  modelLoaded: boolean
+  lastFrameTime: string
+}
+
+export interface FaceTrackingStats {
+  totalDetections: number
+  totalIdentifications: number
+  uniqueFaces: number
+  averageConfidence: number
+  trackingUptime: number
+  profilesCount: number
+}
+
+// --- Hardware Bridge Types ---
+export type BridgeMode = 'serial' | 'i2c' | 'spi' | 'gpio' | 'adc'
+export type BusStatus = 'unknown' | 'available' | 'busy' | 'error'
+
+export interface SerialPort {
+  path: string
+  baudRate: number
+  dataBits: 5 | 6 | 7 | 8
+  stopBits: 1 | 2
+  parity: 'none' | 'even' | 'odd'
+  flowControl: 'none' | 'hardware' | 'software'
+  isConnected: boolean
+  deviceName?: string
+}
+
+export interface I2CBus {
+  busNumber: number
+  path: string
+  speed: number // kHz
+  devices: I2CDevice[]
+  isAvailable: boolean
+}
+
+export interface I2CDevice {
+  address: string // hex like 0x68
+  name: string
+  description?: string
+  isResponsive: boolean
+}
+
+export interface SPIBus {
+  busNumber: number
+  path: string
+  mode: 0 | 1 | 2 | 3
+  maxSpeed: number // Hz
+  bitOrder: 'msb' | 'lsb'
+  isAvailable: boolean
+}
+
+export interface GPIOConfig {
+  pin: number
+  direction: 'input' | 'output'
+  pullMode: 'none' | 'pullup' | 'pulldown'
+  value?: boolean
+  edge?: 'none' | 'rising' | 'falling' | 'both'
+}
+
+export interface ADCChannel {
+  channel: number
+  resolution: number // bits
+  referenceVoltage: number
+  currentValue: number
+  unit: string
+}
+
+export interface HardwareBusStateEntry {
+  id: string
+  busType: BridgeMode
+  busPath: string
+  status: BusStatus
+  deviceId?: string | null
+  config?: Record<string, unknown> | null
+  lastScanned: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HardwareBridgeStatus {
+  mode: BridgeMode
+  isConnected: boolean
+  activeBus?: HardwareBusStateEntry
+  serialPorts: SerialPort[]
+  i2cBuses: I2CBus[]
+  spiBuses: SPIBus[]
+  gpioPins: GPIOConfig[]
+  adcChannels: ADCChannel[]
+  lastScanned: string
+}
+
+// --- Extension Connection Types ---
+export type ExtensionType = 'vscode' | 'cursor' | 'neovim' | 'jetbrains' | 'custom'
+export type ExtensionStatus = 'connected' | 'disconnected'
+
+export interface ExtensionConnectionEntry {
+  id: string
+  name: string
+  type: ExtensionType
+  status: ExtensionStatus
+  apiKey: string
+  capabilities: string[]
+  lastHeartbeat: string
+  connectedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ExtensionCapability {
+  id: string
+  name: string
+  description: string
+  enabled: boolean
+}
+
+export interface ExtensionConfig {
+  name: string
+  type: ExtensionType
+  capabilities: ExtensionCapability[]
+  autoConnect: boolean
+  heartbeatInterval: number // seconds
+  reconnectAttempts: number
+}

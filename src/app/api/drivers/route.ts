@@ -109,10 +109,11 @@ export async function PUT(request: NextRequest) {
 
     // Execute driver command
     if (action === 'command') {
-      const { deviceType, command, data } = body as {
+      const { deviceType, command, data, params } = body as {
         deviceType: string
-        command: 'healthCheck' | 'readData' | 'writeData'
+        command: 'healthCheck' | 'readData' | 'writeData' | 'executeCommand'
         data?: Record<string, unknown>
+        params?: Record<string, unknown>
       }
 
       if (!deviceType || !command) {
@@ -164,20 +165,40 @@ export async function PUT(request: NextRequest) {
               { status: 400 }
             )
           }
-          const result = await driver.writeData(data)
+          const writeResult = await driver.writeData(data)
           return NextResponse.json({
-            success: result.success,
+            success: writeResult.success,
             data: {
-              writeResult: result,
+              writeResult,
               driverState: driver.getState(),
             },
-            message: result.message,
+            message: writeResult.message,
+          })
+        }
+
+        case 'executeCommand': {
+          const execCommand = data?.command as string | undefined
+          const execParams = data?.params as Record<string, unknown> | undefined
+          if (!execCommand) {
+            return NextResponse.json(
+              { success: false, error: 'data.command is required for executeCommand' },
+              { status: 400 }
+            )
+          }
+          const execResult = await driver.executeCommand(execCommand, execParams)
+          return NextResponse.json({
+            success: execResult.success,
+            data: {
+              commandResult: execResult,
+              driverState: driver.getState(),
+            },
+            message: execResult.message,
           })
         }
 
         default:
           return NextResponse.json(
-            { success: false, error: `Invalid command: ${command}. Use healthCheck, readData, or writeData` },
+            { success: false, error: `Invalid command: ${command}. Use healthCheck, readData, writeData, or executeCommand` },
             { status: 400 }
           )
       }
