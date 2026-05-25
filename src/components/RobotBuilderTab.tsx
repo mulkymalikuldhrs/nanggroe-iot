@@ -120,7 +120,7 @@ export function RobotBuilderTab() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
+    let active = true
     const load = async () => {
       try {
         const [tplRes, projRes] = await Promise.all([
@@ -129,7 +129,7 @@ export function RobotBuilderTab() {
         ])
         const tplData = await tplRes.json()
         const projData = await projRes.json()
-        if (!cancelled) {
+        if (active) {
           if (tplData.success) setTemplates(tplData.data)
           if (projData.success) setProjects(projData.data)
         }
@@ -138,7 +138,7 @@ export function RobotBuilderTab() {
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => { active = false }
   }, [])
 
   const fetchTemplateDetail = async (id: string) => {

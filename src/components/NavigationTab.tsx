@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
-  Navigation, MapPin, Home, Crosshair, Truck, Map,
-  Play, Plus, Route, Ruler,
+  Navigation, Home, Truck, Map,
+  Play, Ruler,
 } from 'lucide-react'
 
 interface NavPlan {
@@ -62,18 +62,18 @@ export function NavigationTab() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
+    let active = true
     const load = async () => {
       try {
         const res = await fetch('/api/navigation')
         const data = await res.json()
-        if (!cancelled && data.success) setPlans(data.data)
+        if (active && data.success) setPlans(data.data)
       } catch (err) {
         console.error('Failed to fetch plans:', err)
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => { active = false }
   }, [])
 
   const executeRTH = async () => {
