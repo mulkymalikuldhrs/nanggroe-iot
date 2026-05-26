@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getMCPServer, MCP_PROTOCOL_VERSION } from '@/lib/mcp'
+import { validateApiKey } from '@/lib/auth'
 import type { MCPRequest, MCPResponse } from '@/lib/mcp'
 
 // --- Session Management ---
@@ -152,6 +153,9 @@ export async function GET(request: NextRequest) {
 // ============================================================
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   const headers = corsHeaders()
 
   // Validate session if provided

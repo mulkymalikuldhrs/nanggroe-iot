@@ -1,23 +1,18 @@
 :81 {
-	@transform_port_query {
-		query XTransformPort=*
-	}
+        # ⚠️ SECURITY WARNING: The original Caddyfile contained an SSRF vulnerability
+        # that allowed arbitrary port proxying via XTransformPort query parameter.
+        # This has been removed. Only the main Next.js app is proxied.
+        #
+        # If you need to proxy to other services, define explicit reverse_proxy
+        # blocks for each known service port. NEVER use user-controlled input
+        # (query params, headers) as a proxy target.
 
-	handle @transform_port_query {
-		reverse_proxy localhost:{query.XTransformPort} {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
-
-	handle {
-		reverse_proxy localhost:3000 {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
+        handle {
+                reverse_proxy localhost:3000 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
 }

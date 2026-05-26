@@ -53,6 +53,10 @@ export async function DELETE(
   try {
     const { id } = await params
     const service = NavigationService.getInstance()
+    const plan = await service.getPlan(id)
+    if (!plan) {
+      return NextResponse.json({ success: false, error: 'Plan not found' }, { status: 404 })
+    }
     const deleted = await service.deletePlan(id)
     return NextResponse.json({ success: deleted })
   } catch (error) {

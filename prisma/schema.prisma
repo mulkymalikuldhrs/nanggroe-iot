@@ -35,6 +35,9 @@ model HardwareDevice {
   updatedAt    DateTime @updatedAt
   profiles     HardwareProfile[]
   telemetry    TelemetryReading[]
+
+  @@index([deviceType])
+  @@index([status])
 }
 
 // Hardware Profiles (HAL adapter configs)
@@ -59,6 +62,10 @@ model TelemetryReading {
   unit       String?  // V, m, %, dBm, C, hPa, deg, m/s
   source     String   @default("sensor") // sensor, manual
   timestamp  DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([metric])
+  @@index([timestamp])
 }
 
 // Missions
@@ -83,6 +90,9 @@ model Mission {
   updatedAt     DateTime @updatedAt
   logs          MissionLog[]
   agentMessages AgentMessage[]
+
+  @@index([status])
+  @@index([type])
 }
 
 // Mission Logs
@@ -107,6 +117,9 @@ model AgentMessage {
   content   String
   metadata  String?  // JSON metadata
   timestamp DateTime @default(now())
+
+  @@index([agent])
+  @@index([timestamp])
 }
 
 // Sessions
@@ -159,6 +172,10 @@ model Alert {
   isRead     Boolean  @default(false)
   isResolved Boolean  @default(false)
   timestamp  DateTime @default(now())
+
+  @@index([isRead])
+  @@index([level])
+  @@index([timestamp])
 }
 
 // Robot Project Templates
@@ -346,6 +363,10 @@ model AgentTaskRecord {
   createdAt   DateTime @default(now())
   startedAt   DateTime?
   completedAt DateTime?
+
+  @@index([agent])
+  @@index([status])
+  @@index([priority])
 }
 
 // Self-Learning Records

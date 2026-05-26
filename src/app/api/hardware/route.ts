@@ -27,17 +27,17 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     })
 
-    // Get summary stats
-    const stats = {
-      total: await db.hardwareDevice.count(),
-      byStatus: {} as Record<string, number>,
-      byType: {} as Record<string, number>,
-    }
+    // Get summary stats using groupBy instead of fetching all devices
+    const [totalCount, statusGroups, typeGroups] = await Promise.all([
+      db.hardwareDevice.count(),
+      db.hardwareDevice.groupBy({ by: ['status'], _count: { status: true } }),
+      db.hardwareDevice.groupBy({ by: ['deviceType'], _count: { deviceType: true } }),
+    ])
 
-    const allDevices = await db.hardwareDevice.findMany()
-    for (const d of allDevices) {
-      stats.byStatus[d.status] = (stats.byStatus[d.status] || 0) + 1
-      stats.byType[d.deviceType] = (stats.byType[d.deviceType] || 0) + 1
+    const stats = {
+      total: totalCount,
+      byStatus: Object.fromEntries(statusGroups.map(g => [g.status, g._count.status])) as Record<string, number>,
+      byType: Object.fromEntries(typeGroups.map(g => [g.deviceType, g._count.deviceType])) as Record<string, number>,
     }
 
     return NextResponse.json({
@@ -156,11 +156,13 @@ export async function POST() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { deviceId, status, profileId, profileConfig } = body as {
+    const { deviceId, status, profileId, profileConfig, name, deviceType } = body as {
       deviceId?: string
       status?: string
       profileId?: string
       profileConfig?: Record<string, unknown>
+      name?: string
+      deviceType?: string
     }
 
     if (!deviceId || typeof deviceId !== 'string') {
@@ -191,15 +193,45 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update device status
-    if (status) {
-      await db.hardwareDevice.update({
-        where: { id: deviceId },
-        data: {
-          status,
-          lastSeen: new Date(),
-        },
-      })
+    const updateData: Record<string, unknown> = {
+      lastSeen: new Date(),
     }
+
+    if (status) {
+      updateData.status = status
+    }
+
+    if (name) {
+      if (typeof name !== 'string' || name.trim().length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'name must be a non-empty string' },
+          { status: 400 }
+        )
+      }
+      if (name.trim().length > 200) {
+        return NextResponse.json(
+          { success: false, error: 'name must not exceed 200 characters' },
+          { status: 400 }
+        )
+      }
+      updateData.name = name.trim()
+    }
+
+    if (deviceType) {
+      const validDeviceTypes = ['flight_controller', 'companion_computer', 'gps', 'camera', 'sensor', 'radio', 'battery', 'motor', 'servo', 'esc']
+      if (typeof deviceType !== 'string' || !validDeviceTypes.includes(deviceType)) {
+        return NextResponse.json(
+          { success: false, error: `Invalid deviceType. Must be one of: ${validDeviceTypes.join(', ')}` },
+          { status: 400 }
+        )
+      }
+      updateData.deviceType = deviceType
+    }
+
+    await db.hardwareDevice.update({
+      where: { id: deviceId },
+      data: updateData,
+    })
 
     // Update profile config
     if (profileId && profileConfig) {

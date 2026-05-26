@@ -75,7 +75,7 @@ export function CommsTab() {
       await fetch(`/api/comms/${channelId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isEnabled: enable }),
+        body: JSON.stringify({ action: enable ? 'connect' : 'disconnect' }),
       })
       toast.success(enable ? 'Channel diaktifkan' : 'Channel dinonaktifkan')
       fetchChannels()
@@ -363,7 +363,7 @@ export function CommsTab() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {['startup', 'warning', 'critical', 'success', 'land', 'rth', 'arm', 'disarm'].map(pattern => (
+            {(['startup', 'warning', 'critical', 'success', 'land', 'rth', 'arm', 'disarm'] as const).map(pattern => (
               <Button
                 key={pattern}
                 size="sm"

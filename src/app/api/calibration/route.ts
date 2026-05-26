@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { executeCalibration } from '@/lib/calibration'
+import { validateApiKey } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,6 +66,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const { deviceType, deviceId, parameters } = body as {

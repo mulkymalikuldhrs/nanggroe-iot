@@ -75,9 +75,18 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json()
+    const { searchParams } = new URL(request.url)
+    const memoryId = searchParams.get('memoryId')
+
+    if (!memoryId || typeof memoryId !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'memoryId query parameter is required' },
+        { status: 400 }
+      )
+    }
+
     const service = AiMemoryService.getInstance()
-    const deleted = await service.forget(body.memoryId)
+    const deleted = await service.forget(memoryId)
     return NextResponse.json({ success: deleted })
   } catch (error) {
     return NextResponse.json(

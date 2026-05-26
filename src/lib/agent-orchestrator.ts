@@ -101,7 +101,7 @@ export class AgentOrchestrator {
 
   registerAgent(agent: AgentInstance): void {
     if (this.agents.has(agent.name)) {
-      console.warn(`[Orchestrator] Agent "${agent.name}" already registered, replacing`)
+      // Agent already registered — replacing silently
     }
     this.agents.set(agent.name, agent)
 
@@ -117,11 +117,11 @@ export class AgentOrchestrator {
       try {
         agent.onMessage(message)
       } catch (error) {
-        console.error(`[Orchestrator] Error delivering message to ${agent.name}:`, error)
+        // Silent error handling — message delivery failed
       }
     })
 
-    console.log(`[Orchestrator] Agent registered: ${agent.name} (${agent.type})`)
+    // Agent registered silently
   }
 
   unregisterAgent(name: string): void {
@@ -129,7 +129,7 @@ export class AgentOrchestrator {
     if (agent) {
       this.messageBus.removeAllListeners(`agent:${name}`)
       this.agents.delete(name)
-      console.log(`[Orchestrator] Agent unregistered: ${name}`)
+      // Agent unregistered silently
     }
   }
 
@@ -165,7 +165,7 @@ export class AgentOrchestrator {
 
   async start(): Promise<void> {
     if (this.running) {
-      console.warn('[Orchestrator] Already running')
+      // Already running
       return
     }
 
@@ -176,11 +176,12 @@ export class AgentOrchestrator {
     for (const [name, agent] of this.agents) {
       try {
         await agent.initialize()
-        console.log(`[Orchestrator] Agent initialized: ${name}`)
+        // Agent initialized silently
       } catch (error) {
-        console.error(`[Orchestrator] Failed to initialize ${name}:`, error)
+        // Failed to initialize agent — will retry on next tick if autoRecovery is enabled
+        void error
         if (this.config.autoRecovery) {
-          console.log(`[Orchestrator] Will retry ${name} on next tick`)
+          // Will retry on next tick
         }
       }
     }
@@ -189,9 +190,10 @@ export class AgentOrchestrator {
     for (const [name, agent] of this.agents) {
       try {
         await agent.start()
-        console.log(`[Orchestrator] Agent started: ${name}`)
+        // Agent started silently
       } catch (error) {
-        console.error(`[Orchestrator] Failed to start ${name}:`, error)
+        // Failed to start agent — silent
+        void error
       }
     }
 
@@ -200,7 +202,7 @@ export class AgentOrchestrator {
       this.tick()
     }, this.config.tickInterval)
 
-    console.log('[Orchestrator] Started successfully')
+    // Orchestrator started successfully
   }
 
   async stop(): Promise<void> {
@@ -218,13 +220,14 @@ export class AgentOrchestrator {
     for (const [name, agent] of this.agents) {
       try {
         await agent.stop()
-        console.log(`[Orchestrator] Agent stopped: ${name}`)
+        // Agent stopped silently
       } catch (error) {
-        console.error(`[Orchestrator] Error stopping ${name}:`, error)
+        // Error stopping agent — silent
+        void error
       }
     }
 
-    console.log('[Orchestrator] Stopped')
+    // Orchestrator stopped silently
   }
 
   // ============================================================
@@ -246,7 +249,8 @@ export class AgentOrchestrator {
       // 3. Process pending DB tasks
       await this.processDbTasks()
     } catch (error) {
-      console.error('[Orchestrator] Tick error:', error)
+      // Tick error — silent
+      void error
     }
   }
 
@@ -302,14 +306,15 @@ export class AgentOrchestrator {
   private async recoverCrashedAgents(): Promise<void> {
     for (const [name, agent] of this.agents) {
       if (agent.state === 'error') {
-        console.log(`[Orchestrator] Recovering agent: ${name}`)
+        // Recovering agent
         try {
           await agent.stop()
           await agent.initialize()
           await agent.start()
-          console.log(`[Orchestrator] Agent recovered: ${name}`)
+          // Agent recovered silently
         } catch (error) {
-          console.error(`[Orchestrator] Failed to recover ${name}:`, error)
+          // Failed to recover agent — silent
+          void error
         }
       }
     }

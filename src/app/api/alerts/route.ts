@@ -30,14 +30,24 @@ export async function GET(request: NextRequest) {
       take: limit,
     })
 
-    // Get alert stats
+    // Get alert stats using groupBy instead of multiple count() queries
+    const [totalCount, readGroups, resolvedGroups, levelGroups] = await Promise.all([
+      db.alert.count(),
+      db.alert.groupBy({ by: ['isRead'], _count: { isRead: true } }),
+      db.alert.groupBy({ by: ['isResolved'], _count: { isResolved: true } }),
+      db.alert.groupBy({ by: ['level', 'isResolved'], _count: { _all: true } }),
+    ])
+
+    const unreadEntry = readGroups.find(g => g.isRead === false)
+    const unresolvedEntry = resolvedGroups.find(g => g.isResolved === false)
+
     const stats = {
-      total: await db.alert.count(),
-      unread: await db.alert.count({ where: { isRead: false } }),
-      unresolved: await db.alert.count({ where: { isResolved: false } }),
-      critical: await db.alert.count({ where: { level: 'critical', isResolved: false } }),
-      warning: await db.alert.count({ where: { level: 'warning', isResolved: false } }),
-      info: await db.alert.count({ where: { level: 'info', isResolved: false } }),
+      total: totalCount,
+      unread: unreadEntry?._count.isRead ?? 0,
+      unresolved: unresolvedEntry?._count.isResolved ?? 0,
+      critical: levelGroups.find(g => g.level === 'critical' && g.isResolved === false)?._count._all ?? 0,
+      warning: levelGroups.find(g => g.level === 'warning' && g.isResolved === false)?._count._all ?? 0,
+      info: levelGroups.find(g => g.level === 'info' && g.isResolved === false)?._count._all ?? 0,
     }
 
     return NextResponse.json({

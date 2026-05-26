@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - MCP (Model Context Protocol) Integration API
+// NANGGROE IOT - MCP (Model Context Protocol) Integration API
 // GET  /api/mcp — List available MCP tools and their statuses
 // POST /api/mcp — Execute an MCP tool call
 // ============================================================
@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { picoclawCheck } from '@/lib/agents'
+import { validateApiKey } from '@/lib/auth'
 import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
 import { executeCalibration } from '@/lib/calibration'
 import ZAI from 'z-ai-web-dev-sdk'
@@ -234,6 +235,9 @@ export async function GET() {
 
 // --- POST: Execute MCP tool ---
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const { tool, arguments: toolArgs } = body as {
@@ -296,7 +300,7 @@ export async function POST(request: NextRequest) {
 
     // Check if the handler returned an error object
     const resultObj = result as Record<string, unknown> | null
-    if (resultObj && resultObj.error && !resultObj.queued && !resultObj.missionId && !resultObj.statuses && !resultObj.records && !resultObj.devices && !resultObj.safe !== undefined) {
+    if (resultObj && resultObj.error && !resultObj.queued && !resultObj.missionId && !resultObj.statuses && !resultObj.records && !resultObj.devices && resultObj.safe === undefined) {
       httpStatus = 400
       return NextResponse.json({
         success: false,
@@ -412,7 +416,7 @@ async function handleMissionGenerate(args: Record<string, unknown>) {
       messages: [
         {
           role: 'system',
-          content: `You are a mission planning AI for NANGGROE OS AI — an autonomous drone operating system for tricopter amphibious platforms in Aceh Utara, Indonesia (4.9125°N, 97.1347°E).
+          content: `You are a mission planning AI for NANGGROE IOT — an autonomous drone operating system for tricopter amphibious platforms in Aceh Utara, Indonesia (4.9125°N, 97.1347°E).
 
 Generate a JSON mission plan with waypoints. Each waypoint must have: lat (number), lng (number), alt (number), action (string: "fly", "hover", "take_photo", "land", "takeoff").
 

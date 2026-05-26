@@ -94,6 +94,29 @@ export async function POST(request: NextRequest) {
 
     // Accept real sensor or manual telemetry readings only
     if (readings && Array.isArray(readings)) {
+      // Validate each reading
+      for (let i = 0; i < readings.length; i++) {
+        const r = readings[i]
+        if (!r.metric || typeof r.metric !== 'string') {
+          return NextResponse.json(
+            { success: false, error: `readings[${i}].metric is required and must be a string` },
+            { status: 400 }
+          )
+        }
+        if (r.value === undefined || r.value === null || typeof r.value !== 'number') {
+          return NextResponse.json(
+            { success: false, error: `readings[${i}].value is required and must be a number` },
+            { status: 400 }
+          )
+        }
+        if (Number.isNaN(r.value)) {
+          return NextResponse.json(
+            { success: false, error: `readings[${i}].value must be a valid number (not NaN)` },
+            { status: 400 }
+          )
+        }
+      }
+
       const created: unknown[] = []
       for (const r of readings) {
         const reading = await db.telemetryReading.create({

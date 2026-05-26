@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { FlashService } from '@/lib/flash'
+import { validateApiKey } from '@/lib/auth'
 import type { FlashTarget, CodeTarget, FlashOptions, DeployOptions } from '@/lib/flash'
 
 export async function GET(request: NextRequest) {
@@ -87,6 +88,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const { action } = body as { action?: string }
@@ -111,6 +115,13 @@ export async function POST(request: NextRequest) {
       if (typeof firmwareVersion !== 'string' || firmwareVersion.trim().length === 0) {
         return NextResponse.json(
           { success: false, error: 'firmwareVersion must be a non-empty string' },
+          { status: 400 }
+        )
+      }
+
+      if (firmwareVersion.trim().length > 100) {
+        return NextResponse.json(
+          { success: false, error: 'firmwareVersion must not exceed 100 characters' },
           { status: 400 }
         )
       }

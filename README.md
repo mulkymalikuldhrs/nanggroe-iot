@@ -4,14 +4,17 @@
 
 ### Modular IoT & Robotics Platform
 
-**Sistem Operasi Robotika Otonom Modular — Dari Aceh Untuk Dunia**
+**Nanggroe IoT — Modular IoT & Robotics Platform**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-teal.svg)](https://github.com/mulkymalikuldhaher/nanggroe-iot)
+*Sistem Operasi Robotika Otonom Modular — Dari Aceh Untuk Dunia*
+
+[![Version](https://img.shields.io/badge/version-2.0.0-teal.svg)](https://github.com/mulkymalikuldhaher/nanggroe-iot)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-orange.svg)](https://tauri.app)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://typescriptlang.org)
 [![Capacitor](https://img.shields.io/badge/Capacitor-6-purple.svg)](https://capacitorjs.com)
+[![Tests](https://img.shields.io/badge/E2E%20Tests-183-teal.svg)](./e2e)
 
 [Report Bug](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) · [Request Feature](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) · [Security](SECURITY.md)
 
@@ -25,17 +28,32 @@ Nanggroe IoT is a modular autonomous robotics operating system designed to build
 
 ### Key Highlights
 
+- **6 AI Agents** — Hermes, PicoClaw, Sentinel, Navigator, CommsGuard, DataSteward with Agent Orchestrator
 - **Multi-Robot Support** — 9 built-in templates for drones, rovers, boats, arms, blimps, and custom projects
-- **AI-Powered** — Local and cloud LLM integration, multi-agent system, self-learning, face tracking
+- **183 Playwright E2E Tests** — 8 spec files covering dashboard, API, agents, hardware, missions, navigation, flash, and power
+- **API Key Authentication** — Secure access to critical routes via `NANGGROE_API_KEY`
 - **Hardware Auto-Detect** — Serial, I2C, SPI, GPIO scanning with automatic driver loading
 - **Offline-First** — Local LLM, SQLite database, memory sync queue for disconnected operation
 - **Cross-Platform** — Web dashboard, Linux desktop (DEB/AppImage), Windows (MSI/NSIS), Android (APK)
 - **Real-Time** — Server-Sent Events telemetry streaming, WebSocket extension bridge
-- **Production-Ready** — Zero TypeScript errors, comprehensive API, 18 Prisma models
+- **Production-Ready** — 22 Prisma models, 42+ API routes, 20 dashboard tabs, database indexes, error boundaries
 
 ---
 
 ## Features
+
+### Multi-Agent System
+
+| Agent | Type | Role |
+|-------|------|------|
+| **Hermes** | LLM | Strategic planning, mission design, natural language chat |
+| **PicoClaw** | Rule | Tactical safety monitoring, failsafe execution |
+| **Sentinel** | Rule | Continuous telemetry monitoring, emergency action trigger |
+| **Navigator** | Hybrid | Route planning, obstacle avoidance, dynamic rerouting |
+| **CommsGuard** | Rule | Communication link monitoring, failover management |
+| **DataSteward** | Rule | Data pipeline health, anomaly detection, cleanup |
+
+**Agent Orchestrator** — Singleton coordinator that manages task queue, inter-agent messaging, auto-recovery, and DB-backed task persistence.
 
 ### Robot Platform
 
@@ -53,7 +71,8 @@ Nanggroe IoT is a modular autonomous robotics operating system designed to build
 | Feature | Description |
 |---------|-------------|
 | LLM Engine | Cloud + local models (TinyLlama, Phi-2, Llama-3.2, Gemma-2, Qwen2.5) |
-| Multi-Agent | Hermes (cloud orchestration) + PicoClaw (local edge agent) |
+| 6-Agent System | Hermes + PicoClaw + Sentinel + Navigator + CommsGuard + DataSteward |
+| Agent Orchestrator | Task queue, priority scheduling, inter-agent communication, auto-recovery |
 | Self-Learning | Pattern detection, auto-tuning, knowledge transfer between projects |
 | AI Memory | Persistent memory with confidence scores and sync queue |
 | AI Testing | Automated test generation and coverage analysis |
@@ -91,6 +110,19 @@ Nanggroe IoT is a modular autonomous robotics operating system designed to build
 | Boot Flow | Startup sequence manager with dependency ordering |
 | Sync Queue | Offline-first data sync with retry logic |
 
+### Security & Quality
+
+| Feature | Description |
+|---------|-------------|
+| API Key Auth | `NANGGROE_API_KEY` for critical route protection |
+| Command Injection Protection | Input sanitization on shell-execution routes |
+| CSP Headers | Content Security Policy in Tauri desktop builds |
+| Input Validation | Zod schema validation on critical API routes |
+| Error Boundaries | React error boundaries with graceful fallback UI |
+| Loading States | Skeleton loading patterns across all dashboard tabs |
+| Database Indexes | Performance indexes on key query fields |
+| N+1 Query Fix | Optimized Prisma queries with proper includes |
+
 ---
 
 ## Tech Stack
@@ -106,6 +138,7 @@ Nanggroe IoT is a modular autonomous robotics operating system designed to build
 | Database | Prisma ORM (SQLite) | 6 |
 | State | Zustand + TanStack Query | 5 / 5 |
 | AI SDK | z-ai-web-dev-sdk | latest |
+| E2E Testing | Playwright | 1.60 |
 | Serial | serialport | 13 |
 
 ---
@@ -130,7 +163,7 @@ bun install
 
 # Set up environment
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your configuration (add NANGGROE_API_KEY for production)
 
 # Initialize database
 bun run db:push
@@ -154,6 +187,8 @@ bun run dev
 | `bun run db:generate` | Generate Prisma client |
 | `bun run db:migrate` | Run database migrations |
 | `bun run db:reset` | Reset database with seed data |
+| `bun run test:e2e` | Run Playwright E2E tests |
+| `bun run test:e2e:ui` | Run E2E tests with Playwright UI |
 | `bun run tauri:dev` | Start Tauri desktop dev mode |
 | `bun run tauri:build` | Build desktop app for current platform |
 | `bun run tauri:build:linux` | Build Linux DEB + AppImage |
@@ -209,10 +244,10 @@ bun run tauri:build:windows
 
 | Platform | Output Path |
 |----------|------------|
-| Linux DEB | `src-tauri/target/release/bundle/deb/nanggroe-iot_1.0.0_amd64.deb` |
-| Linux AppImage | `src-tauri/target/release/bundle/appimage/nanggroe-iot_1.0.0_amd64.AppImage` |
-| Windows MSI | `src-tauri/target/release/bundle/msi/Nanggroe IoT_1.0.0_x64_en-US.msi` |
-| Windows EXE | `src-tauri/target/release/bundle/nsis/Nanggroe IoT_1.0.0_x64-setup.exe` |
+| Linux DEB | `src-tauri/target/release/bundle/deb/nanggroe-iot_2.0.0_amd64.deb` |
+| Linux AppImage | `src-tauri/target/release/bundle/appimage/nanggroe-iot_2.0.0_amd64.AppImage` |
+| Windows MSI | `src-tauri/target/release/bundle/msi/Nanggroe IoT_2.0.0_x64_en-US.msi` |
+| Windows EXE | `src-tauri/target/release/bundle/nsis/Nanggroe IoT_2.0.0_x64-setup.exe` |
 
 ### Tauri Configuration
 
@@ -265,8 +300,8 @@ bun run android:run
 nanggroe-iot/
 ├── src/
 │   ├── app/                        # Next.js App Router
-│   │   ├── api/                    # 40+ API endpoints
-│   │   │   ├── agents/             # AI agent chat & management
+│   │   ├── api/                    # 42+ API endpoints
+│   │   │   ├── agents/             # AI agent chat, management & orchestration
 │   │   │   ├── ai-memory/          # AI memory CRUD
 │   │   │   ├── alerts/             # Alert system
 │   │   │   ├── assembly/           # Robot assembly steps
@@ -293,12 +328,14 @@ nanggroe-iot/
 │   │   │   ├── system/             # System configuration
 │   │   │   ├── telemetry/          # Telemetry readings
 │   │   │   └── testing/            # AI-powered testing
+│   │   ├── error.tsx               # Error boundary
+│   │   ├── loading.tsx             # Loading state
 │   │   ├── layout.tsx              # Root layout
 │   │   ├── page.tsx                # Main dashboard page
 │   │   └── globals.css             # Global styles
 │   ├── components/                 # 23 React components
 │   │   ├── ui/                     # 40+ shadcn/ui components
-│   │   ├── Dashboard.tsx           # Main dashboard with tab navigation
+│   │   ├── Dashboard.tsx           # Main dashboard with 20 tab navigation
 │   │   ├── OverviewTab.tsx         # System overview
 │   │   ├── RobotBuilderTab.tsx     # Robot project builder
 │   │   ├── AgentsTab.tsx           # AI agent management
@@ -321,8 +358,14 @@ nanggroe-iot/
 │   │   ├── LogsTab.tsx             # System logs
 │   │   ├── BootFlowPanel.tsx       # Boot flow
 │   │   └── MobileLayout.tsx        # Mobile responsive layout
-│   ├── lib/                        # 22 service modules
-│   │   ├── agents.ts               # Multi-agent orchestration
+│   ├── lib/                        # 28 service modules
+│   │   ├── agents.ts               # Hermes + PicoClaw agent logic
+│   │   ├── agent-orchestrator.ts   # Multi-agent coordination
+│   │   ├── agents-sentinel.ts      # Safety monitoring agent
+│   │   ├── agents-navigator.ts     # Route planning agent
+│   │   ├── agents-comms.ts         # Communication guard agent
+│   │   ├── agents-data.ts          # Data steward agent
+│   │   ├── auth.ts                 # API key authentication
 │   │   ├── ai-memory.ts            # AI memory with sync
 │   │   ├── beep-alerts.ts          # Buzzer alert patterns
 │   │   ├── communication.ts        # Telegram, voice, GSM
@@ -352,8 +395,19 @@ nanggroe-iot/
 │       ├── usePlatform.ts          # Platform detection (web/Tauri/Capacitor)
 │       └── use-sse.ts              # Server-Sent Events hook
 ├── prisma/
-│   ├── schema.prisma               # 18 database models
+│   ├── schema.prisma               # 22 database models
 │   └── seed.ts                     # Sample data seeder
+├── e2e/                            # Playwright E2E tests
+│   ├── fixtures.ts                 # Test fixtures and mock data
+│   ├── helpers.ts                  # Test helper utilities
+│   ├── dashboard.spec.ts           # Dashboard & navigation tests
+│   ├── api-health.spec.ts          # API endpoint health checks
+│   ├── agents.spec.ts              # AI agent tab tests
+│   ├── hardware.spec.ts            # Hardware tab tests
+│   ├── missions.spec.ts            # Mission planning tests
+│   ├── navigation.spec.ts          # Navigation tab tests
+│   ├── flash.spec.ts               # Firmware flash tests
+│   └── power.spec.ts               # Power management tests
 ├── src-tauri/                      # Tauri v2 desktop app
 │   ├── src/
 │   │   ├── main.rs                 # Rust entry point
@@ -363,24 +417,23 @@ nanggroe-iot/
 │   ├── capabilities/default.json   # Permission grants
 │   └── icons/                      # Platform icons (Linux/Windows/macOS)
 ├── android/                        # Capacitor Android project
-│   ├── app/
-│   │   ├── src/main/
-│   │   │   ├── AndroidManifest.xml
-│   │   │   ├── java/com/nanggroe/iot/MainActivity.java
-│   │   │   └── res/               # Icons, splash screens, layouts
-│   │   └── build.gradle
-│   ├── build.gradle
-│   └── settings.gradle
+├── mini-services/                  # Mini service processes
+│   └── extension-ws/               # WebSocket extension bridge
 ├── examples/
 │   └── websocket/                  # WebSocket examples
 ├── .github/                        # GitHub templates & CI
 │   ├── ISSUE_TEMPLATE/             # Bug, feature, hardware templates
-│   ├── workflows/ci.yml            # CI pipeline
+│   ├── workflows/ci.yml            # CI pipeline (lint + E2E)
 │   ├── dependabot.yml              # Dependency updates
 │   ├── FUNDING.yml                 # Sponsorship
 │   └── PULL_REQUEST_TEMPLATE.md    # PR template
 ├── .env.example                    # Environment template
 ├── .gitignore                      # Comprehensive ignore rules
+├── ARCHITECTURE.md                 # Architecture documentation
+├── API.md                          # API reference documentation
+├── AGENTS.md                       # Agent system documentation
+├── TESTING.md                      # Testing documentation
+├── DEPLOYMENT.md                   # Deployment guide
 ├── AUTHORS.md                      # Contributor credits
 ├── CHANGELOG.md                    # Version history
 ├── CONTRIBUTING.md                 # Contribution guidelines
@@ -389,6 +442,7 @@ nanggroe-iot/
 ├── capacitor.config.ts             # Capacitor configuration
 ├── next.config.ts                  # Next.js configuration
 ├── package.json                    # Project manifest
+├── playwright.config.ts            # Playwright test configuration
 ├── tailwind.config.ts              # Tailwind configuration
 └── tsconfig.json                   # TypeScript configuration
 ```
@@ -397,7 +451,7 @@ nanggroe-iot/
 
 ## Database Schema
 
-18 Prisma models covering the full robotics platform:
+22 Prisma models covering the full robotics platform:
 
 | Model | Purpose |
 |-------|---------|
@@ -407,7 +461,7 @@ nanggroe-iot/
 | TelemetryReading | Time-series sensor/metric data |
 | Mission | Mission plans with waypoints and parameters |
 | MissionLog | Mission execution logs |
-| AgentMessage | Hermes/PicoClaw agent communication |
+| AgentMessage | Multi-agent communication (Hermes, PicoClaw, Sentinel, etc.) |
 | Session | User sessions with mode tracking |
 | Calibration | Calibration records and results |
 | SyncQueue | Offline-first data sync queue |
@@ -422,7 +476,21 @@ nanggroe-iot/
 | FaceProfile | Face recognition database |
 | HardwareBusState | Hardware bus status monitoring |
 | ExtensionConnection | IDE extension connections |
+| AgentTaskRecord | Orchestrated task queue (persistent) |
 | LearningRecord | Self-learning pattern records |
+
+### Performance Indexes
+
+Key database indexes for query performance:
+
+| Model | Indexed Fields |
+|-------|---------------|
+| HardwareDevice | `deviceType`, `status` |
+| TelemetryReading | `deviceId`, `metric`, `timestamp` |
+| Mission | `status`, `type` |
+| AgentMessage | `agent`, `timestamp` |
+| Alert | `isRead`, `level`, `timestamp` |
+| AgentTaskRecord | `agent`, `status`, `priority` |
 
 ---
 
@@ -444,61 +512,65 @@ nanggroe-iot/
 
 ## API Reference
 
-All endpoints are under `/api/`. Here is a summary of available routes:
+All endpoints are under `/api/`. See [API.md](API.md) for comprehensive documentation with request/response formats, authentication, and error codes.
 
-### Core System
+### Quick Reference
+
+#### Core System
 - `GET /api` — Health check
 - `GET/POST /api/system` — System configuration
 - `GET /api/doctor` — System diagnostics
 - `GET/POST /api/bootflow` — Boot sequence management
 
-### Robots & Projects
+#### Robots & Projects
 - `GET/POST /api/robot-templates` — List/create templates
 - `GET/PUT/DELETE /api/robot-templates/[id]` — Template CRUD
 - `GET/POST /api/projects` — List/create robot projects
 - `GET/PUT/DELETE /api/projects/[id]` — Project CRUD
 
-### Hardware
+#### Hardware
 - `GET/POST /api/hardware` — List/register devices
 - `GET/POST /api/hardware-bridge` — Hardware bus operations
 - `GET/POST /api/drivers` — Driver management
 - `GET/POST /api/auto-detect` — Hardware auto-detection
 - `GET/POST /api/flash` — Firmware flashing
 
-### AI & Agents
+#### AI & Agents
 - `GET/POST /api/agents` — Agent management
 - `POST /api/agents/chat` — Agent chat
+- `GET/POST /api/agents/orchestrate` — Agent orchestrator control
+- `GET/POST /api/agents/sentinel` — Sentinel safety monitoring
 - `POST /api/llm/chat` — LLM completions
 - `GET/POST /api/ai-memory` — AI memory CRUD
 - `GET/POST /api/self-learn` — Self-learning engine
 - `GET/POST /api/face-tracking` — Face tracking operations
 - `GET/POST /api/testing` — AI-powered testing
 
-### Missions & Navigation
+#### Missions & Navigation
 - `GET/POST /api/missions` — Mission planning
 - `GET/PUT/DELETE /api/missions/[id]` — Mission CRUD
 - `GET/POST /api/navigation` — Navigation plans
 - `GET/PUT/DELETE /api/navigation/[id]` — Navigation CRUD
 
-### Communications
+#### Communications
 - `GET/POST /api/comms` — Communication channels
 - `GET/PUT/DELETE /api/comms/[id]` — Channel CRUD
 - `POST /api/comms/telegram` — Telegram bot
 - `POST /api/comms/voice` — Voice/TTS
 - `POST /api/comms/beep` — Beep alerts
 
-### Telemetry & Monitoring
+#### Telemetry & Monitoring
 - `GET/POST /api/telemetry` — Telemetry readings
 - `GET/POST /api/power` — Power source monitoring
 - `GET/POST /api/alerts` — Alert management
 - `GET/POST /api/calibration` — Calibration records
 
-### Streaming (SSE)
+#### Streaming (SSE)
 - `GET /api/stream/telemetry` — Real-time telemetry stream
 - `GET /api/stream/alerts` — Real-time alert stream
 - `GET /api/stream/testing` — Testing progress stream
 
-### Integrations
+#### Integrations
 - `GET/POST /api/mcp` — MCP protocol
 - `POST /api/mcp/transport` — MCP JSON-RPC transport
 - `GET/POST /api/extension` — IDE extension bridge
@@ -513,6 +585,7 @@ See [.env.example](.env.example) for a complete list with descriptions.
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | Yes | `file:./db/nanggroe-iot.db` | SQLite database path |
+| `NANGGROE_API_KEY` | No (prod: Yes) | — | API key for authenticating critical routes |
 | `ZAI_API_KEY` | No | — | Z-AI SDK key for cloud LLM |
 | `TELEGRAM_BOT_TOKEN` | No | — | Telegram bot token for Hermes |
 | `SERIAL_PORT` | No | `/dev/ttyUSB0` | Default serial port |
@@ -520,6 +593,25 @@ See [.env.example](.env.example) for a complete list with descriptions.
 | `PORT` | No | `3000` | Server port |
 | `MCP_PORT` | No | `8080` | MCP protocol port |
 | `EXTENSION_WS_PORT` | No | `8081` | Extension WebSocket port |
+
+---
+
+## CI/CD
+
+### GitHub Actions
+
+The project includes a CI pipeline (`.github/workflows/ci.yml`) that runs on every push and pull request:
+
+1. **Lint** — ESLint checks (`bun run lint`)
+2. **Type Check** — TypeScript compilation verification
+3. **E2E Tests** — Playwright test suite (`bun run test:e2e`)
+4. **Build** — Production build verification
+
+### Branch Protection
+
+- `main` branch requires passing CI checks
+- Pull requests require at least 1 review
+- Conventional commit messages enforced
 
 ---
 
@@ -533,8 +625,24 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Make your changes
 4. Run `bun run lint` and fix any issues
-5. Commit with conventional commits: `feat(scope): description`
-6. Push and open a Pull Request
+5. Run `bun run test:e2e` to verify no regressions
+6. Commit with conventional commits: `feat(scope): description`
+7. Push and open a Pull Request
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, data flow, deployment |
+| [API.md](API.md) | Comprehensive API reference (42+ endpoints) |
+| [AGENTS.md](AGENTS.md) | Agent system documentation (6 agents + orchestrator) |
+| [TESTING.md](TESTING.md) | E2E testing guide (183 tests, 8 spec files) |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment guide (Web, Desktop, Android, Raspberry Pi) |
+| [SECURITY.md](SECURITY.md) | Security policy and hardening |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 
 ---
 
