@@ -1354,12 +1354,28 @@ export class FlashService {
     }
 
     try {
-      const { exec } = await import('child_process')
+      const { execFile } = await import('child_process')
       const buildEnv = { ...process.env, ...env }
 
+      // Sanitize buildCommand: split into command + args to prevent command injection.
+      // execFile does not spawn a shell, so shell metacharacters are inert.
+      // Only allow known safe build commands.
+      const ALLOWED_BUILD_COMMANDS = ['npm', 'yarn', 'pnpm', 'bun', 'make', 'python3', 'node']
+      const parts = buildCommand.split(/\s+/)
+      const cmd = parts[0]
+      const args = parts.slice(1)
+
+      if (!ALLOWED_BUILD_COMMANDS.includes(cmd)) {
+        return { success: false, error: `Build command "${cmd}" is not allowed. Allowed: ${ALLOWED_BUILD_COMMANDS.join(', ')}` }
+      }
+
+      // Sanitize args: remove any shell metacharacters
+      const sanitizedArgs = args.map(arg => arg.replace(/[;&|`$(){}[\]<>!#~\\]/g, ''))
+
       return new Promise((resolve) => {
-        exec(
-          buildCommand,
+        execFile(
+          cmd,
+          sanitizedArgs,
           { cwd: codePath, env: buildEnv, timeout: 120000 },
           (error, stdout, stderr) => {
             if (error) {

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getLLMService } from '@/lib/llm'
+import { validateApiKey } from '@/lib/auth'
 import type { ChatMessage, ChatParams } from '@/lib/llm'
 import type { AgentName } from '@/lib/types'
 
@@ -29,6 +30,9 @@ interface ChatRequestBody {
 // ============================================================
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json() as ChatRequestBody
 

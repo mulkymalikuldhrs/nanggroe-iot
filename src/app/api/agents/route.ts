@@ -29,32 +29,38 @@ export async function GET(request: NextRequest) {
     })
 
     // Get agent status from SystemConfig in database
-    const agentConfigs = await db.systemConfig.findMany({
-      where: {
-        key: { in: ['hermes.enabled', 'hermes.status', 'picoclaw.enabled', 'picoclaw.status'] },
-      },
-    })
+    const [agentConfigs, lastMessages] = await Promise.all([
+      db.systemConfig.findMany({
+        where: {
+          key: { in: ['hermes.enabled', 'hermes.status', 'picoclaw.enabled', 'picoclaw.status'] },
+        },
+      }),
+      // Single query for both agents' last messages instead of N+1 separate findFirst calls
+      db.agentMessage.findMany({
+        where: { agent: { in: ['hermes', 'picoclaw'] } },
+        orderBy: { timestamp: 'desc' },
+        distinct: ['agent'],
+      }),
+    ])
+
     const agentConfigMap: Record<string, string> = {}
     for (const c of agentConfigs) {
       agentConfigMap[c.key] = c.value
     }
 
+    const hermesLastMsg = lastMessages.find(m => m.agent === 'hermes') ?? null
+    const picoclawLastMsg = lastMessages.find(m => m.agent === 'picoclaw') ?? null
+
     const agentStatus = {
       hermes: {
         enabled: agentConfigMap['hermes.enabled'] !== 'false',
         status: agentConfigMap['hermes.status'] || (agentConfigMap['hermes.enabled'] === 'false' ? 'offline' : 'online'),
-        lastMessage: await db.agentMessage.findFirst({
-          where: { agent: 'hermes' },
-          orderBy: { timestamp: 'desc' },
-        }),
+        lastMessage: hermesLastMsg,
       },
       picoclaw: {
         enabled: agentConfigMap['picoclaw.enabled'] !== 'false',
         status: agentConfigMap['picoclaw.status'] || (agentConfigMap['picoclaw.enabled'] === 'false' ? 'offline' : 'online'),
-        lastMessage: await db.agentMessage.findFirst({
-          where: { agent: 'picoclaw' },
-          orderBy: { timestamp: 'desc' },
-        }),
+        lastMessage: picoclawLastMsg,
       },
     }
 

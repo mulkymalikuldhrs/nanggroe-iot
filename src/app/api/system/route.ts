@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { seedDatabase } from '@/lib/seed'
+import { validateApiKey } from '@/lib/auth'
 
 export async function GET() {
   try {
@@ -106,6 +107,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const { configs, seed } = body as {

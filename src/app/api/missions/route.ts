@@ -25,17 +25,17 @@ export async function GET(request: NextRequest) {
       take: limit,
     })
 
-    // Get summary stats
-    const stats = {
-      total: await db.mission.count(),
-      byStatus: {} as Record<string, number>,
-      byType: {} as Record<string, number>,
-    }
+    // Get summary stats using groupBy instead of fetching all missions
+    const [totalCount, statusGroups, typeGroups] = await Promise.all([
+      db.mission.count(),
+      db.mission.groupBy({ by: ['status'], _count: { status: true } }),
+      db.mission.groupBy({ by: ['type'], _count: { type: true } }),
+    ])
 
-    const allMissions = await db.mission.findMany()
-    for (const m of allMissions) {
-      stats.byStatus[m.status] = (stats.byStatus[m.status] || 0) + 1
-      stats.byType[m.type] = (stats.byType[m.type] || 0) + 1
+    const stats = {
+      total: totalCount,
+      byStatus: Object.fromEntries(statusGroups.map(g => [g.status, g._count.status])) as Record<string, number>,
+      byType: Object.fromEntries(typeGroups.map(g => [g.type, g._count.type])) as Record<string, number>,
     }
 
     return NextResponse.json({
@@ -89,9 +89,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate mission type if provided
+    if (name.trim().length > 200) {
+      return NextResponse.json(
+        { success: false, error: 'Mission name must not exceed 200 characters' },
+        { status: 400 }
+      )
+    }
+
+    // Validate mission type (required)
     const validTypes = ['mapping', 'survey', 'delivery', 'patrol', 'inspection', 'agriculture']
-    if (type && !validTypes.includes(type)) {
+    if (!type || typeof type !== 'string') {
+      return NextResponse.json(
+        { success: false, error: `Mission type is required. Must be one of: ${validTypes.join(', ')}` },
+        { status: 400 }
+      )
+    }
+    if (!validTypes.includes(type)) {
       return NextResponse.json(
         { success: false, error: `Invalid mission type. Must be one of: ${validTypes.join(', ')}` },
         { status: 400 }

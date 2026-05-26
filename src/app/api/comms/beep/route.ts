@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CommunicationService } from '@/lib/communication'
+import type { BeepPatternName } from '@/lib/beep-alerts'
+
+const VALID_BEEP_PATTERNS: BeepPatternName[] = [
+  'startup', 'warning', 'critical', 'success', 'land', 'rth',
+  'arm', 'disarm', 'boot', 'heartbeat', 'low_battery', 'gps_lock',
+  'error', 'custom',
+]
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const validPatterns = ['warning', 'alert', 'success', 'error', 'startup', 'shutdown', 'notify']
-    if (body.pattern && !validPatterns.includes(body.pattern)) {
+    if (body.pattern && !VALID_BEEP_PATTERNS.includes(body.pattern as BeepPatternName)) {
       return NextResponse.json(
-        { success: false, error: `Invalid pattern. Must be one of: ${validPatterns.join(', ')}` },
+        { success: false, error: `Invalid pattern. Must be one of: ${VALID_BEEP_PATTERNS.join(', ')}` },
         { status: 400 }
       )
     }

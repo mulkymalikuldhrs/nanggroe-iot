@@ -6,9 +6,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hermesRespond } from '@/lib/agents'
+import { validateApiKey } from '@/lib/auth'
 import type { SystemContext, TelemetrySnapshot, MissionType, MissionStatus } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const { prompt, missionId, includeContext } = body as {
