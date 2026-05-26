@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Alerts Management API
+// NANGGROE IOT - Alerts Management API
 // GET    /api/alerts — List alerts with filters
 // PATCH  /api/alerts — Mark alert as read/resolved
 // ============================================================
@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Alerts API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve alerts' },
       { status: 500 }
@@ -112,7 +111,6 @@ export async function PATCH(request: NextRequest) {
       message: `Updated ${result.count} alerts`,
     })
   } catch (error) {
-    console.error('[Alerts API] PATCH error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to update alerts' },
       { status: 500 }

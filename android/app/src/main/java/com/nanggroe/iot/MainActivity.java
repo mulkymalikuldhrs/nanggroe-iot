@@ -1,4 +1,4 @@
-package com.nanggroe.osai;
+package com.nanggroe.iot;
 
 import com.getcapacitor.BridgeActivity;
 

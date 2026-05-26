@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Flash & Code Deploy API
+// NANGGROE IOT - Flash & Code Deploy API
 // GET  /api/flash — List firmware, active operations, history
 // POST /api/flash — Start firmware flash or code deploy
 // PUT  /api/flash — Cancel operation, verify firmware
@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Flash API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve flash information' },
       { status: 500 }
@@ -105,6 +104,13 @@ export async function POST(request: NextRequest) {
       if (!target || !firmwareVersion) {
         return NextResponse.json(
           { success: false, error: 'target and firmwareVersion are required' },
+          { status: 400 }
+        )
+      }
+
+      if (typeof firmwareVersion !== 'string' || firmwareVersion.trim().length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'firmwareVersion must be a non-empty string' },
           { status: 400 }
         )
       }
@@ -141,6 +147,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      if (typeof codePath !== 'string' || codePath.trim().length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'codePath must be a non-empty string' },
+          { status: 400 }
+        )
+      }
+
       const validCodeTargets: CodeTarget[] = ['companion', 'agent']
       if (!validCodeTargets.includes(target)) {
         return NextResponse.json(
@@ -163,7 +176,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Flash API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to start flash/deploy operation' },
       { status: 500 }
@@ -236,7 +248,6 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Flash API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process flash operation' },
       { status: 500 }

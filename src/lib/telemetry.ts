@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Telemetry Data Engine
+// NANGGROE IOT - Telemetry Data Engine
 // Real database-driven telemetry processing
 // NO simulation, NO mock data
 // ============================================================

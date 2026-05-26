@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Power Management Service
+// NANGGROE IOT - Power Management Service
 // Battery, Solar panel, GSM power monitoring
 // ============================================================
 
@@ -12,6 +12,8 @@ import type { PowerSourceType, PowerSourceStatus, PowerSourceSummary, SolarConfi
 
 export class PowerService {
   private static instance: PowerService
+  private monitoringInterval: ReturnType<typeof setInterval> | null = null
+  private isMonitoring = false
 
   private constructor() {}
 
@@ -198,7 +200,133 @@ export class PowerService {
         voltage: gsm?.voltage ?? 0,
         isConnected: gsm?.status !== 'offline',
       },
-      emergencyMode: battery ? battery.voltage <= 13.0 && solar?.status === 'charging' : false,
+      emergencyMode: battery ? battery.voltage > 0 && battery.voltage <= 13.0 && battery.current > 0 : false,
+    }
+  }
+
+  /**
+   * Start automatic power monitoring via hardware bridge.
+   * Polls battery voltage, solar status, and creates alerts on threshold breaches.
+   */
+  async startMonitoring(intervalMs: number = 5000): Promise<{ started: boolean; intervalMs: number }> {
+    if (this.isMonitoring) {
+      return { started: false, intervalMs }
+    }
+
+    this.isMonitoring = true
+    this.monitoringInterval = setInterval(async () => {
+      try {
+        await this.pollPowerReadings()
+      } catch {
+        // Monitoring tick failed — will retry next interval
+      }
+    }, intervalMs)
+
+    return { started: true, intervalMs }
+  }
+
+  /**
+   * Stop automatic power monitoring.
+   */
+  stopMonitoring(): { stopped: boolean } {
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval)
+      this.monitoringInterval = null
+    }
+    this.isMonitoring = false
+    return { stopped: true }
+  }
+
+  /**
+   * Get current monitoring status.
+   */
+  getMonitoringStatus(): { isMonitoring: boolean; intervalMs: number | null } {
+    return {
+      isMonitoring: this.isMonitoring,
+      intervalMs: this.monitoringInterval ? 5000 : null,
+    }
+  }
+
+  /**
+   * Poll hardware bridge for current power readings and update DB.
+   */
+  private async pollPowerReadings(): Promise<void> {
+    const sources = await db.powerSource.findMany()
+
+    for (const source of sources) {
+      try {
+        let reading: { voltage?: number; current?: number; temperature?: number; currentLevel?: number } = {}
+
+        if (source.type === 'battery') {
+          // Attempt to read battery voltage from hardware bridge
+          try {
+            const res = await fetch(`http://localhost:3000/api/hardware-bridge`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'gpio_read', path: '/sys/class/power_supply/battery/voltage_now' }),
+            })
+            if (res.ok) {
+              const data = await res.json()
+              if (data.success && data.data?.value) {
+                reading.voltage = Number(data.data.value) / 1000000 // microvolts to volts
+              }
+            }
+          } catch {
+            // Hardware bridge unavailable — keep existing values
+          }
+
+          // Calculate percentage from voltage if we got a reading
+          if (reading.voltage && reading.voltage > 0) {
+            const config = source.config ? JSON.parse(source.config) : {}
+            const minV = config.minVoltage || 12.0
+            const maxV = config.maxChargeVoltage || 16.8
+            reading.currentLevel = Math.max(0, Math.min(100, ((reading.voltage - minV) / (maxV - minV)) * 100))
+          }
+        } else if (source.type === 'solar') {
+          try {
+            const res = await fetch(`http://localhost:3000/api/hardware-bridge`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'i2c_read', busNumber: 1, address: 0x68, length: 2, register: 0x02 }),
+            })
+            if (res.ok) {
+              const data = await res.json()
+              if (data.success && data.data) {
+                // Attempt to parse real I2C data from the solar charge controller.
+                // The I2C read returns raw bytes; we need to interpret them based
+                // on the charge controller's register map (e.g., INA219 at 0x40).
+                // If the raw data contains meaningful voltage/current, parse it here.
+                const rawData = data.data
+
+                // Check if the data contains raw bytes that can be interpreted
+                if (rawData && typeof rawData === 'object' && 'rawBytes' in (rawData as Record<string, unknown>)) {
+                  const bytes = (rawData as { rawBytes: number[] }).rawBytes
+                  if (bytes && bytes.length >= 2) {
+                    // Example: INA219 bus voltage register — upper 2 bytes
+                    // Voltage = (raw >> 3) * 4mV
+                    const rawVal = (bytes[0] << 8) | bytes[1]
+                    const voltage = ((rawVal >> 3) * 4) / 1000 // Convert mV to V
+                    reading.voltage = voltage
+                    reading.current = 0 // Would need shunt register read for current
+                  }
+                }
+
+                // If we couldn't parse real data, do NOT fabricate values.
+                // Leave reading empty to indicate no real data available.
+              }
+            }
+          } catch {
+            // Hardware bridge unavailable — leave reading empty
+          }
+        }
+
+        // Only update if we got new readings
+        if (Object.keys(reading).length > 0) {
+          await this.updateReading(source.id, reading)
+        }
+      } catch {
+        // Failed to poll this source — skip to next
+      }
     }
   }
 }

@@ -4,6 +4,14 @@ import { CommunicationService } from '@/lib/communication'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    if (!body.command) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required field: command' },
+        { status: 400 }
+      )
+    }
+
     const service = CommunicationService.getInstance()
     const result = await service.processTelegramCommand(
       body.command,

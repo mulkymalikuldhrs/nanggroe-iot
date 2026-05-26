@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Firmware Flash & Code Deploy Service
+// NANGGROE IOT - Firmware Flash & Code Deploy Service
 // Production-grade flashing pipeline with real download, serial
 // flash, code deploy, verification, rollback, and cancellation
 // ============================================================
@@ -155,21 +155,21 @@ const FIRMWARE_CATALOG: FirmwareInfo[] = [
   },
   {
     target: 'companion',
-    version: 'Nanggroe OS 1.2.0',
+    version: 'Nanggroe IoT 1.2.0',
     releaseDate: '2025-01-10',
     size: 52428800,
     checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
-    changelog: 'Nanggroe OS 1.2.0 - Agent optimization, telemetry pipeline v2',
-    url: 'firmware/companion/nanggroe-os-1.2.0.img',
+    changelog: 'Nanggroe IoT 1.2.0 - Agent optimization, telemetry pipeline v2',
+    url: 'firmware/companion/nanggroe-iot-1.2.0.img',
   },
   {
     target: 'companion',
-    version: 'Nanggroe OS 1.1.0',
+    version: 'Nanggroe IoT 1.1.0',
     releaseDate: '2024-11-15',
     size: 50331648,
     checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
-    changelog: 'Nanggroe OS 1.1.0 - Hermes agent upgrade, MCP calibration support',
-    url: 'firmware/companion/nanggroe-os-1.1.0.img',
+    changelog: 'Nanggroe IoT 1.1.0 - Hermes agent upgrade, MCP calibration support',
+    url: 'firmware/companion/nanggroe-iot-1.1.0.img',
   },
   {
     target: 'esc',
@@ -300,7 +300,6 @@ export class FlashService {
 
     // Execute flash asynchronously
     this.executeFirmwareFlash(operation, options).catch(err => {
-      console.error('[FlashService] Firmware flash error:', err)
     })
 
     return operation
@@ -520,7 +519,6 @@ export class FlashService {
     this.activeOperations.set(operation.id, operation)
 
     this.executeCodeDeploy(operation, options).catch(err => {
-      console.error('[FlashService] Code deploy error:', err)
     })
 
     return operation
@@ -842,7 +840,14 @@ export class FlashService {
         const existingHash = await sha256Hex(existingData)
         const expectedHash = firmware.checksum.replace('sha256:', '')
 
-        if (expectedHash === '0'.repeat(64) || existingHash === expectedHash) {
+        if (expectedHash === '0'.repeat(64)) {
+          op.logs.push(createLogEntry('warning', `Firmware checksum is placeholder (all zeros) — skipping cache verification. Update firmware entry with real SHA-256 hash for proper verification.`))
+          op.bytesDownloaded = existingData.length
+          op.progress = 20
+          op.logs.push(createLogEntry('info', `Using cached firmware: ${localPath} (${existingData.length} bytes)`))
+          this.activeOperations.set(op.id, op)
+          return { success: true, data: existingData }
+        } else if (existingHash === expectedHash) {
           op.bytesDownloaded = existingData.length
           op.progress = 20
           op.logs.push(createLogEntry('info', `Using cached firmware: ${localPath} (${existingData.length} bytes)`))
@@ -923,7 +928,9 @@ export class FlashService {
       const actualHash = await sha256Hex(firmwareData)
       const expectedHash = firmware.checksum.replace('sha256:', '')
 
-      if (expectedHash !== '0'.repeat(64) && actualHash !== expectedHash) {
+      if (expectedHash === '0'.repeat(64)) {
+        op.logs.push(createLogEntry('warning', `Firmware has placeholder checksum (all zeros) — skipping download verification. Update firmware entry with real SHA-256 hash for security.`))
+      } else if (actualHash !== expectedHash) {
         op.logs.push(createLogEntry('error', `SHA-256 checksum mismatch! Expected ${expectedHash}, got ${actualHash}`))
         return { success: false, error: `Checksum verification failed: expected ${firmware.checksum}, got sha256:${actualHash}` }
       }

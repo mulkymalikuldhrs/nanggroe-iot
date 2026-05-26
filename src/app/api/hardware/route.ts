@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Hardware Detection & Management API
+// NANGGROE IOT - Hardware Detection & Management API
 // GET  /api/hardware — List all hardware devices with profiles
 // POST /api/hardware — Trigger hardware detection scan (DB-based)
 // PUT  /api/hardware — Update device status/profile
@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Hardware API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve hardware devices' },
       { status: 500 }
@@ -60,11 +59,17 @@ export async function POST() {
   try {
     // Real hardware detection: query the database for existing devices
     // and check their last-seen timestamps to determine current status.
-    // If no devices exist, the seed function handles initial device creation.
+    // Detect newly appeared devices by comparing against previously known offline devices.
     const existingDevices = await db.hardwareDevice.findMany()
     let newDevices = 0
     let updatedDevices = 0
     let offlineDevices = 0
+
+    // Track which device IDs were previously offline so we can count
+    // devices that come back online as "newly detected"
+    const previouslyOffline = new Set(
+      existingDevices.filter(d => d.status === 'offline').map(d => d.id)
+    )
 
     for (const device of existingDevices) {
       const timeSinceLastSeen = Date.now() - new Date(device.lastSeen).getTime()
@@ -78,11 +83,14 @@ export async function POST() {
         })
         offlineDevices++
       } else if (!isStale && device.status === 'offline') {
-        // Mark recently-seen offline devices as active
+        // Mark recently-seen offline devices as active — count as new detection
         await db.hardwareDevice.update({
           where: { id: device.id },
           data: { status: 'active', lastSeen: new Date() },
         })
+        if (previouslyOffline.has(device.id)) {
+          newDevices++
+        }
         updatedDevices++
       } else if (!isStale) {
         // Update lastSeen for active devices
@@ -91,6 +99,21 @@ export async function POST() {
           data: { lastSeen: new Date() },
         })
         updatedDevices++
+      }
+    }
+
+    // Also detect devices that were in "detected" or "unknown" status
+    // and have now been initialized — count those as newDevices too
+    for (const device of existingDevices) {
+      if (
+        (device.status === 'detected' || device.status === 'unknown') &&
+        !previouslyOffline.has(device.id)
+      ) {
+        const timeSinceLastSeen = Date.now() - new Date(device.lastSeen).getTime()
+        const isRecent = timeSinceLastSeen <= 60000
+        if (isRecent) {
+          newDevices++
+        }
       }
     }
 
@@ -123,7 +146,6 @@ export async function POST() {
       message: `Hardware scan complete: ${updatedDevices} updated, ${offlineDevices} offline`,
     })
   } catch (error) {
-    console.error('[Hardware API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to perform hardware scan' },
       { status: 500 }
@@ -141,9 +163,18 @@ export async function PUT(request: NextRequest) {
       profileConfig?: Record<string, unknown>
     }
 
-    if (!deviceId) {
+    if (!deviceId || typeof deviceId !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'deviceId is required' },
+        { success: false, error: 'deviceId is required and must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
+    // Validate status if provided
+    const validStatuses = ['active', 'offline', 'detected', 'initialized', 'error', 'unknown']
+    if (status && !validStatuses.includes(status)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
         { status: 400 }
       )
     }
@@ -189,7 +220,6 @@ export async function PUT(request: NextRequest) {
       message: 'Device updated successfully',
     })
   } catch (error) {
-    console.error('[Hardware API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to update hardware device' },
       { status: 500 }

@@ -34,6 +34,7 @@ import {
   Bot,
   Radio,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface AlertEntry {
   id: string
@@ -119,6 +120,7 @@ export function LogsTab() {
   const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   const refresh = () => setRefreshKey(k => k + 1)
 
@@ -134,8 +136,8 @@ export function LogsTab() {
         const agentsJson = await agentsRes.json()
         if (mounted && alertsJson.success) setAlerts(alertsJson.data.alerts)
         if (mounted && agentsJson.success) setAgentMessages(agentsJson.data.messages)
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load logs: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (mounted) setLoading(false)
     }
@@ -156,8 +158,8 @@ export function LogsTab() {
         body: JSON.stringify({ alertIds, isRead: true }),
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to mark alert as read: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -169,8 +171,8 @@ export function LogsTab() {
         body: JSON.stringify({ alertIds, isRead: true, isResolved: true }),
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to resolve alert: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -182,8 +184,8 @@ export function LogsTab() {
         body: JSON.stringify({ markAllRead: true }),
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to mark all alerts as read: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Multi-Model LLM Service
+// NANGGROE IOT - Multi-Model LLM Service
 // Production-grade LLM orchestration with streaming, tool calling,
 // conversation memory, and model switching
 // ============================================================
@@ -99,7 +99,7 @@ export interface ModelInfo {
   provider: string
 }
 
-// --- Nanggroe OS AI Tool Definitions ---
+// --- Nanggroe IoT Tool Definitions ---
 
 const NANGGROE_TOOLS: ToolDefinition[] = [
   {
@@ -210,7 +210,7 @@ const NANGGROE_TOOLS: ToolDefinition[] = [
     type: 'function',
     function: {
       name: 'code_generate',
-      description: 'Generate code for Nanggroe OS AI extensions, drivers, or scripts. Supports multiple languages.',
+      description: 'Generate code for Nanggroe IoT extensions, drivers, or scripts. Supports multiple languages.',
       parameters: {
         type: 'object',
         properties: {
@@ -254,12 +254,31 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
     case 'mavlink_command': {
       const command = args.command as string
       const parameters = (args.parameters as Record<string, unknown>) || {}
+      // ⚠️ SIMULATION ONLY: MAVLink commands are NOT actually sent to a flight
+      // controller. The system has no real hardware bridge connected. Returning
+      // "queued: true" would be dangerous — operators could believe they've
+      // armed or landed the drone when no command was actually executed.
+      const bridgeMode = process.env.HARDWARE_BRIDGE_MODE || 'simulation'
+      if (bridgeMode === 'simulation') {
+        return {
+          queued: false,
+          simulated: true,
+          command,
+          parameters,
+          message: `⚠️ SIMULATED: MAVLink command "${command}" was NOT sent to any flight controller. No hardware bridge is connected. This is a simulation-only response.`,
+          sequenceId: `SIM-${Date.now()}`,
+          warning: 'This command was not executed on real hardware. Do NOT rely on this for actual flight operations.',
+        }
+      }
+      // In real mode, the command would be queued via the hardware bridge.
+      // Since no real bridge is currently connected, return an error.
       return {
-        queued: true,
+        queued: false,
+        simulated: false,
         command,
         parameters,
-        message: `MAVLink command "${command}" queued for execution`,
-        sequenceId: `CMD-${Date.now()}`,
+        message: `ERROR: MAVLink command "${command}" could NOT be executed. No hardware bridge is connected to the flight controller.`,
+        error: 'No active hardware bridge connection. Connect to a flight controller before sending MAVLink commands.',
       }
     }
 
@@ -311,7 +330,7 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
         messages: [
           {
             role: 'system',
-            content: `You are a mission planning AI for NANGGROE OS AI. Generate a JSON mission plan with waypoints.
+            content: `You are a mission planning AI for NANGGROE IOT. Generate a JSON mission plan with waypoints.
 Each waypoint: {lat, lng, alt, action}. Actions: fly, hover, take_photo, land, takeoff.
 Mission type: ${missionType}. Altitude: ${altitude}m. Speed: ${speed}m/s. Max altitude: 120m.
 Home: 4.9125, 97.1347. Include takeoff first and land/RTH last.
@@ -408,6 +427,10 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
       }
 
       if (!telemetry) {
+        // Attempt to build telemetry from recent DB readings — but do NOT
+        // fabricate "safe" default values for missing metrics. If a metric
+        // has no real data, mark it as UNAVAILABLE so the safety assessment
+        // correctly flags it rather than passing all checks with fake data.
         const latestReadings = await db.telemetryReading.findMany({
           orderBy: { timestamp: 'desc' },
           take: 100,
@@ -418,24 +441,39 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
             metricMap[r.metric] = r.value
           }
         }
+
+        // If there are NO readings at all, return a warning instead of fake safe data
+        if (latestReadings.length === 0) {
+          return {
+            safe: false,
+            status: 'UNAVAILABLE',
+            warning: 'No telemetry data available — safety assessment cannot be performed. Treat all systems as potentially unsafe.',
+            alerts: [{ level: 'critical', metric: 'telemetry', message: 'No telemetry data available. All readings are UNAVAILABLE. Do NOT assume systems are safe.' }],
+            actions: [{ type: 'ground', reason: 'Cannot verify safety without telemetry data. Recommend grounding the drone until telemetry is restored.' }],
+            dataAvailability: 'UNAVAILABLE',
+          }
+        }
+
+        // Build telemetry with available data, using sentinel values for missing metrics
+        // These sentinel values will trigger safety alerts rather than pass checks
         telemetry = {
-          battery_voltage: metricMap.battery_voltage ?? 14.8,
-          gps_lat: metricMap.gps_lat ?? 4.9125,
-          gps_lng: metricMap.gps_lng ?? 97.1347,
-          altitude: metricMap.altitude ?? 50,
-          signal_strength: metricMap.signal_strength ?? -45,
-          temperature: metricMap.temperature ?? 28,
-          humidity: metricMap.humidity ?? 75,
-          pressure: metricMap.pressure ?? 1013,
-          heading: metricMap.heading ?? 0,
-          speed: metricMap.speed ?? 0,
-          roll: metricMap.roll ?? 0,
-          pitch: metricMap.pitch ?? 0,
-          yaw: metricMap.yaw ?? 0,
-          motor_rpm_1: metricMap.motor_rpm_1 ?? 0,
-          motor_rpm_2: metricMap.motor_rpm_2 ?? 0,
-          motor_rpm_3: metricMap.motor_rpm_3 ?? 0,
-          current_draw: metricMap.current_draw ?? 0,
+          battery_voltage: metricMap.battery_voltage ?? 0,    // 0V = will trigger critical alert
+          gps_lat: metricMap.gps_lat ?? 0,                     // 0 = invalid GPS
+          gps_lng: metricMap.gps_lng ?? 0,                     // 0 = invalid GPS
+          altitude: metricMap.altitude ?? -1,                   // -1 = unknown altitude
+          signal_strength: metricMap.signal_strength ?? -200,   // -200dBm = no signal
+          temperature: metricMap.temperature ?? -999,           // -999 = no reading
+          humidity: metricMap.humidity ?? -1,                   // -1 = no reading
+          pressure: metricMap.pressure ?? 0,                    // 0 = no reading
+          heading: metricMap.heading ?? -1,                     // -1 = no reading
+          speed: metricMap.speed ?? -1,                         // -1 = no reading
+          roll: metricMap.roll ?? -999,                         // -999 = no reading
+          pitch: metricMap.pitch ?? -999,                       // -999 = no reading
+          yaw: metricMap.yaw ?? -999,                           // -999 = no reading
+          motor_rpm_1: metricMap.motor_rpm_1 ?? -1,            // -1 = no reading
+          motor_rpm_2: metricMap.motor_rpm_2 ?? -1,            // -1 = no reading
+          motor_rpm_3: metricMap.motor_rpm_3 ?? -1,            // -1 = no reading
+          current_draw: metricMap.current_draw ?? -1,           // -1 = no reading
         }
       }
 
@@ -453,7 +491,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
         messages: [
           {
             role: 'system',
-            content: `You are a code generation AI for NANGGROE OS AI — an autonomous robotics OS.
+            content: `You are a code generation AI for NANGGROE IOT — an autonomous robotics OS.
 Generate clean, production-grade ${language} code based on the user's request.
 Follow best practices for the ${language} ecosystem. Include error handling and comments.
 ${context ? `Existing code context:\n${context}` : ''}`,
@@ -517,7 +555,7 @@ ${context ? `Existing code context:\n${context}` : ''}`,
 // --- System Prompt Builder ---
 
 function buildSystemPrompt(context?: SystemContext): string {
-  let prompt = `You are the AI assistant for NANGGROE OS AI — an autonomous modular robotics operating system designed for drone tricopter amphibious platforms in Aceh Utara, Indonesia.
+  let prompt = `You are the AI assistant for NANGGROE IOT — an autonomous modular robotics operating system designed for drone tricopter amphibious platforms in Aceh Utara, Indonesia.
 
 ## Your Capabilities
 You can plan missions, diagnose hardware, query telemetry, assess safety, generate code, and control the drone through MAVLink commands.
@@ -757,7 +795,6 @@ export class LLMService {
         },
       })
     } catch (error) {
-      console.error('[LLMService] Failed to store message:', error)
     }
   }
 
@@ -852,7 +889,6 @@ export class LLMService {
         finishReason,
       }
     } catch (error) {
-      console.error('[LLMService] Chat error:', error)
       throw new Error(
         `LLM chat failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
@@ -987,7 +1023,6 @@ export class LLMService {
         )
       }
     } catch (error) {
-      console.error('[LLMService] Stream error, falling back to non-streaming:', error)
       // Fall back to non-streaming mode
       yield* this.fallbackStream(params, messages)
     }
@@ -1047,7 +1082,6 @@ export class LLMService {
         )
       }
     } catch (fallbackError) {
-      console.error('[LLMService] Fallback stream error:', fallbackError)
       yield {
         type: 'error',
         error: `Chat failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`,
@@ -1091,7 +1125,7 @@ export class LLMService {
         messages: [
           {
             role: 'system',
-            content: `You are a hardware diagnostic AI for NANGGROE OS AI. Analyze hardware issues for a tricopter amphibious drone platform.
+            content: `You are a hardware diagnostic AI for NANGGROE IOT. Analyze hardware issues for a tricopter amphibious drone platform.
 Provide clear, actionable diagnostic steps. Consider common failure modes for:
 Pixhawk 4, Raspberry Pi 4B, GPS NEO-M8N, BME280, MPU6050, SiK Radio, 4S LiPo battery.
 Focus on practical troubleshooting that can be done in the field in Aceh Utara, Indonesia.`,
@@ -1107,7 +1141,6 @@ Focus on practical troubleshooting that can be done in the field in Aceh Utara, 
 
       return response.choices?.[0]?.message?.content || 'Unable to generate diagnostic analysis.'
     } catch (error) {
-      console.error('[LLMService] Hardware diagnosis error:', error)
       return `Diagnostic AI unavailable. Error: ${error instanceof Error ? error.message : 'Unknown'}. Please check hardware connections manually.`
     }
   }
@@ -1124,7 +1157,7 @@ Focus on practical troubleshooting that can be done in the field in Aceh Utara, 
         messages: [
           {
             role: 'system',
-            content: `You are a code generation AI for NANGGROE OS AI — an autonomous robotics OS.
+            content: `You are a code generation AI for NANGGROE IOT — an autonomous robotics OS.
 Generate clean, production-grade ${language} code. Follow best practices.
 Include error handling, comments, and type annotations where applicable.
 For robotics code, consider real-time constraints and safety.`,
@@ -1137,7 +1170,6 @@ For robotics code, consider real-time constraints and safety.`,
 
       return response.choices?.[0]?.message?.content || ''
     } catch (error) {
-      console.error('[LLMService] Code generation error:', error)
       throw new Error(`Code generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -1169,7 +1201,7 @@ For robotics code, consider real-time constraints and safety.`,
         messages: [
           {
             role: 'system',
-            content: `You are PicoClaw AI, the safety analysis assistant for NANGGROE OS AI.
+            content: `You are PicoClaw AI, the safety analysis assistant for NANGGROE IOT.
 Given telemetry data and deterministic safety check results, provide a brief (2-3 sentence) AI insight
 about the overall safety situation. Focus on trends, correlations, and proactive recommendations.
 Do not repeat the alerts — add contextual intelligence.`,
@@ -1235,7 +1267,6 @@ Safe: ${checkResult.safe}`,
         },
       })
     } catch (error) {
-      console.error('[LLMService] Failed to persist model switch:', error)
     }
   }
 }

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - System Doctor / Health Check API
+// NANGGROE IOT - System Doctor / Health Check API
 // GET /api/doctor — Run full system diagnostics
 // ============================================================
 
@@ -60,7 +60,6 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: report })
   } catch (error) {
-    console.error('[Doctor API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to run system diagnostics' },
       { status: 500 }

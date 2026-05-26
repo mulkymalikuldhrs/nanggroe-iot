@@ -54,7 +54,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        system: 'Nanggroe OS AI',
+        system: 'Nanggroe IoT',
         version,
         mode,
         uptime: {
@@ -72,7 +72,6 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[System Health API] Error:', error)
     return NextResponse.json(
       {
         success: false,

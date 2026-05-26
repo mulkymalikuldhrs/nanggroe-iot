@@ -25,6 +25,7 @@ import {
   History,
   Package,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 // ---- Types ----
 type FlashTarget = 'pixhawk' | 'companion' | 'esc' | 'radio'
@@ -109,6 +110,7 @@ export function FlashTab() {
   const [verifyResults, setVerifyResults] = useState<Record<string, VerificationResult>>({})
   const [expandedOp, setExpandedOp] = useState<string | null>(null)
   const [firmwareLoading, setFirmwareLoading] = useState(false)
+  const { toast } = useToast()
 
   const fetchData = useCallback(async () => {
     try {
@@ -117,29 +119,15 @@ export function FlashTab() {
       if (json.success) {
         setData(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch flash data: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      try {
-        const res = await fetch('/api/flash')
-        const json = await res.json()
-        if (!cancelled && json.success) {
-          setData(json.data)
-        }
-      } catch {
-        // silent
-      }
-      if (!cancelled) setLoading(false)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
+    fetchData()
+  }, [fetchData])
 
   useEffect(() => {
     let cancelled = false
@@ -154,8 +142,8 @@ export function FlashTab() {
             setSelectedVersion(json.data.firmware[0].version)
           }
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load firmware list: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (!cancelled) setFirmwareLoading(false)
     }
@@ -184,10 +172,11 @@ export function FlashTab() {
       if (json.success) {
         await fetchData()
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to flash firmware: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setFlashLoading(false)
     }
-    setFlashLoading(false)
   }
 
   const handleDeploy = async () => {
@@ -203,10 +192,11 @@ export function FlashTab() {
       if (json.success) {
         await fetchData()
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to deploy code: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setDeployLoading(false)
     }
-    setDeployLoading(false)
   }
 
   const handleCancel = async (operationId: string) => {
@@ -217,8 +207,8 @@ export function FlashTab() {
         body: JSON.stringify({ action: 'cancel', operationId }),
       })
       await fetchData()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to cancel operation: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -234,10 +224,11 @@ export function FlashTab() {
       if (json.success) {
         setVerifyResults(prev => ({ ...prev, [target]: json.data }))
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to verify firmware: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setVerifyLoading(prev => ({ ...prev, [target]: false }))
     }
-    setVerifyLoading(prev => ({ ...prev, [target]: false }))
   }
 
   if (loading) {
@@ -267,6 +258,7 @@ export function FlashTab() {
             size="sm"
             variant={activeTab === 'firmware' ? 'default' : 'outline'}
             onClick={() => setActiveTab('firmware')}
+            data-testid="firmware-tab-btn"
             className={activeTab === 'firmware' ? 'bg-teal-600 hover:bg-teal-700 text-white h-8' : 'h-8 border-white/10 text-slate-300'}
           >
             <Zap className="w-3.5 h-3.5 mr-1.5" />
@@ -276,6 +268,7 @@ export function FlashTab() {
             size="sm"
             variant={activeTab === 'deploy' ? 'default' : 'outline'}
             onClick={() => setActiveTab('deploy')}
+            data-testid="code-deploy-tab-btn"
             className={activeTab === 'deploy' ? 'bg-teal-600 hover:bg-teal-700 text-white h-8' : 'h-8 border-white/10 text-slate-300'}
           >
             <Code className="w-3.5 h-3.5 mr-1.5" />
@@ -358,6 +351,7 @@ export function FlashTab() {
                 <Button
                   onClick={handleFlash}
                   disabled={flashLoading || !selectedVersion}
+                  data-testid="flash-firmware-btn"
                   className="w-full bg-teal-600 hover:bg-teal-700 text-white"
                 >
                   {flashLoading ? (

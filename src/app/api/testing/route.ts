@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Testing API Route
+// NANGGROE IOT - Testing API Route
 // GET    /api/testing — List suites, tests, results
 // POST   /api/testing — Generate tests, run tests, run suites
 // PUT    /api/testing — Create manual test case, create suite
@@ -93,7 +93,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Testing API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve testing data' },
       { status: 500 }
@@ -285,7 +284,6 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[Testing API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process testing action' },
       { status: 500 }
@@ -364,7 +362,6 @@ export async function PUT(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[Testing API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to create test/suite' },
       { status: 500 }
@@ -411,7 +408,6 @@ export async function DELETE(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Testing API] DELETE error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to delete test/suite' },
       { status: 500 }

@@ -1,6 +1,7 @@
 // ============================================================
-// NANGGROE OS AI - Agent Logic
-// Hermes (strategic planner) + PicoClaw (tactical real-time)
+// NANGGROE IOT - Agent Logic
+// Hermes (strategic planner) + PicoClaw (safety monitoring)
+// With AgentInstance interface for multi-agent architecture
 // ============================================================
 
 import ZAI from 'z-ai-web-dev-sdk'
@@ -14,11 +15,77 @@ import type {
 } from './types'
 import { SAFETY_THRESHOLDS } from './constants'
 
-// --- Hermes System Prompt ---
-const HERMES_SYSTEM_PROMPT = `You are Hermes, the strategic planning agent for NANGGROE OS AI — an autonomous modular robotics operating system designed for drone tricopter amphibious platforms.
+// ============================================================
+// Agent Instance Interface — All agents must implement this
+// ============================================================
+
+export type AgentState = 'idle' | 'thinking' | 'acting' | 'waiting' | 'error'
+export type AgentType = 'llm' | 'rule' | 'hybrid'
+export type AgentPriority = 'critical' | 'high' | 'normal' | 'low'
+
+export interface AgentTask {
+  id: string
+  type: string
+  agent: string
+  priority: AgentPriority
+  payload: unknown
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  result?: unknown
+  createdAt: Date
+  startedAt?: Date
+  completedAt?: Date
+}
+
+export interface AgentMessage {
+  id: string
+  from: string
+  to: string
+  type: string // alert, command, status, escalation, data
+  payload: unknown
+  timestamp: Date
+  priority?: AgentPriority
+}
+
+export interface AgentStatus {
+  name: string
+  type: AgentType
+  state: AgentState
+  capabilities: string[]
+  lastActivity: Date | null
+  tasksCompleted: number
+  tasksFailed: number
+  uptime: number // seconds
+}
+
+export interface AgentInstance {
+  name: string
+  type: AgentType
+  state: AgentState
+  capabilities: string[]
+
+  // Lifecycle
+  initialize(): Promise<void>
+  start(): Promise<void>
+  stop(): Promise<void>
+
+  // Processing
+  processTask(task: AgentTask): Promise<unknown>
+
+  // Communication
+  onMessage(message: AgentMessage): void
+
+  // Status
+  getStatus(): AgentStatus
+}
+
+// ============================================================
+// Hermes Agent — Strategic Planning (LLM-powered)
+// ============================================================
+
+const HERMES_SYSTEM_PROMPT = `You are Hermes, the strategic planning agent for NANGGROE IOT — an autonomous modular robotics operating system designed for drone tricopter amphibious platforms.
 
 ## Your Role
-You are the high-level strategic intelligence. You design missions, optimize routes, analyze terrain, and provide mission-critical recommendations. You work alongside PicoClaw, the tactical real-time safety agent.
+You are the high-level strategic intelligence. You design missions, optimize routes, analyze terrain, and provide mission-critical recommendations. You work alongside PicoClaw, the tactical real-time safety agent, and the broader agent team (Sentinel, Navigator, CommsGuard, DataSteward).
 
 ## System Knowledge
 - **Platform**: Tricopter amphibious drone (3 motors, waterproof, VTOL capable)
@@ -84,10 +151,161 @@ For a safety concern:
   "priority": "high"
 }`
 
-/**
- * Hermes AI Response — Uses z-ai-web-dev-sdk for strategic planning.
- * Returns a structured HermesResponse object.
- */
+export class HermesAgent implements AgentInstance {
+  name = 'hermes'
+  type: AgentType = 'llm'
+  state: AgentState = 'idle'
+  capabilities = [
+    'mission_planning',
+    'route_optimization',
+    'terrain_analysis',
+    'weather_assessment',
+    'battery_estimation',
+    'strategic_recommendation',
+    'natural_language_chat',
+  ]
+
+  private startTime: Date | null = null
+  private _tasksCompleted = 0
+  private _tasksFailed = 0
+  private lastActivity: Date | null = null
+
+  async initialize(): Promise<void> {
+    this.state = 'idle'
+    this.startTime = new Date()
+  }
+
+  async start(): Promise<void> {
+    this.state = 'idle'
+    this.startTime = new Date()
+  }
+
+  async stop(): Promise<void> {
+    this.state = 'idle'
+  }
+
+  async processTask(task: AgentTask): Promise<unknown> {
+    this.state = 'thinking'
+    this.lastActivity = new Date()
+    try {
+      const payload = task.payload as { prompt?: string; context?: SystemContext } | null
+      const result = await hermesRespond(
+        payload?.prompt || JSON.stringify(task.payload),
+        payload?.context
+      )
+      this.state = 'idle'
+      this._tasksCompleted++
+      return result
+    } catch (error) {
+      this.state = 'error'
+      this._tasksFailed++
+      throw error
+    }
+  }
+
+  onMessage(message: AgentMessage): void {
+    // Hermes can receive escalations from other agents
+    if (message.type === 'escalation') {
+      this.lastActivity = new Date()
+    }
+  }
+
+  getStatus(): AgentStatus {
+    return {
+      name: this.name,
+      type: this.type,
+      state: this.state,
+      capabilities: this.capabilities,
+      lastActivity: this.lastActivity,
+      tasksCompleted: this._tasksCompleted,
+      tasksFailed: this._tasksFailed,
+      uptime: this.startTime ? Math.floor((Date.now() - this.startTime.getTime()) / 1000) : 0,
+    }
+  }
+}
+
+// ============================================================
+// PicoClaw Agent — Safety Monitoring (Rule-based)
+// ============================================================
+
+export class PicoClawAgent implements AgentInstance {
+  name = 'picoclaw'
+  type: AgentType = 'rule'
+  state: AgentState = 'idle'
+  capabilities = [
+    'safety_check',
+    'battery_monitoring',
+    'signal_monitoring',
+    'altitude_monitoring',
+    'temperature_monitoring',
+    'motor_asymmetry_detection',
+    'failsafe_execution',
+  ]
+
+  private startTime: Date | null = null
+  private _tasksCompleted = 0
+  private _tasksFailed = 0
+  private lastActivity: Date | null = null
+
+  async initialize(): Promise<void> {
+    this.state = 'idle'
+    this.startTime = new Date()
+  }
+
+  async start(): Promise<void> {
+    this.state = 'idle'
+    this.startTime = new Date()
+  }
+
+  async stop(): Promise<void> {
+    this.state = 'idle'
+  }
+
+  async processTask(task: AgentTask): Promise<unknown> {
+    this.state = 'acting'
+    this.lastActivity = new Date()
+    try {
+      const payload = task.payload as { telemetry?: TelemetrySnapshot } | null
+      const telemetry = payload?.telemetry
+      if (!telemetry) {
+        throw new Error('No telemetry data provided for safety check')
+      }
+      const result = picoclawCheck(telemetry)
+      this.state = 'idle'
+      this._tasksCompleted++
+      return result
+    } catch (error) {
+      this.state = 'error'
+      this._tasksFailed++
+      throw error
+    }
+  }
+
+  onMessage(message: AgentMessage): void {
+    // PicoClaw listens for safety alerts from other agents
+    if (message.type === 'alert' || message.type === 'escalation') {
+      this.lastActivity = new Date()
+    }
+  }
+
+  getStatus(): AgentStatus {
+    return {
+      name: this.name,
+      type: this.type,
+      state: this.state,
+      capabilities: this.capabilities,
+      lastActivity: this.lastActivity,
+      tasksCompleted: this._tasksCompleted,
+      tasksFailed: this._tasksFailed,
+      uptime: this.startTime ? Math.floor((Date.now() - this.startTime.getTime()) / 1000) : 0,
+    }
+  }
+}
+
+// ============================================================
+// Hermes AI Response — Uses z-ai-web-dev-sdk for strategic planning
+// ============================================================
+
 export async function hermesRespond(
   prompt: string,
   context?: SystemContext
@@ -132,7 +350,6 @@ export async function hermesRespond(
 
     // Try to parse structured JSON from the response
     try {
-      // Extract JSON from markdown code blocks if present
       const jsonMatch = responseContent.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
       const jsonStr = jsonMatch ? jsonMatch[1] : responseContent
       const parsed = JSON.parse(jsonStr)
@@ -156,7 +373,6 @@ export async function hermesRespond(
       priority: 'medium',
     }
   } catch (error) {
-    console.error('[Hermes] AI response error:', error)
     return {
       type: 'alert',
       content: 'I encountered an error processing your request. The AI service may be temporarily unavailable. Please try again or use manual mission planning.',
@@ -166,10 +382,10 @@ export async function hermesRespond(
   }
 }
 
-/**
- * PicoClaw Safety Check — Deterministic real-time safety analysis.
- * Does NOT use AI — purely rule-based safety monitoring.
- */
+// ============================================================
+// PicoClaw Safety Check — Deterministic real-time safety analysis
+// ============================================================
+
 export function picoclawCheck(telemetry: TelemetrySnapshot): PicoClawCheckResult {
   const alerts: PicoClawAlert[] = []
   const actions: PicoClawAction[] = []

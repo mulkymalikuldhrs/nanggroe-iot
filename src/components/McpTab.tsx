@@ -34,6 +34,7 @@ import {
   XCircle,
   AlertTriangle,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface McpInputSchemaProperty {
   type: string
@@ -91,6 +92,7 @@ export function McpTab() {
   const [executing, setExecuting] = useState<string | null>(null)
   const [results, setResults] = useState<Record<string, { data: Record<string, unknown> | null; error?: string; success: boolean }>>({})
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
 
@@ -103,8 +105,8 @@ export function McpTab() {
         if (mounted && json.success) {
           setToolsData(json.data)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load MCP tools: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (mounted) setLoading(false)
     }
@@ -457,7 +459,7 @@ export function McpTab() {
               <p className="text-xs font-medium text-slate-300 mb-1">About MCP Integration</p>
               <p className="text-[10px] text-slate-500 leading-relaxed">
                 Model Context Protocol (MCP) provides a standardized interface for AI agents and external tools to interact with
-                Nanggroe OS AI subsystems. Each tool exposes a JSON Schema input definition and returns structured responses.
+                Nanggroe IoT subsystems. Each tool exposes a JSON Schema input definition and returns structured responses.
                 Tools like <span className="text-teal-400">mission_generate</span> use the ZAI SDK for AI-powered waypoint generation,
                 while <span className="text-amber-400">safety_assessment</span> leverages PicoClaw&apos;s deterministic safety analysis engine.
               </p>

@@ -33,6 +33,18 @@ import {
   Hash,
   Braces,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 // ---- Types ----
 interface ExtensionConnection {
@@ -115,6 +127,7 @@ export function ExtensionTab() {
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null)
   const [snippetsLoading, setSnippetsLoading] = useState(false)
   const [hoverLoading, setHoverLoading] = useState(false)
+  const { toast } = useToast()
 
   const fetchData = useCallback(async () => {
     try {
@@ -123,8 +136,8 @@ export function ExtensionTab() {
       if (json.success) {
         setData(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch extension data: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setLoading(false)
   }, [])
@@ -136,45 +149,18 @@ export function ExtensionTab() {
       if (json.success) {
         setEvents(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch extension events: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      try {
-        const res = await fetch('/api/extension')
-        const json = await res.json()
-        if (!cancelled && json.success) {
-          setData(json.data)
-        }
-      } catch {
-        // silent
-      }
-      if (!cancelled) setLoading(false)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
+    fetchData()
+  }, [fetchData])
 
   useEffect(() => {
-    let cancelled = false
-    const loadEvents = async () => {
-      try {
-        const res = await fetch('/api/extension?action=events&limit=30')
-        const json = await res.json()
-        if (!cancelled && json.success) {
-          setEvents(json.data)
-        }
-      } catch {
-        // silent
-      }
-    }
-    loadEvents()
-    return () => { cancelled = true }
-  }, [data])
+    fetchEvents()
+  }, [data, fetchEvents])
 
   const handleRegister = async () => {
     if (!regName.trim()) return
@@ -199,10 +185,11 @@ export function ExtensionTab() {
         await fetchData()
         await fetchEvents()
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to register extension: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setRegLoading(false)
     }
-    setRegLoading(false)
   }
 
   const handleDisconnect = async (connectionId: string) => {
@@ -213,8 +200,8 @@ export function ExtensionTab() {
         body: JSON.stringify({ action: 'update', connectionId, connected: false }),
       })
       await fetchData()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to disconnect extension: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -223,8 +210,8 @@ export function ExtensionTab() {
       await fetch(`/api/extension?connectionId=${connectionId}`, { method: 'DELETE' })
       await fetchData()
       await fetchEvents()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to unregister extension: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -263,10 +250,11 @@ export function ExtensionTab() {
       if (json.success) {
         setSnippets(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch snippets: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setSnippetsLoading(false)
     }
-    setSnippetsLoading(false)
   }
 
   const handleFetchHover = async (connectionId: string) => {
@@ -281,8 +269,9 @@ export function ExtensionTab() {
       }
     } catch {
       setHoverInfo({ contents: 'Failed to fetch hover info.' })
+    } finally {
+      setHoverLoading(false)
     }
-    setHoverLoading(false)
   }
 
   if (loading) {
@@ -535,15 +524,32 @@ export function ExtensionTab() {
                             <WifiOff className="w-3 h-3 mr-1" />
                             Disconnect
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUnregister(conn.id)}
-                            className="h-6 text-[10px] border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
-                          >
-                            <Trash2 className="w-3 h-3 mr-1" />
-                            Remove
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-6 text-[10px] border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                              >
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                Remove
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-slate-900 border-slate-700">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-white">Remove Extension</AlertDialogTitle>
+                                <AlertDialogDescription className="text-slate-400">
+                                  Are you sure you want to unregister &quot;{conn.name}&quot;? This will permanently remove the extension and its API key. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="border-slate-700 text-slate-300">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleUnregister(conn.id)} className="bg-rose-600 hover:bg-rose-700 text-white">
+                                  Remove
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     )

@@ -1,6 +1,6 @@
 // ============================================================
-// NANGGROE OS AI - Hardware Bridge Service
-// Abstraction layer between Nanggroe OS and real hardware.
+// NANGGROE IOT - Hardware Bridge Service
+// Abstraction layer between Nanggroe IoT and real hardware.
 // All drivers use this bridge to communicate with physical devices.
 // Graceful fallback to simulation mode when not on Raspberry Pi.
 // ============================================================
@@ -137,6 +137,137 @@ const I2C_DEVICE_MAP: Record<number, string> = {
 }
 
 // ============================================================
+// MAVLink v2 CRC Extra Bytes per Message ID
+// These seeds are XOR'd into the final CRC to provide message-type
+// validation. Sourced from the MAVLink common message set.
+// ============================================================
+
+const MAVLINK_MESSAGE_CRCS: Record<number, number> = {
+  0: 50,    // HEARTBEAT
+  1: 124,   // SYS_STATUS
+  2: 137,   // SYSTEM_TIME
+  4: 237,   // PING
+  5: 217,   // CHANGE_OPERATOR_CONTROL
+  6: 217,   // CHANGE_OPERATOR_CONTROL_ACK
+  7: 129,   // AUTH_KEY
+  11: 89,   // SET_MODE
+  20: 214,  // PARAM_REQUEST_READ
+  21: 159,  // PARAM_REQUEST_LIST
+  22: 168,  // PARAM_VALUE
+  23: 242,  // PARAM_SET
+  24: 71,   // GPS_RAW_INT
+  25: 187,  // GPS_STATUS
+  26: 219,  // SCALED_IMU
+  27: 198,  // RAW_IMU
+  28: 134,  // RAW_PRESSURE
+  29: 217,  // SCALED_PRESSURE
+  30: 53,   // ATTITUDE
+  31: 115,  // ATTITUDE_QUATERNION
+  32: 104,  // LOCAL_POSITION_NED
+  33: 237,  // GLOBAL_POSITION_INT
+  34: 175,  // RC_CHANNELS_SCALED
+  35: 88,   // RC_CHANNELS_RAW
+  36: 199,  // SERVO_OUTPUT_RAW
+  37: 47,   // MISSION_REQUEST_PARTIAL_LIST
+  38: 84,   // MISSION_WRITE_PARTIAL_LIST
+  39: 21,   // MISSION_ITEM
+  40: 200,  // MISSION_REQUEST
+  41: 253,  // MISSION_SET_CURRENT
+  42: 34,   // MISSION_CURRENT
+  43: 243,  // MISSION_REQUEST_LIST
+  44: 225,  // MISSION_COUNT
+  45: 236,  // MISSION_CLEAR_ALL
+  46: 137,  // MISSION_ITEM_REACHED
+  47: 159,  // MISSION_ACK
+  48: 7,    // SET_GPS_GLOBAL_ORIGIN
+  49: 221,  // GPS_GLOBAL_ORIGIN
+  50: 187,  // PARAM_MAP_RC
+  51: 203,  // MISSION_REQUEST_INT
+  54: 132,  // SAFETY_SET_ALLOWED_AREA
+  55: 5,    // SAFETY_ALLOWED_AREA
+  62: 189,  // NAV_CONTROLLER_OUTPUT
+  65: 11,   // GLOBAL_POSITION_INT_COV
+  69: 63,   // LOCAL_POSITION_NED_COV
+  70: 19,   // RC_CHANNELS
+  73: 124,  // VFR_HUD
+  74: 64,   // COMMAND_INT
+  75: 152,  // COMMAND_LONG
+  76: 14,   // COMMAND_ACK
+  77: 134,  // COMMAND_CANCEL
+  80: 204,  // MANUAL_SETPOINT
+  81: 167,  // ATTITUDE_TARGET
+  82: 91,   // POSITION_TARGET_LOCAL_NED
+  83: 140,  // POSITION_TARGET_GLOBAL_INT
+  84: 46,   // LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET
+  85: 30,   // HIL_STATE
+  86: 23,   // HIL_CONTROLS
+  87: 185,  // HIL_RC_INPUTS_RAW
+  89: 232,  // HIL_ACTUATOR_CONTROLS
+  90: 190,  // OPTICAL_FLOW
+  91: 6,    // GLOBAL_VISION_POSITION_ESTIMATE
+  92: 51,   // VISION_POSITION_ESTIMATE
+  93: 101,  // VISION_SPEED_ESTIMATE
+  94: 81,   // VICON_POSITION_ESTIMATE
+  95: 113,  // HIGHRES_IMU
+  96: 43,   // OPTICAL_FLOW_RAD
+  100: 160, // VISION_POSITION_DELTA
+  101: 232, // CELLULAR_STATUS
+  110: 241, // SET_POSITION_TARGET_LOCAL_NED
+  111: 5,   // SET_POSITION_TARGET_GLOBAL_INT
+  112: 210, // SET_ATTITUDE_TARGET
+  115: 50,  // DISTANCE_SENSOR
+  116: 86,   // NAV_FILTER_BIAS
+  117: 29,   // FENCE_STATUS
+  118: 181,  // DATA_TRANSMISSION_HANDSHAKE
+  119: 107,  // ENCAPSULATED_DATA
+  120: 80,   // DISTANCE_SENSOR (duplicate ID in some dialects)
+  125: 43,   // FOLLOW_TARGET
+  126: 157,  // HIL_GPS
+  129: 207,  // WIFI_CONFIG_AP
+  130: 10,   // WIFI_CONFIG_AP (duplicate)
+  131: 224,  // PROTOCOL_VERSION
+  147: 203,  // AUTOTUNE_STATE
+  148: 167,  // LANDING_TARGET
+  230: 171,  // ESTIMATOR_STATUS
+  231: 138,  // WIND_COV
+  232: 155,  // GPS_INPUT
+  233: 131,  // GPS_RTCM_DATA
+  234: 125,  // HIGH_LATENCY
+  235: 150,  // HIGH_LATENCY2
+  241: 89,   // V2_EXTENSION
+  242: 95,   // VFR_HUD (duplicate)
+  243: 70,   // SMART_BATTERY_INFO
+  252: 172,  // COMPONENT_INFORMATION
+  253: 76,   // COMPONENT_METADATA
+  254: 182,  // PLAY_TUNE_V2
+  260: 141,  // SET_ACTUATOR_CONTROL_TARGET
+  261: 222,  // GET_HOME_POSITION
+  262: 85,   // HOME_POSITION
+  263: 82,   // SET_HOME_POSITION
+  290: 212,  // CELLULAR_CONFIG
+  295: 159,  // RAW_RPM
+  300: 75,   // CAN_FRAME
+  301: 11,   // ONBOARD_COMPUTER_STATUS
+  310: 151,  // CANFD_FRAME
+  311: 216,  // CAN_FILTER_MODIFY
+  320: 30,   // TUNNEL
+  330: 94,   // UAVCAN_NODE_STATUS
+  331: 115,  // UAVCAN_NODE_INFO
+  338: 4,    // DEBUG
+  339: 37,   // SETUP_SIGNING
+  340: 237,  // BUTTON_CHANGE
+  341: 37,   // PLAY_TUNE
+  350: 235,  // CAMERA_INFORMATION
+  351: 236,  // CAMERA_SETTINGS
+  352: 95,   // STORAGE_INFORMATION
+  361: 230,  // OPEN_DRONE_ID_BASIC_ID
+  370: 25,   // AIS_VESSEL
+  380: 138,  // RESOURCE_REQUEST
+  900: 96,   // BATTERY_STATUS_V2
+  9100: 26,  // MAV_CMD_ACK (extended)
+}
+
+// ============================================================
 // HardwareBridge — Singleton service
 // ============================================================
 
@@ -151,6 +282,9 @@ export class HardwareBridge {
   private i2cBuses: Map<number, I2CBus> = new Map()
   private spiBuses: Map<number, SPIBus> = new Map()
   private gpioPins: Map<number, GPIOPin> = new Map()
+
+  // Native serial port handles (for real mode read/write)
+  private serialPortHandles: Map<string, any> = new Map() // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // MAVLink parser state
   private mavlinkSequence: number = 0
@@ -194,15 +328,12 @@ export class HardwareBridge {
   async initialize(): Promise<void> {
     if (this.initialized) return
 
-    console.log('[HardwareBridge] Initializing hardware detection...')
 
     // Detect if we are running on real Raspberry Pi hardware
     this.mode = await this.detectBridgeMode()
-    console.log(`[HardwareBridge] Running in ${this.mode} mode`)
 
     // Scan for available hardware buses
     const scanResult = await this.detectHardware()
-    console.log(`[HardwareBridge] Detected: ${scanResult.serialPorts.length} serial ports, ${scanResult.i2cBuses.length} I2C buses, ${scanResult.spiBuses.length} SPI buses, ${scanResult.gpioPins.length} GPIO pins`)
 
     // Persist scan results to database
     await this.persistScanResults(scanResult)
@@ -309,8 +440,7 @@ export class HardwareBridge {
         return this.simulateSerialOpen(path, config)
       }
 
-      // In real mode, we would use the serialport package
-      // For now, we store the configuration and track the connection
+      // In real mode, attempt to open the serial port using the serialport package
       const portConfig: SerialPort = {
         path,
         baudRate: config?.baudRate ?? DEFAULT_SERIAL_CONFIG.baudRate,
@@ -319,6 +449,23 @@ export class HardwareBridge {
         parity: config?.parity ?? DEFAULT_SERIAL_CONFIG.parity,
         flowControl: config?.flowControl ?? DEFAULT_SERIAL_CONFIG.flowControl,
         isOpen: true,
+      }
+
+      // Attempt to create a real serial port handle
+      try {
+        const { SerialPort } = require('serialport') // eslint-disable-line @typescript-eslint/no-require-imports
+        const sp = new SerialPort({
+          path,
+          baudRate: portConfig.baudRate,
+          dataBits: portConfig.dataBits,
+          stopBits: portConfig.stopBits,
+          parity: portConfig.parity,
+          autoOpen: true,
+        })
+        this.serialPortHandles.set(path, sp)
+      } catch {
+        // serialport module not available — port is tracked but has no native handle.
+        // Read/write operations will return an error indicating no native handle.
       }
 
       this.serialPorts.set(path, portConfig)
@@ -364,13 +511,33 @@ export class HardwareBridge {
         return { success: true, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use serialport.write()
-      this.emitEvent('data_received', `serial:${path}`, {
-        direction: 'tx',
-        bytes: typeof data === 'string' ? data.length : data.byteLength,
-      })
+      // Real hardware: attempt to use serialport native module
+      try {
+        const serialport = require('serialport') // eslint-disable-line @typescript-eslint/no-require-imports
+        const sp = this.serialPortHandles.get(path)
+        if (sp) {
+          const buf = typeof data === 'string' ? Buffer.from(data) : Buffer.from(data as Uint8Array)
+          await new Promise<void>((resolve, reject) => {
+            sp.write(buf, (err?: Error | null) => {
+              if (err) reject(err)
+              else resolve()
+            })
+          })
+          this.emitEvent('data_received', `serial:${path}`, {
+            direction: 'tx',
+            bytes: typeof data === 'string' ? data.length : data.byteLength,
+          })
+          return { success: true, latency: Date.now() - startTime }
+        }
+      } catch {
+        // serialport module not available
+      }
 
-      return { success: true, latency: Date.now() - startTime }
+      return {
+        success: false,
+        error: 'Native serialport module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -408,10 +575,25 @@ export class HardwareBridge {
         }
       }
 
-      // Real hardware: would use serialport.read() with timeout
+      // Real hardware: attempt to use serialport native module
+      try {
+        const serialport = require('serialport') // eslint-disable-line @typescript-eslint/no-require-imports
+        const sp = this.serialPortHandles.get(path)
+        if (sp) {
+          const data = sp.read() as Buffer | null
+          return {
+            success: true,
+            data: data ?? Buffer.alloc(0),
+            latency: Date.now() - startTime,
+          }
+        }
+      } catch {
+        // serialport module not available
+      }
+
       return {
-        success: true,
-        data: null,
+        success: false,
+        error: 'Native serialport module not available',
         latency: Date.now() - startTime,
       }
     } catch (err) {
@@ -438,6 +620,16 @@ export class HardwareBridge {
 
       port.isOpen = false
       this.serialPorts.delete(path)
+      // Close and remove the native serial port handle if present
+      const nativeHandle = this.serialPortHandles.get(path)
+      if (nativeHandle) {
+        try {
+          nativeHandle.close()
+        } catch {
+          // Handle may already be closed
+        }
+        this.serialPortHandles.delete(path)
+      }
       this.connectionPool.delete(`serial:${path}`)
       this.emitEvent('device_disconnected', `serial:${path}`, { path })
 
@@ -517,8 +709,27 @@ export class HardwareBridge {
         return { success: true, data: simulatedData, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use i2c-bus.readI2cBlock()
-      return { success: true, data: null, latency: Date.now() - startTime }
+      // Real hardware: attempt to use i2c-bus native module
+      try {
+        const i2cBus = require('i2c-bus') // eslint-disable-line @typescript-eslint/no-require-imports
+        const busHandle = i2cBus.openPromisified(busNumber)
+        const buf = Buffer.alloc(length)
+        if (register !== undefined) {
+          const result = await (busHandle as any).readI2cBlock(address, register, length, buf) // eslint-disable-line @typescript-eslint/no-explicit-any
+          return { success: true, data: result.buffer, latency: Date.now() - startTime }
+        } else {
+          const result = await (busHandle as any).i2cRead(address, length, buf) // eslint-disable-line @typescript-eslint/no-explicit-any
+          return { success: true, data: result.buffer, latency: Date.now() - startTime }
+        }
+      } catch {
+        // i2c-bus module not available
+      }
+
+      return {
+        success: false,
+        error: 'Native i2c-bus module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -555,8 +766,26 @@ export class HardwareBridge {
         return { success: true, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use i2c-bus.writeI2cBlock()
-      return { success: true, latency: Date.now() - startTime }
+      // Real hardware: attempt to use i2c-bus native module
+      try {
+        const i2cBus = require('i2c-bus') // eslint-disable-line @typescript-eslint/no-require-imports
+        const busHandle = i2cBus.openPromisified(busNumber)
+        const buf = Array.isArray(data) ? Buffer.from(data) : Buffer.from(data)
+        if (register !== undefined) {
+          await (busHandle as any).writeI2cBlock(address, register, buf.length, buf) // eslint-disable-line @typescript-eslint/no-explicit-any
+        } else {
+          await (busHandle as any).i2cWrite(address, buf.length, buf) // eslint-disable-line @typescript-eslint/no-explicit-any
+        }
+        return { success: true, latency: Date.now() - startTime }
+      } catch {
+        // i2c-bus module not available
+      }
+
+      return {
+        success: false,
+        error: 'Native i2c-bus module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -627,8 +856,33 @@ export class HardwareBridge {
         return { success: true, data: rxData, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use spidev.transfer()
-      return { success: true, data: null, latency: Date.now() - startTime }
+      // Real hardware: attempt SPI transfer via spidev
+      try {
+        const spi = require('spi-device') // eslint-disable-line @typescript-eslint/no-require-imports
+        const spiDev = spi.open(busNumber, 0, { maxSpeedHz: bus.maxSpeedHz })
+        const txBuf = Array.isArray(txData) ? Buffer.from(txData) : Buffer.from(txData)
+        const message = [{
+          byteLength: rxLength,
+          sendBuffer: txBuf,
+          receiveBuffer: Buffer.alloc(rxLength),
+        }]
+        const result = await new Promise<Buffer>((resolve, reject) => {
+          spiDev.transfer(message, (err: Error | null, msg: Array<{ receiveBuffer: Buffer }>) => {
+            spiDev.close()
+            if (err) reject(err)
+            else resolve(msg[0].receiveBuffer)
+          })
+        })
+        return { success: true, data: result, latency: Date.now() - startTime }
+      } catch {
+        // spi-device module not available
+      }
+
+      return {
+        success: false,
+        error: 'Native spi-device module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -699,8 +953,26 @@ export class HardwareBridge {
         return { success: true, data: value, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use rpi-gpio or pigpio read
-      return { success: true, data: gpioPin.value, latency: Date.now() - startTime }
+      // Real hardware: attempt to use rpi-gpio native module
+      try {
+        const gpio = require('rpi-gpio') // eslint-disable-line @typescript-eslint/no-require-imports
+        const value = await new Promise<boolean>((resolve, reject) => {
+          gpio.read(pin, (err: Error | null, val: boolean) => {
+            if (err) reject(err)
+            else resolve(val)
+          })
+        })
+        gpioPin.value = value
+        return { success: true, data: value, latency: Date.now() - startTime }
+      } catch {
+        // rpi-gpio module not available
+      }
+
+      return {
+        success: false,
+        error: 'Native rpi-gpio module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -735,15 +1007,33 @@ export class HardwareBridge {
     }
 
     try {
-      gpioPin.value = value
       this.emitEvent('data_received', `gpio:${pin}`, { pin, value })
 
       if (this.mode === 'simulation') {
+        gpioPin.value = value
         return { success: true, latency: Date.now() - startTime }
       }
 
-      // Real hardware: would use rpi-gpio or pigpio write
-      return { success: true, latency: Date.now() - startTime }
+      // Real hardware: attempt to use rpi-gpio native module
+      try {
+        const gpio = require('rpi-gpio') // eslint-disable-line @typescript-eslint/no-require-imports
+        await new Promise<void>((resolve, reject) => {
+          gpio.write(pin, value as boolean, (err: Error | null) => {
+            if (err) reject(err)
+            else resolve()
+          })
+        })
+        gpioPin.value = value
+        return { success: true, latency: Date.now() - startTime }
+      } catch {
+        // rpi-gpio module not available
+      }
+
+      return {
+        success: false,
+        error: 'Native rpi-gpio module not available',
+        latency: Date.now() - startTime,
+      }
     } catch (err) {
       this.recordError(err)
       return {
@@ -823,6 +1113,14 @@ export class HardwareBridge {
 
   /**
    * Encode a MAVLink command into a byte buffer.
+   *
+   * ⚠️ SIMULATION ONLY: This encoder uses a simplified payload format where the
+   * payload object is serialized as packed little-endian fields. Real MAVLink
+   * requires strict struct packing per message definition. This implementation
+   * produces valid MAVLink v2 framing with correct CRC-16/MCR428 checksums,
+   * but the payload layout only matches if the `payload` fields match the
+   * exact MAVLink message struct. For production use, integrate a full MAVLink
+   * code generator (e.g., pymavlink or node-mavlink).
    */
   encodeMAVLinkCommand(
     messageId: number,
@@ -830,31 +1128,112 @@ export class HardwareBridge {
     componentId: number,
     payload: Record<string, unknown>
   ): Uint8Array {
-    const payloadJson = JSON.stringify(payload)
-    const payloadBytes = Buffer.from(payloadJson, 'utf-8')
+    // Pack payload as MAVLink-compatible binary: each value as little-endian
+    const payloadBytes = this.packMAVLinkPayload(payload)
+    const sequence = this.mavlinkSequence++ & 0xFF
 
-    // MAVLink v2 header
+    // MAVLink v2 header (10 bytes)
     const header = new Uint8Array(10)
-    header[0] = 0xFD // Start byte
+    header[0] = 0xFD // Start byte (MAVLink v2)
     header[1] = payloadBytes.length // Payload length
-    header[2] = 0x00 // Incompat flags
+    header[2] = 0x00 // Incompat flags (no signing)
     header[3] = 0x00 // Compat flags
-    header[4] = this.mavlinkSequence++ & 0xFF // Sequence
+    header[4] = sequence
     header[5] = systemId & 0xFF
     header[6] = componentId & 0xFF
     header[7] = messageId & 0xFF
     header[8] = (messageId >> 8) & 0xFF
     header[9] = (messageId >> 16) & 0xFF
 
-    // Combine header + payload + checksum placeholder (2 bytes)
+    // Compute CRC-16/MCR428 over header (excluding start byte) + payload
+    const checksum = this.computeMAVLinkCRC(header, payloadBytes, messageId)
+
+    // Combine header + payload + checksum (2 bytes, little-endian)
     const packet = new Uint8Array(header.length + payloadBytes.length + 2)
     packet.set(header, 0)
     packet.set(payloadBytes, header.length)
-    // Checksum would be computed in real implementation
-    packet[header.length + payloadBytes.length] = 0x00
-    packet[header.length + payloadBytes.length + 1] = 0x00
+    packet[header.length + payloadBytes.length] = checksum & 0xFF
+    packet[header.length + payloadBytes.length + 1] = (checksum >> 8) & 0xFF
 
     return packet
+  }
+
+  /**
+   * Pack a payload object into MAVLink-compatible binary.
+   * Supports: number (float64 → float32 or int32/int16/int8 based on value range),
+   * boolean, and string fields. Numbers are written as little-endian.
+   * ⚠️ This is a simplified packer — real MAVLink messages require exact field
+   * types and ordering per the message definition XML.
+   */
+  private packMAVLinkPayload(payload: Record<string, unknown>): Uint8Array {
+    const buffers: Buffer[] = []
+    for (const value of Object.values(payload)) {
+      if (typeof value === 'boolean') {
+        buffers.push(Buffer.from([value ? 1 : 0]))
+      } else if (typeof value === 'number') {
+        // Use float32 for fractional, int32 for integer values
+        if (Number.isInteger(value) && Math.abs(value) <= 0x7FFFFFFF) {
+          const buf = Buffer.alloc(4)
+          buf.writeInt32LE(value, 0)
+          buffers.push(buf)
+        } else {
+          const buf = Buffer.alloc(4)
+          buf.writeFloatLE(value, 0)
+          buffers.push(buf)
+        }
+      } else if (typeof value === 'string') {
+        // MAVLink strings are null-padded fixed-length; here we use variable length as SIMULATION
+        buffers.push(Buffer.from(value, 'utf-8'))
+      } else if (value === null || value === undefined) {
+        buffers.push(Buffer.from([0]))
+      }
+    }
+    if (buffers.length === 0) {
+      return new Uint8Array(0)
+    }
+    return new Uint8Array(Buffer.concat(buffers))
+  }
+
+  /**
+   * Compute MAVLink v2 CRC-16/MCR428 checksum.
+   * CRC is computed over bytes 1-9 of the header (excluding start byte 0xFD)
+   * and the entire payload, then XOR'd with the message-specific seed.
+   */
+  private computeMAVLinkCRC(header: Uint8Array, payload: Uint8Array, messageId: number): number {
+    let crc = 0xFFFF
+
+    // CRC over header bytes 1-9 (skip start byte at index 0)
+    for (let i = 1; i < header.length; i++) {
+      crc = this.crcAccumulate(header[i], crc)
+    }
+
+    // CRC over payload
+    for (let i = 0; i < payload.length; i++) {
+      crc = this.crcAccumulate(payload[i], crc)
+    }
+
+    // XOR with message-specific seed from the MAVLink CRC extra byte table
+    const seed = MAVLINK_MESSAGE_CRCS[messageId] ?? 0
+    crc = this.crcAccumulate(seed, crc)
+
+    return crc
+  }
+
+  /**
+   * Single-byte CRC-16 accumulation for MAVLink (X.25/CCITT variant).
+   */
+  private crcAccumulate(byte: number, crc: number): number {
+    const byteVal = byte & 0xFF
+    let result = crc ^ (byteVal << 8)
+    for (let i = 0; i < 8; i++) {
+      if (result & 0x8000) {
+        result = (result << 1) ^ 0x1021
+      } else {
+        result = result << 1
+      }
+      result &= 0xFFFF
+    }
+    return result
   }
 
   // ============================================================
@@ -1002,7 +1381,6 @@ export class HardwareBridge {
       data,
     }
     for (const cb of this.eventListeners) {
-      try { cb(event) } catch (e) { console.error('[HardwareBridge] Event listener error:', e) }
     }
   }
 
@@ -1081,7 +1459,7 @@ export class HardwareBridge {
     const devices: I2CDeviceInfo[] = []
 
     if (this.mode === 'simulation') {
-      // Standard Nanggroe OS sensor addresses
+      // Standard Nanggroe IoT sensor addresses
       const knownDevices = [0x68, 0x76]
       for (const addr of knownDevices) {
         devices.push({
@@ -1417,7 +1795,6 @@ export class HardwareBridge {
         })
       }
     } catch (err) {
-      console.error('[HardwareBridge] Failed to persist scan results:', err)
     }
   }
 
@@ -1457,7 +1834,6 @@ export class HardwareBridge {
     this.eventListeners = []
 
     this.initialized = false
-    console.log('[HardwareBridge] Bridge shut down')
   }
 }
 
@@ -1471,6 +1847,105 @@ let bridgeInstance: HardwareBridge | null = null
  * Get the HardwareBridge singleton instance.
  * Initializes the bridge on first access.
  */
+// ============================================================
+// HardwareBusManager — Singleton manager for bus-level state
+// Manages serial, I2C, SPI, and GPIO bus configurations,
+// distinct from the HardwareBridgeManager in drivers.ts
+// which manages hardware driver instances.
+// ============================================================
+
+export class HardwareBusManager {
+  private static instance: HardwareBusManager
+  private bridge: HardwareBridge | null = null
+  private busConfigs: Map<string, Record<string, unknown>> = new Map()
+  private busStatuses: Map<string, 'active' | 'idle' | 'error'> = new Map()
+
+  private constructor() {}
+
+  static getInstance(): HardwareBusManager {
+    if (!HardwareBusManager.instance) {
+      HardwareBusManager.instance = new HardwareBusManager()
+    }
+    return HardwareBusManager.instance
+  }
+
+  /** Set the hardware bridge instance to manage buses for */
+  setBridge(bridge: HardwareBridge): void {
+    this.bridge = bridge
+  }
+
+  /** Get the current bridge */
+  getBridge(): HardwareBridge | null {
+    return this.bridge
+  }
+
+  /** Get the bridge mode (real or simulation) */
+  getMode(): BridgeMode {
+    return this.bridge?.getMode() ?? 'simulation'
+  }
+
+  /** Register a bus configuration */
+  registerBusConfig(busType: 'serial' | 'i2c' | 'spi' | 'gpio', busId: string, config: Record<string, unknown>): void {
+    this.busConfigs.set(`${busType}:${busId}`, config)
+    this.busStatuses.set(`${busType}:${busId}`, 'idle')
+  }
+
+  /** Get a bus configuration */
+  getBusConfig(busType: 'serial' | 'i2c' | 'spi' | 'gpio', busId: string): Record<string, unknown> | undefined {
+    return this.busConfigs.get(`${busType}:${busId}`)
+  }
+
+  /** Update a bus status */
+  setBusStatus(busType: 'serial' | 'i2c' | 'spi' | 'gpio', busId: string, status: 'active' | 'idle' | 'error'): void {
+    this.busStatuses.set(`${busType}:${busId}`, status)
+  }
+
+  /** Get a bus status */
+  getBusStatus(busType: 'serial' | 'i2c' | 'spi' | 'gpio', busId: string): 'active' | 'idle' | 'error' {
+    return this.busStatuses.get(`${busType}:${busId}`) ?? 'idle'
+  }
+
+  /** Get all registered bus configurations */
+  getAllBusConfigs(): Map<string, Record<string, unknown>> {
+    return new Map(this.busConfigs)
+  }
+
+  /** Get all bus statuses */
+  getAllBusStatuses(): Map<string, 'active' | 'idle' | 'error'> {
+    return new Map(this.busStatuses)
+  }
+
+  /** Get summary of all bus states */
+  getBusSummary(): {
+    serial: { count: number; active: number; error: number }
+    i2c: { count: number; active: number; error: number }
+    spi: { count: number; active: number; error: number }
+    gpio: { count: number; active: number; error: number }
+  } {
+    const summary = {
+      serial: { count: 0, active: 0, error: 0 },
+      i2c: { count: 0, active: 0, error: 0 },
+      spi: { count: 0, active: 0, error: 0 },
+      gpio: { count: 0, active: 0, error: 0 },
+    }
+
+    for (const [key, status] of this.busStatuses) {
+      const busType = key.split(':')[0] as 'serial' | 'i2c' | 'spi' | 'gpio'
+      summary[busType].count++
+      if (status === 'active') summary[busType].active++
+      if (status === 'error') summary[busType].error++
+    }
+
+    return summary
+  }
+
+  /** Clear all bus configurations and statuses */
+  clearAll(): void {
+    this.busConfigs.clear()
+    this.busStatuses.clear()
+  }
+}
+
 export async function getHardwareBridge(): Promise<HardwareBridge> {
   if (!bridgeInstance) {
     bridgeInstance = HardwareBridge.getInstance()

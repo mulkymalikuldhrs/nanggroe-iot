@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Navigation Service
+// NANGGROE IOT - Navigation Service
 // GPS tracking, Autopilot, Return-to-Home, Field mapping,
 // Measurement, Payload delivery
 // ============================================================
@@ -294,8 +294,10 @@ export class NavigationService {
 
   /**
    * Execute Return to Home
+   * ⚠️ In simulation mode, this only creates an alert and logs the RTH.
+   * In real mode, this would queue a MAVLink RTL command via the hardware bridge.
    */
-  async executeRTH(): Promise<{ success: boolean; homePosition: { lat: number; lng: number; alt: number } | null }> {
+  async executeRTH(): Promise<{ success: boolean; simulated: boolean; homePosition: { lat: number; lng: number; alt: number } | null; warning?: string }> {
     const telemetry = await getLatestTelemetrySnapshot()
 
     // Get home position from config
@@ -308,19 +310,80 @@ export class NavigationService {
       alt: 0,
     }
 
-    // Create alert
-    await db.alert.create({
-      data: {
-        level: 'warning',
-        source: 'picoclaw',
-        title: 'Return to Home Activated',
-        message: `Autopilot RTH: Kembali ke ${homePosition.lat}°N, ${homePosition.lng}°E. Altitude saat ini: ${telemetry?.altitude ?? 0}m`,
-        category: 'safety',
-        isRead: false,
-      },
-    })
+    const bridgeMode = process.env.HARDWARE_BRIDGE_MODE || 'simulation'
 
-    return { success: true, homePosition }
+    if (bridgeMode === 'simulation') {
+      // SIMULATION MODE: Do NOT actually command the drone to return.
+      // Only create an alert and return simulated result.
+      await db.alert.create({
+        data: {
+          level: 'warning',
+          source: 'picoclaw',
+          title: '⚠️ SIMULATED: Return to Home Activated',
+          message: `SIMULATED RTH: No real RTL command was sent. Home position: ${homePosition.lat}°N, ${homePosition.lng}°E. Altitude saat ini: ${telemetry?.altitude ?? 0}m. This is a simulation-only response.`,
+          category: 'safety',
+          isRead: false,
+        },
+      })
+
+      return {
+        success: true,
+        simulated: true,
+        homePosition,
+        warning: '⚠️ SIMULATED: RTH was NOT executed on real hardware. No MAVLink RTL command was sent to the flight controller.',
+      }
+    }
+
+    // REAL MODE: Queue MAVLink RTL command via hardware bridge
+    // In a full implementation, this would send COMMAND_LONG with MAV_CMD_NAV_RETURN_TO_LAUNCH
+    try {
+      const bridge = await import('./hardware-bridge').then(m => m.HardwareBridge.getInstance())
+      const result = await bridge.serialWrite('/dev/serial0', bridge.encodeMAVLinkCommand(
+        76, // COMMAND_ACK message ID for command response
+        255, // target system
+        0,   // target component
+        { command: 20, result: 0 } // MAV_CMD_NAV_RETURN_TO_LAUNCH = 20
+      ))
+
+      if (!result.success) {
+        await db.alert.create({
+          data: {
+            level: 'critical',
+            source: 'picoclaw',
+            title: 'RTH Command FAILED',
+            message: `RTL command could not be sent: ${result.error}. Home: ${homePosition.lat}°N, ${homePosition.lng}°E. Altitude: ${telemetry?.altitude ?? 0}m`,
+            category: 'safety',
+            isRead: false,
+          },
+        })
+        return { success: false, simulated: false, homePosition }
+      }
+
+      await db.alert.create({
+        data: {
+          level: 'warning',
+          source: 'picoclaw',
+          title: 'Return to Home Commanded',
+          message: `RTL command sent. Returning to ${homePosition.lat}°N, ${homePosition.lng}°E. Current altitude: ${telemetry?.altitude ?? 0}m`,
+          category: 'safety',
+          isRead: false,
+        },
+      })
+
+      return { success: true, simulated: false, homePosition }
+    } catch {
+      await db.alert.create({
+        data: {
+          level: 'critical',
+          source: 'picoclaw',
+          title: 'RTH Command FAILED',
+          message: `Hardware bridge unavailable — RTL command could not be sent. Home: ${homePosition.lat}°N, ${homePosition.lng}°E. Altitude: ${telemetry?.altitude ?? 0}m`,
+          category: 'safety',
+          isRead: false,
+        },
+      })
+      return { success: false, simulated: false, homePosition }
+    }
   }
 
   /**

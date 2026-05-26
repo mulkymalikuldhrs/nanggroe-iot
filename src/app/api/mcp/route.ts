@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { picoclawCheck } from '@/lib/agents'
 import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
+import { executeCalibration } from '@/lib/calibration'
 import ZAI from 'z-ai-web-dev-sdk'
 
 // --- MCP Tool Definitions ---
@@ -224,7 +225,6 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[MCP API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve MCP tools' },
       { status: 500 }
@@ -241,9 +241,9 @@ export async function POST(request: NextRequest) {
       arguments: Record<string, unknown>
     }
 
-    if (!tool) {
+    if (!tool || typeof tool !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'Tool name is required' },
+        { success: false, error: 'Tool name is required and must be a string' },
         { status: 400 }
       )
     }
@@ -266,6 +266,7 @@ export async function POST(request: NextRequest) {
 
     // Route to appropriate handler
     let result: unknown
+    let httpStatus = 200
 
     switch (tool) {
       case 'mavlink_command':
@@ -293,6 +294,18 @@ export async function POST(request: NextRequest) {
         )
     }
 
+    // Check if the handler returned an error object
+    const resultObj = result as Record<string, unknown> | null
+    if (resultObj && resultObj.error && !resultObj.queued && !resultObj.missionId && !resultObj.statuses && !resultObj.records && !resultObj.devices && !resultObj.safe !== undefined) {
+      httpStatus = 400
+      return NextResponse.json({
+        success: false,
+        error: resultObj.error,
+        tool,
+        timestamp: new Date().toISOString(),
+      }, { status: httpStatus })
+    }
+
     return NextResponse.json({
       success: true,
       data: result,
@@ -300,7 +313,6 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[MCP API] POST error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Tool execution failed' },
       { status: 500 }
@@ -312,30 +324,32 @@ export async function POST(request: NextRequest) {
 
 async function handleMavlinkCommand(args: Record<string, unknown>) {
   const command = args.command as string
-  const parameters = (args.parameters as Record<string, unknown>) || {}
+  const parameters = (args.parameters as Record<string, unknown>) ?? {}
 
   const validCommands = ['ARM', 'DISARM', 'TAKEOFF', 'LAND', 'RTL', 'SET_MODE', 'CHANGE_SPEED', 'SET_HOME']
   if (!command || !validCommands.includes(command)) {
     return {
-      queued: false,
       error: `Invalid command. Valid commands: ${validCommands.join(', ')}`,
     }
   }
 
+  // SIMULATED: No real MAVLink command is sent to the flight controller.
+  // In production, this would communicate with the MAVLink-compatible FC.
   return {
+    simulated: true,
     queued: true,
     command,
     parameters,
-    message: `MAVLink command "${command}" queued for execution`,
-    note: 'Command will be sent to flight controller on next heartbeat cycle',
-    sequenceId: `CMD-${Date.now()}`,
+    message: `MAVLink command "${command}" SIMULATED — no real hardware command was sent`,
+    warning: 'This is a SIMULATION. No MAVLink command was sent to any flight controller. Real flight requires hardware connection.',
+    sequenceId: `SIM-${Date.now()}`,
   }
 }
 
 async function handleTelemetryQuery(args: Record<string, unknown>) {
   const metric = args.metric as string
   const deviceId = args.deviceId as string | undefined
-  const limit = Math.min((args.limit as number) || 50, 200)
+  const limit = Math.min((args.limit as number) ?? 50, 200)
 
   if (!metric) {
     return {
@@ -360,8 +374,8 @@ async function handleTelemetryQuery(args: Record<string, unknown>) {
     max: Math.max(...values),
     avg: Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100,
     count: values.length,
-    latest: values[0] || null,
-    oldest: values[values.length - 1] || null,
+    latest: values[0] ?? null,
+    oldest: values[values.length - 1] ?? null,
   } : null
 
   return {
@@ -380,9 +394,9 @@ async function handleTelemetryQuery(args: Record<string, unknown>) {
 
 async function handleMissionGenerate(args: Record<string, unknown>) {
   const prompt = args.prompt as string
-  const missionType = (args.missionType as string) || 'mapping'
-  const altitude = (args.altitude as number) || 50
-  const speed = (args.speed as number) || 5
+  const missionType = (args.missionType as string) ?? 'mapping'
+  const altitude = (args.altitude as number) ?? 50
+  const speed = (args.speed as number) ?? 5
 
   if (!prompt) {
     return {
@@ -426,7 +440,7 @@ Respond ONLY with valid JSON:
       max_tokens: 2048,
     })
 
-    const responseContent = response.choices?.[0]?.message?.content || ''
+    const responseContent = response.choices?.[0]?.message?.content ?? ''
 
     // Try to extract JSON from response
     let missionData: Record<string, unknown> | null = null
@@ -450,11 +464,11 @@ Respond ONLY with valid JSON:
     }
 
     // Create the mission in the database
-    const waypoints = (missionData?.waypoints || []) as Array<{ lat: number; lng: number; alt: number; action: string }>
+    const waypoints = (missionData?.waypoints ?? []) as Array<{ lat: number; lng: number; alt: number; action: string }>
     const mission = await db.mission.create({
       data: {
-        name: (missionData?.name as string) || `${missionType} Mission`,
-        description: (missionData?.description as string) || prompt,
+        name: (missionData?.name as string) ?? `${missionType} Mission`,
+        description: (missionData?.description as string) ?? prompt,
         type: missionType,
         status: 'planned',
         prompt,
@@ -469,12 +483,11 @@ Respond ONLY with valid JSON:
       name: mission.name,
       description: mission.description,
       waypoints,
-      estimatedFlightTime: missionData?.estimatedFlightTime || null,
-      batteryMargin: missionData?.batteryMargin || null,
+      estimatedFlightTime: (missionData?.estimatedFlightTime as number) ?? null,
+      batteryMargin: (missionData?.batteryMargin as number) ?? null,
       rawResponse: responseContent,
     }
   } catch (error) {
-    console.error('[MCP] Mission generation error:', error)
     return {
       error: 'Failed to generate mission with AI',
       details: error instanceof Error ? error.message : 'Unknown error',
@@ -536,7 +549,7 @@ async function handleHardwareDiagnostic(args: Record<string, unknown>) {
 async function handleCalibrationControl(args: Record<string, unknown>) {
   const action = args.action as string
   const deviceType = args.deviceType as string | undefined
-  const limit = Math.min((args.limit as number) || 10, 50)
+  const limit = Math.min((args.limit as number) ?? 10, 50)
 
   if (!action || !['status', 'start', 'history'].includes(action)) {
     return {
@@ -558,7 +571,7 @@ async function handleCalibrationControl(args: Record<string, unknown>) {
           })
           return {
             deviceType: type,
-            latestCalibration: latest || null,
+            latestCalibration: latest ?? null,
             inProgress: !!inProgress,
           }
         })
@@ -594,25 +607,18 @@ async function handleCalibrationControl(args: Record<string, unknown>) {
         },
       })
 
-      // Trigger calibration by calling the calibration API internally
-      try {
-        const baseUrl = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : `http://localhost:${process.env.PORT || 3000}`
-        await fetch(`${baseUrl}/api/calibration`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deviceType }),
-        })
-      } catch {
-        // Fire and forget — the calibration API handles the routine
-      }
+      // Call the calibration service directly — NO self-referential HTTP call.
+      // The executeCalibration function runs a SIMULATED calibration.
+      executeCalibration(calibration.id, deviceType).catch(err => {
+      })
 
       return {
         calibrationId: calibration.id,
         deviceType,
         status: 'pending',
-        message: `Calibration for ${deviceType} initiated`,
+        simulated: true,
+        warning: 'Calibration is SIMULATED. No real hardware calibration will be performed.',
+        message: `SIMULATED calibration for ${deviceType} initiated — real calibration requires hardware connection`,
       }
     }
 
@@ -696,6 +702,29 @@ async function handleSafetyAssessment(args: Record<string, unknown>) {
       motor_rpm_2: snapshotMap.motor_rpm_2 ?? 0,
       motor_rpm_3: snapshotMap.motor_rpm_3 ?? 0,
       current_draw: snapshotMap.current_draw ?? 0,
+    }
+  }
+
+  // If telemetrySnapshot is null (no data), use defaults
+  if (!telemetrySnapshot) {
+    telemetrySnapshot = {
+      battery_voltage: 14.8,
+      gps_lat: 4.9125,
+      gps_lng: 97.1347,
+      altitude: 50,
+      signal_strength: -45,
+      temperature: 28,
+      humidity: 75,
+      pressure: 1013,
+      heading: 0,
+      speed: 0,
+      roll: 0,
+      pitch: 0,
+      yaw: 0,
+      motor_rpm_1: 0,
+      motor_rpm_2: 0,
+      motor_rpm_3: 0,
+      current_draw: 0,
     }
   }
 

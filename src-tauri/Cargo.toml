@@ -1,10 +1,10 @@
 [package]
-name = "nanggroe-os-ai"
+name = "nanggroe-iot"
 version = "1.0.0"
-description = "Nanggroe OS AI — Autonomous Robotics Operating System Platform"
+description = "Nanggroe IoT — IoT & Robotics Platform"
 authors = ["Mulky Malikul Dhaher <mulkymalikuldhaher@email.com>"]
 license = "MIT"
-repository = "https://github.com/nanggroe/os-ai"
+repository = "https://github.com/mulkymalikuldhaher/nanggroe-iot"
 edition = "2021"
 rust-version = "1.77.2"
 

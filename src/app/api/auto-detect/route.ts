@@ -4,6 +4,22 @@ import { RobotTemplateService } from '@/lib/robot-templates'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    if (!body.action) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required field: action' },
+        { status: 400 }
+      )
+    }
+
+    const validActions = ['scan', 'auto-configure', 'update-step']
+    if (!validActions.includes(body.action)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid action. Must be one of: ${validActions.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
     const service = RobotTemplateService.getInstance()
 
     if (body.action === 'scan') {

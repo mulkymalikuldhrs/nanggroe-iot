@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "Nanggroe OS AI",
+  "productName": "Nanggroe IoT",
   "version": "1.0.0",
-  "identifier": "com.nanggroe.os-ai",
+  "identifier": "com.nanggroe.iot",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:3000",
@@ -13,7 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Nanggroe OS AI — Autonomous Robotics Platform",
+        "title": "Nanggroe IoT — IoT & Robotics Platform",
         "width": 1440,
         "height": 900,
         "minWidth": 1024,

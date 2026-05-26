@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Telemetry API
+// NANGGROE IOT - Telemetry API
 // GET  /api/telemetry — Get latest telemetry readings
 // POST /api/telemetry — Add new telemetry reading (sensor/manual)
 // ============================================================
@@ -26,21 +26,10 @@ export async function GET(request: NextRequest) {
 
       let safetyResult: PicoClawCheckResult | null = null
       if (safetyCheck && telemetrySnapshot) {
+        // Note: GET requests must be idempotent — safety checks are returned
+        // but do NOT create Alert records. Use POST /api/telemetry/safety-check
+        // or the alerts endpoint to persist safety alerts.
         safetyResult = picoclawCheck(telemetrySnapshot)
-
-        // Create alerts for any critical/warning issues found
-        for (const alert of safetyResult.alerts) {
-          await db.alert.create({
-            data: {
-              level: alert.level,
-              source: 'picoclaw',
-              title: `${alert.metric} ${alert.level}`,
-              message: alert.message,
-              category: 'safety',
-              isRead: false,
-            },
-          })
-        }
       }
 
       return NextResponse.json({
@@ -83,7 +72,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Telemetry API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve telemetry data' },
       { status: 500 }
@@ -132,7 +120,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Telemetry API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to create telemetry readings' },
       { status: 500 }

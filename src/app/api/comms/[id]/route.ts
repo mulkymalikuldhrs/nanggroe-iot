@@ -34,7 +34,10 @@ export async function PUT(
 
     if (body.action === 'connect') {
       const result = await service.connectChannel(id)
-      return NextResponse.json({ success: result.success, message: result.message })
+      return NextResponse.json(
+        { success: result.success, message: result.message },
+        { status: result.success ? 200 : 400 }
+      )
     }
 
     if (body.action === 'disconnect') {

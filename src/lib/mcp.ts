@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - MCP (Model Context Protocol) Server
+// NANGGROE IOT - MCP (Model Context Protocol) Server
 // Full MCP implementation with JSON-RPC 2.0, tool registry,
 // resource subscriptions, and protocol version 2024-11-05
 // ============================================================
@@ -164,12 +164,29 @@ export class MCPServer {
         if (!command || !validCommands.includes(command)) {
           return { queued: false, error: `Invalid command. Valid: ${validCommands.join(', ')}` }
         }
+        // ⚠️ SIMULATION ONLY: MAVLink commands are NOT actually sent to a flight
+        // controller. Returning "queued: true" would be dangerous — operators
+        // could believe they've armed/landed the drone when nothing happened.
+        const bridgeMode = process.env.HARDWARE_BRIDGE_MODE || 'simulation'
+        if (bridgeMode === 'simulation') {
+          return {
+            queued: false,
+            simulated: true,
+            command,
+            parameters,
+            message: `⚠️ SIMULATED: MAVLink command "${command}" was NOT sent to any flight controller. No hardware bridge is connected. This is a simulation-only response.`,
+            sequenceId: `SIM-${Date.now()}`,
+            warning: 'This command was not executed on real hardware. Do NOT rely on this for actual flight operations.',
+          }
+        }
+        // In real mode, the command would be queued via the hardware bridge.
         return {
-          queued: true,
+          queued: false,
+          simulated: false,
           command,
           parameters,
-          message: `MAVLink command "${command}" queued for execution`,
-          sequenceId: `CMD-${Date.now()}`,
+          message: `ERROR: MAVLink command "${command}" could NOT be executed. No hardware bridge is connected to the flight controller.`,
+          error: 'No active hardware bridge connection. Connect to a flight controller before sending MAVLink commands.',
         }
       },
     })
@@ -267,7 +284,7 @@ export class MCPServer {
             messages: [
               {
                 role: 'system',
-                content: `You are a mission planning AI for NANGGROE OS AI. Generate a JSON mission plan with waypoints.
+                content: `You are a mission planning AI for NANGGROE IOT. Generate a JSON mission plan with waypoints.
 Each waypoint: {lat, lng, alt, action}. Actions: fly, hover, take_photo, land, takeoff.
 Mission type: ${missionType}. Altitude: ${altitude}m. Speed: ${speed}m/s. Max altitude: 120m.
 Home: 4.9125, 97.1347. Include takeoff first and land/RTH last.
@@ -523,32 +540,53 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
         let telemetrySnapshot: TelemetrySnapshot
 
         if (customSnapshot) {
+          // When a custom snapshot is provided, use its values directly.
+          // Do NOT fill missing fields with fake "safe" defaults.
           telemetrySnapshot = {
-            battery_voltage: (customSnapshot.battery_voltage as number) ?? 14.8,
-            gps_lat: (customSnapshot.gps_lat as number) ?? 4.9125,
-            gps_lng: (customSnapshot.gps_lng as number) ?? 97.1347,
-            altitude: (customSnapshot.altitude as number) ?? 50,
-            signal_strength: (customSnapshot.signal_strength as number) ?? -45,
-            temperature: (customSnapshot.temperature as number) ?? 28,
-            humidity: (customSnapshot.humidity as number) ?? 75,
-            pressure: (customSnapshot.pressure as number) ?? 1013,
-            heading: (customSnapshot.heading as number) ?? 0,
-            speed: (customSnapshot.speed as number) ?? 0,
-            roll: (customSnapshot.roll as number) ?? 0,
-            pitch: (customSnapshot.pitch as number) ?? 0,
-            yaw: (customSnapshot.yaw as number) ?? 0,
-            motor_rpm_1: (customSnapshot.motor_rpm_1 as number) ?? 0,
-            motor_rpm_2: (customSnapshot.motor_rpm_2 as number) ?? 0,
-            motor_rpm_3: (customSnapshot.motor_rpm_3 as number) ?? 0,
-            current_draw: (customSnapshot.current_draw as number) ?? 0,
+            battery_voltage: (customSnapshot.battery_voltage as number) ?? 0,
+            gps_lat: (customSnapshot.gps_lat as number) ?? 0,
+            gps_lng: (customSnapshot.gps_lng as number) ?? 0,
+            altitude: (customSnapshot.altitude as number) ?? -1,
+            signal_strength: (customSnapshot.signal_strength as number) ?? -200,
+            temperature: (customSnapshot.temperature as number) ?? -999,
+            humidity: (customSnapshot.humidity as number) ?? -1,
+            pressure: (customSnapshot.pressure as number) ?? 0,
+            heading: (customSnapshot.heading as number) ?? -1,
+            speed: (customSnapshot.speed as number) ?? -1,
+            roll: (customSnapshot.roll as number) ?? -999,
+            pitch: (customSnapshot.pitch as number) ?? -999,
+            yaw: (customSnapshot.yaw as number) ?? -999,
+            motor_rpm_1: (customSnapshot.motor_rpm_1 as number) ?? -1,
+            motor_rpm_2: (customSnapshot.motor_rpm_2 as number) ?? -1,
+            motor_rpm_3: (customSnapshot.motor_rpm_3 as number) ?? -1,
+            current_draw: (customSnapshot.current_draw as number) ?? -1,
           }
         } else if (useLiveTelemetry) {
           const live = await getLatestTelemetrySnapshot()
-          telemetrySnapshot = live ?? {
-            battery_voltage: 14.8, gps_lat: 4.9125, gps_lng: 97.1347,
-            altitude: 50, signal_strength: -45, temperature: 28, humidity: 75,
-            pressure: 1013, heading: 0, speed: 0, roll: 0, pitch: 0, yaw: 0,
-            motor_rpm_1: 0, motor_rpm_2: 0, motor_rpm_3: 0, current_draw: 0,
+          if (live) {
+            telemetrySnapshot = live
+          } else {
+            // No live telemetry available — do NOT fabricate "safe" values.
+            // Return sentinel values that will trigger safety alerts.
+            telemetrySnapshot = {
+              battery_voltage: 0,
+              gps_lat: 0,
+              gps_lng: 0,
+              altitude: -1,
+              signal_strength: -200,
+              temperature: -999,
+              humidity: -1,
+              pressure: 0,
+              heading: -1,
+              speed: -1,
+              roll: -999,
+              pitch: -999,
+              yaw: -999,
+              motor_rpm_1: -1,
+              motor_rpm_2: -1,
+              motor_rpm_3: -1,
+              current_draw: -1,
+            }
           }
         } else {
           const latestReadings = await db.telemetryReading.findMany({
@@ -559,24 +597,38 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
           for (const r of latestReadings) {
             if (snapshotMap[r.metric] === undefined) snapshotMap[r.metric] = r.value
           }
+
+          // If no readings at all, return critical warning
+          if (latestReadings.length === 0) {
+            return {
+              safe: false,
+              status: 'UNAVAILABLE',
+              warning: 'No telemetry data available — safety assessment cannot be performed.',
+              alerts: [{ level: 'critical', metric: 'telemetry', message: 'No telemetry data available. All readings are UNAVAILABLE. Do NOT assume systems are safe.' }],
+              actions: [{ type: 'ground', reason: 'Cannot verify safety without telemetry data.' }],
+              dataAvailability: 'UNAVAILABLE',
+            }
+          }
+
+          // Build telemetry with available data, using sentinel values for missing metrics
           telemetrySnapshot = {
-            battery_voltage: snapshotMap.battery_voltage ?? 14.8,
-            gps_lat: snapshotMap.gps_lat ?? 4.9125,
-            gps_lng: snapshotMap.gps_lng ?? 97.1347,
-            altitude: snapshotMap.altitude ?? 50,
-            signal_strength: snapshotMap.signal_strength ?? -45,
-            temperature: snapshotMap.temperature ?? 28,
-            humidity: snapshotMap.humidity ?? 75,
-            pressure: snapshotMap.pressure ?? 1013,
-            heading: snapshotMap.heading ?? 0,
-            speed: snapshotMap.speed ?? 0,
-            roll: snapshotMap.roll ?? 0,
-            pitch: snapshotMap.pitch ?? 0,
-            yaw: snapshotMap.yaw ?? 0,
-            motor_rpm_1: snapshotMap.motor_rpm_1 ?? 0,
-            motor_rpm_2: snapshotMap.motor_rpm_2 ?? 0,
-            motor_rpm_3: snapshotMap.motor_rpm_3 ?? 0,
-            current_draw: snapshotMap.current_draw ?? 0,
+            battery_voltage: snapshotMap.battery_voltage ?? 0,
+            gps_lat: snapshotMap.gps_lat ?? 0,
+            gps_lng: snapshotMap.gps_lng ?? 0,
+            altitude: snapshotMap.altitude ?? -1,
+            signal_strength: snapshotMap.signal_strength ?? -200,
+            temperature: snapshotMap.temperature ?? -999,
+            humidity: snapshotMap.humidity ?? -1,
+            pressure: snapshotMap.pressure ?? 0,
+            heading: snapshotMap.heading ?? -1,
+            speed: snapshotMap.speed ?? -1,
+            roll: snapshotMap.roll ?? -999,
+            pitch: snapshotMap.pitch ?? -999,
+            yaw: snapshotMap.yaw ?? -999,
+            motor_rpm_1: snapshotMap.motor_rpm_1 ?? -1,
+            motor_rpm_2: snapshotMap.motor_rpm_2 ?? -1,
+            motor_rpm_3: snapshotMap.motor_rpm_3 ?? -1,
+            current_draw: snapshotMap.current_draw ?? -1,
           }
         }
 
@@ -597,7 +649,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
     // --- code_generate (NEW) ---
     this.registerTool({
       name: 'code_generate',
-      description: 'Generate code for Nanggroe OS AI extensions, drivers, or scripts using AI. Supports Python, TypeScript, C, C++.',
+      description: 'Generate code for Nanggroe IoT extensions, drivers, or scripts using AI. Supports Python, TypeScript, C, C++.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -945,7 +997,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
             return {
               editorState: 'unavailable',
               openFiles: [],
-              activeProject: 'nanggroe-os-ai',
+              activeProject: 'nanggroe-iot',
               message: 'No IDE extension connected — state unavailable',
             }
 
@@ -1090,7 +1142,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
         const telemetryCount = await db.telemetryReading.count()
 
         return JSON.stringify({
-          system: 'NANGGROE OS AI',
+          system: 'NANGGROE IOT',
           version: '1.0.0',
           status: criticalAlerts > 0 ? 'critical' : errorDevices > 0 ? 'warning' : 'nominal',
           devices: { total: totalDevices, active: activeDevices, errors: errorDevices },
@@ -1177,7 +1229,6 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
           }
       }
     } catch (error) {
-      console.error('[MCPServer] Error handling request:', error)
       return {
         jsonrpc: '2.0',
         id: request.id ?? null,
@@ -1198,7 +1249,6 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
     this.initialized = true
 
     const clientInfo = params?.clientInfo as { name?: string; version?: string } | undefined
-    console.log(`[MCPServer] Initialize from client: ${clientInfo?.name || 'unknown'} v${clientInfo?.version || '?.?'}`)
 
     const result: MCPInitializeResult = {
       protocolVersion: MCP_PROTOCOL_VERSION,
@@ -1207,7 +1257,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
         resources: { subscribe: true, listChanged: true },
       },
       serverInfo: {
-        name: 'NANGGROE OS AI MCP Server',
+        name: 'NANGGROE IOT MCP Server',
         version: '1.0.0',
       },
     }
@@ -1518,7 +1568,7 @@ Respond ONLY with valid JSON: {"name":"...","description":"...","waypoints":[...
 
   getServerInfo(): MCPServerInfo {
     return {
-      name: 'NANGGROE OS AI MCP Server',
+      name: 'NANGGROE IOT MCP Server',
       version: '1.0.0',
       protocolVersion: MCP_PROTOCOL_VERSION,
       capabilities: {

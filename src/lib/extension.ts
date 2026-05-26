@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - VSCode/IDE Extension Bridge
+// NANGGROE IOT - VSCode/IDE Extension Bridge
 // Manages IDE extension connections, command routing,
 // authentication, code completions, and diagnostics
 //
@@ -78,14 +78,14 @@ export interface ExtensionEvent {
   source: string
 }
 
-// --- Nanggroe OS Specific Completions ---
+// --- Nanggroe IoT Specific Completions ---
 
 const NANGGROE_SNIPPETS: CompletionItem[] = [
   {
     label: 'nanggroe-mission',
     kind: 'snippet',
     detail: 'Nanggroe Mission Template',
-    documentation: 'Create a new Nanggroe OS AI mission with waypoints',
+    documentation: 'Create a new Nanggroe IoT mission with waypoints',
     insertText: `{
   "name": "$1",
   "type": "$2|mapping,survey,delivery,patrol,inspection,agriculture|",
@@ -397,7 +397,6 @@ export class ExtensionBridge {
         this.connections.set(row.id, conn)
       }
     } catch (err) {
-      console.error('[ExtensionBridge] Failed to load persisted connections:', err)
     }
   }
 
@@ -655,21 +654,21 @@ export class ExtensionBridge {
       }
     }
 
-    // Add Nanggroe OS-specific keywords for TypeScript
+    // Add Nanggroe IoT-specific keywords for TypeScript
     if (context.language === 'typescript' || context.language === 'typescriptreact') {
       items.push(
         {
           label: 'DeviceDriver',
           kind: 'class',
-          detail: 'Nanggroe OS DeviceDriver abstract class',
-          documentation: 'Base class for all hardware device drivers in Nanggroe OS AI',
+          detail: 'Nanggroe IoT DeviceDriver abstract class',
+          documentation: 'Base class for all hardware device drivers in Nanggroe IoT',
           insertText: 'DeviceDriver',
           sortText: '1',
         },
         {
           label: 'DriverRegistry',
           kind: 'class',
-          detail: 'Nanggroe OS DriverRegistry singleton',
+          detail: 'Nanggroe IoT DriverRegistry singleton',
           documentation: 'Singleton registry for managing all device drivers',
           insertText: 'DriverRegistry.getInstance()',
           sortText: '1',
@@ -677,7 +676,7 @@ export class ExtensionBridge {
         {
           label: 'FlashService',
           kind: 'class',
-          detail: 'Nanggroe OS FlashService singleton',
+          detail: 'Nanggroe IoT FlashService singleton',
           documentation: 'Firmware flashing and code deployment service',
           insertText: 'FlashService.getInstance()',
           sortText: '1',
@@ -685,7 +684,7 @@ export class ExtensionBridge {
         {
           label: 'ExtensionBridge',
           kind: 'class',
-          detail: 'Nanggroe OS ExtensionBridge singleton',
+          detail: 'Nanggroe IoT ExtensionBridge singleton',
           documentation: 'VSCode/IDE extension communication bridge',
           insertText: 'ExtensionBridge.getInstance()',
           sortText: '1',
@@ -729,7 +728,7 @@ export class ExtensionBridge {
   }
 
   async provideHover(_connectionId: string, position: Position): Promise<HoverInfo | null> {
-    // Provide hover information for Nanggroe OS specific terms
+    // Provide hover information for Nanggroe IoT specific terms
     const hoverDocs: Record<string, { contents: string; language: string }> = {
       'DeviceDriver': {
         contents: `**DeviceDriver** — Abstract base class for hardware drivers\n\nImplements connect/disconnect lifecycle, health checks, data read/write, and event emission.\n\n\`\`\`typescript\nimport { DeviceDriver } from "@/lib/drivers"\n\`\`\``,
@@ -848,7 +847,7 @@ export class ExtensionBridge {
   }
 
   /**
-   * Actually execute Nanggroe OS tasks by performing real DB
+   * Actually execute Nanggroe IoT tasks by performing real DB
    * operations and triggering real side-effects.
    */
   private async handleRunTask(connectionId: string, taskName: string): Promise<unknown> {
@@ -1137,7 +1136,7 @@ export class ExtensionBridge {
     const connectedExtensions = Array.from(this.connections.values()).filter(c => c.connected).length
 
     return {
-      system: 'NANGGROE OS AI',
+      system: 'NANGGROE IOT',
       version: '1.0.0',
       status: activeDevices > 0 ? 'operational' : 'degraded',
       devices: { total: totalDevices, active: activeDevices },

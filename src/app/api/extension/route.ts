@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Extension Bridge API
+// NANGGROE IOT - Extension Bridge API
 // GET    /api/extension — List connected extensions, capabilities, events
 // POST   /api/extension — Register new extension, send command
 // PUT    /api/extension — Authenticate extension, update extension
@@ -114,7 +114,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Extension API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve extension information' },
       { status: 500 }
@@ -218,7 +217,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Extension API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process extension request' },
       { status: 500 }
@@ -305,7 +303,6 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Extension API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process extension update' },
       { status: 500 }
@@ -343,7 +340,6 @@ export async function DELETE(request: NextRequest) {
       message: `Extension "${connection.name}" unregistered successfully`,
     })
   } catch (error) {
-    console.error('[Extension API] DELETE error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to unregister extension' },
       { status: 500 }

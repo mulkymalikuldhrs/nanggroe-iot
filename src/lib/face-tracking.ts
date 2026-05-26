@@ -1,7 +1,7 @@
 // ============================================================
-// NANGGROE OS AI - Face Tracking Service
+// NANGGROE IOT - Face Tracking Service
 // Camera-based face detection, tracking, and identification
-// for Nanggroe OS robotics platform.
+// for Nanggroe IoT robotics platform.
 // Supports multiple tracking modes, pan-tilt servo control,
 // face recognition database, and AI-powered identification.
 // Optimized for Raspberry Pi with TFLite fallback.
@@ -204,7 +204,6 @@ export class FaceTrackingService {
    * Loads config from DB and detects available backends.
    */
   async initialize(config?: Partial<FaceTrackingConfig>): Promise<void> {
-    console.log('[FaceTracking] Initializing face tracking service...')
 
     // Merge config
     if (config) {
@@ -226,12 +225,10 @@ export class FaceTrackingService {
 
     // Detect available backend
     this.backend = await this.detectBackend()
-    console.log(`[FaceTracking] Using backend: ${this.backend}`)
 
     // Load face database from DB into memory
     await this.loadFaceDatabase()
 
-    console.log('[FaceTracking] Initialization complete')
   }
 
   /**
@@ -239,7 +236,6 @@ export class FaceTrackingService {
    */
   async startTracking(mode?: TrackingMode): Promise<void> {
     if (this.isRunning) {
-      console.warn('[FaceTracking] Tracking is already running')
       return
     }
 
@@ -247,7 +243,6 @@ export class FaceTrackingService {
       this.config.trackingMode = mode
     }
 
-    console.log(`[FaceTracking] Starting tracking in ${this.config.trackingMode} mode`)
     this.isRunning = true
     this.status = 'detecting'
     this.frameCount = 0
@@ -259,7 +254,6 @@ export class FaceTrackingService {
       try {
         await this.processFrame()
       } catch (err) {
-        console.error('[FaceTracking] Frame processing error:', err)
         this.status = 'error'
       }
     }, 100) // 10 FPS target
@@ -270,7 +264,6 @@ export class FaceTrackingService {
         try {
           await this.updateTracking()
         } catch (err) {
-          console.error('[FaceTracking] Tracking update error:', err)
         }
       }, 50) // 20 Hz servo update
     }
@@ -287,7 +280,6 @@ export class FaceTrackingService {
   async stopTracking(): Promise<void> {
     if (!this.isRunning) return
 
-    console.log('[FaceTracking] Stopping tracking')
     this.isRunning = false
     this.status = 'idle'
     this.activeFace = null
@@ -374,7 +366,6 @@ export class FaceTrackingService {
 
       return []
     } catch (err) {
-      console.error('[FaceTracking] Face detection error:', err)
       this.status = 'error'
       return []
     }
@@ -556,9 +547,7 @@ export class FaceTrackingService {
 
     try {
       // Would use pigpio or rpi-gpio to set PWM
-      console.log(`[FaceTracking] Servo move: pan=${position.pan.toFixed(1)}° (duty=${panDutyCycle.toFixed(1)}%), tilt=${position.tilt.toFixed(1)}° (duty=${tiltDutyCycle.toFixed(1)}%)`)
     } catch (err) {
-      console.error('[FaceTracking] Servo control error:', err)
     }
   }
 
@@ -577,7 +566,6 @@ export class FaceTrackingService {
     photoPath?: string,
     metadata?: Record<string, unknown>
   ): Promise<FaceProfileEntry> {
-    console.log(`[FaceTracking] Registering face: ${name} (${label})`)
 
     // Check if label already exists
     const existing = await db.faceProfile.findFirst({ where: { label } })
@@ -924,7 +912,7 @@ export class FaceTrackingService {
         messages: [
           {
             role: 'system',
-            content: `You are a face identification AI for Nanggroe OS AI robotics platform.
+            content: `You are a face identification AI for Nanggroe IoT robotics platform.
 Given face detection data (position, confidence), attempt to identify the person.
 ${peopleList}
 If you can identify the person, respond with their name. If not, respond with "unknown".
@@ -967,7 +955,6 @@ Respond ONLY with JSON: {"name": "string", "confidence": 0-1, "reasoning": "stri
         }
       }
     } catch (err) {
-      console.error('[FaceTracking] AI identification failed:', err)
     }
 
     return null
@@ -992,9 +979,7 @@ Respond ONLY with JSON: {"name": "string", "confidence": 0-1, "reasoning": "stri
         this.faceDatabase.set(profile.id, entry)
       }
 
-      console.log(`[FaceTracking] Loaded ${profiles.length} face profiles from database`)
     } catch (err) {
-      console.error('[FaceTracking] Failed to load face database:', err)
     }
   }
 
@@ -1040,7 +1025,6 @@ Respond ONLY with JSON: {"name": "string", "confidence": 0-1, "reasoning": "stri
       data,
     }
     for (const cb of this.eventListeners) {
-      try { cb(event) } catch (e) { console.error('[FaceTracking] Event listener error:', e) }
     }
   }
 
@@ -1138,7 +1122,6 @@ Respond ONLY with JSON: {"name": "string", "confidence": 0-1, "reasoning": "stri
     this.faceDatabase.clear()
     this.eventListeners = []
     this.zaiInstance = null
-    console.log('[FaceTracking] Service shut down')
   }
 }
 

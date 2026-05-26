@@ -1,27 +1,28 @@
 {
-  "name": "nanggroe-os-ai",
+  "name": "nanggroe-iot",
   "version": "1.0.0",
-  "private": true,
-  "description": "Nanggroe OS AI — Modular Autonomous Robotics Operating System Platform",
+  "private": false,
+  "description": "Nanggroe IoT — Modular IoT & Robotics Platform",
   "author": "Mulky Malikul Dhaher <mulkymalikuldhaher@email.com>",
   "license": "MIT",
-  "homepage": "https://github.com/mulkymalikuldhaher/nanggroe-os-ai#readme",
+  "homepage": "https://github.com/mulkymalikuldhaher/nanggroe-iot#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mulkymalikuldhaher/nanggroe-os-ai.git"
+    "url": "https://github.com/mulkymalikuldhaher/nanggroe-iot.git"
   },
   "bugs": {
-    "url": "https://github.com/mulkymalikuldhaher/nanggroe-os-ai/issues"
+    "url": "https://github.com/mulkymalikuldhaher/nanggroe-iot/issues"
   },
   "keywords": [
+    "iot",
     "robotics",
-    "os",
-    "ai",
-    "autonomous",
+    "embedded",
+    "arduino",
+    "raspberry-pi",
+    "automation",
     "drone",
     "rover",
-    "arduino",
-    "raspberry-pi"
+    "sensors"
   ],
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
@@ -41,7 +42,9 @@
     "android:open": "npx cap open android",
     "android:run": "npx cap run android",
     "android:build": "next build && npx cap sync android",
-    "export:static": "next build"
+    "export:static": "next build",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
@@ -119,6 +122,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/react": "^19",
     "@types/react-dom": "^19",

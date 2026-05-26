@@ -171,6 +171,19 @@ function toast({ ...props }: Toast) {
   }
 }
 
+type ToastFn = typeof toast & {
+  error: (message: string) => ReturnType<typeof toast>
+  success: (message: string) => ReturnType<typeof toast>
+}
+
+const toastWithMethods = toast as ToastFn
+
+toastWithMethods.error = (message: string) =>
+  toast({ variant: 'destructive', title: 'Error', description: message })
+
+toastWithMethods.success = (message: string) =>
+  toast({ title: 'Success', description: message })
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
@@ -186,9 +199,9 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: toastWithMethods,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, toastWithMethods as toast }

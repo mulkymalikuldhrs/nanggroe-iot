@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - TypeScript Type Definitions
+// NANGGROE IOT - TypeScript Type Definitions
 // ============================================================
 
 // --- Hardware Types ---

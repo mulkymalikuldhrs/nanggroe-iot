@@ -32,6 +32,7 @@ import {
   Wifi,
 } from 'lucide-react'
 import { DEVICE_TYPE_LABELS, PROTOCOL_LABELS } from '@/lib/constants'
+import { useToast } from '@/hooks/use-toast'
 
 interface HardwareProfile {
   id: string
@@ -101,6 +102,7 @@ export function HardwareTab() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [expandedDevice, setExpandedDevice] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   const refresh = () => setRefreshKey(k => k + 1)
 
@@ -115,8 +117,8 @@ export function HardwareTab() {
           setDevices(json.data.devices)
           setStats(json.data.stats)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load hardware: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (mounted) setLoading(false)
     }
@@ -132,8 +134,8 @@ export function HardwareTab() {
         headers: { 'Content-Type': 'application/json' },
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to scan hardware: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setScanning(false)
   }
@@ -146,8 +148,8 @@ export function HardwareTab() {
         body: JSON.stringify({ deviceId, status }),
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to update device status: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -201,6 +203,7 @@ export function HardwareTab() {
           size="sm"
           onClick={handleScan}
           disabled={scanning}
+          data-testid="scan-hardware-btn"
           className="bg-teal-600 hover:bg-teal-700 text-white h-8"
         >
           <Search className={`w-3.5 h-3.5 mr-1.5 ${scanning ? 'animate-spin' : ''}`} />
@@ -222,7 +225,8 @@ export function HardwareTab() {
           {devices.map((device) => {
             const DeviceIcon = DEVICE_ICONS[device.deviceType] || Cpu
             const isExpanded = expandedDevice === device.id
-            const capabilities = device.capabilities ? JSON.parse(device.capabilities) : []
+            let caps: unknown[] = []
+            try { caps = JSON.parse(device.capabilities || '[]') } catch { caps = [] }
             const profiles = device.profiles || []
 
             return (
@@ -294,10 +298,10 @@ export function HardwareTab() {
                           <span className="text-slate-300 font-mono">{device.productId}</span>
                         </div>
                       )}
-                      {capabilities.length > 0 && (
+                      {caps.length > 0 && (
                         <div className="text-[10px]">
                           <span className="text-slate-500">Capabilities: </span>
-                          <span className="text-slate-300">{capabilities.join(', ')}</span>
+                          <span className="text-slate-300">{caps.join(', ')}</span>
                         </div>
                       )}
                       {profiles.length > 0 && (

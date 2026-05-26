@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Missions API
+// NANGGROE IOT - Missions API
 // GET  /api/missions — List all missions
 // POST /api/missions — Create new mission
 // PUT  /api/missions — Update mission (start, pause, stop, abort)
@@ -46,7 +46,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Missions API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve missions' },
       { status: 500 }
@@ -83,9 +82,34 @@ export async function POST(request: NextRequest) {
       overlapSide?: number
     }
 
-    if (!name) {
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Mission name is required' },
+        { success: false, error: 'Mission name is required and must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
+    // Validate mission type if provided
+    const validTypes = ['mapping', 'survey', 'delivery', 'patrol', 'inspection', 'agriculture']
+    if (type && !validTypes.includes(type)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid mission type. Must be one of: ${validTypes.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Validate altitude range (regulatory: max 120m)
+    if (altitude !== undefined && (typeof altitude !== 'number' || altitude < 0 || altitude > 120)) {
+      return NextResponse.json(
+        { success: false, error: 'Altitude must be a number between 0 and 120 meters' },
+        { status: 400 }
+      )
+    }
+
+    // Validate speed range
+    if (speed !== undefined && (typeof speed !== 'number' || speed < 0 || speed > 30)) {
+      return NextResponse.json(
+        { success: false, error: 'Speed must be a number between 0 and 30 m/s' },
         { status: 400 }
       )
     }
@@ -143,7 +167,6 @@ export async function POST(request: NextRequest) {
       message: `Mission "${name}" created successfully`,
     }, { status: 201 })
   } catch (error) {
-    console.error('[Missions API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to create mission' },
       { status: 500 }
@@ -159,9 +182,17 @@ export async function PUT(request: NextRequest) {
       action: 'start' | 'pause' | 'resume' | 'stop' | 'abort'
     }
 
-    if (!missionId || !action) {
+    if (!missionId || typeof missionId !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'missionId and action are required' },
+        { success: false, error: 'missionId is required and must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
+    const validActions = ['start', 'pause', 'resume', 'stop', 'abort']
+    if (!action || !validActions.includes(action)) {
+      return NextResponse.json(
+        { success: false, error: `action is required and must be one of: ${validActions.join(', ')}` },
         { status: 400 }
       )
     }
@@ -283,7 +314,6 @@ export async function PUT(request: NextRequest) {
       message: `Mission ${action}ed successfully`,
     })
   } catch (error) {
-    console.error('[Missions API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to update mission' },
       { status: 500 }

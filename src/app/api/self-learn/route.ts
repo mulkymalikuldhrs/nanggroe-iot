@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Self-Learning API Route
+// NANGGROE IOT - Self-Learning API Route
 // GET    /api/self-learn — Get learning status, reports, suggestions, performance
 // POST   /api/self-learn — Record decisions, trigger analysis, auto-tune
 // PUT    /api/self-learn — Review decisions, apply suggestions
@@ -53,7 +53,6 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[SelfLearn API] GET error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to get learning data' },
       { status: 500 }
@@ -141,7 +140,6 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[SelfLearn API] POST error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to process learning action' },
       { status: 500 }
@@ -205,7 +203,6 @@ export async function PUT(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[SelfLearn API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to update learning data' },
       { status: 500 }

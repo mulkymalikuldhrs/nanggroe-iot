@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Robot Template & Auto-Detect Service
+// NANGGROE IOT - Robot Template & Auto-Detect Service
 // Auto-detect hardware, match templates, auto-prepare configurations
 // ============================================================
 

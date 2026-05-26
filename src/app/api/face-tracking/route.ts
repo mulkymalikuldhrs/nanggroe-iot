@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Face Tracking API Route
+// NANGGROE IOT - Face Tracking API Route
 // GET    /api/face-tracking — Get tracking status, detected faces, face database, stats
 // POST   /api/face-tracking — Start/stop tracking, register face, identify, delete
 // PUT    /api/face-tracking — Update tracking config (mode, confidence threshold)
@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[FaceTracking API] GET error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to get face tracking data' },
       { status: 500 }
@@ -128,7 +127,6 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[FaceTracking API] POST error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to process face tracking action' },
       { status: 500 }
@@ -212,7 +210,6 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[FaceTracking API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to update face tracking config' },
       { status: 500 }

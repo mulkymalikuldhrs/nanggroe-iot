@@ -21,9 +21,20 @@ import { Slider } from '@/components/ui/slider'
 import {
   Eye, EyeOff, Camera, Users, UserPlus, Trash2, Loader2,
   RefreshCw, AlertCircle, Play, Square, Scan, Settings,
-  Shield, Target, Fingerprint, Clock, MapPin,
+  Shield, Target, Fingerprint, Clock, MapPin, AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 // ---- Types ----
 interface TrackingState {
@@ -165,57 +176,15 @@ export function FaceTrackingTab() {
       } catch {
         // detection may fail if tracking not running
       }
-    } catch (err) {
-      console.error('Failed to fetch face tracking data:', err)
+    } catch {
       setError('Gagal memuat data face tracking. Periksa koneksi server.')
       toast.error('Gagal memuat data face tracking')
     }
   }, [])
 
   useEffect(() => {
-    let active = true
-    const load = async () => {
-      setLoading(true)
-      try {
-        setError(null)
-        const [statusRes, facesRes, statsRes] = await Promise.all([
-          fetch('/api/face-tracking?action=status'),
-          fetch('/api/face-tracking?action=faces'),
-          fetch('/api/face-tracking?action=stats'),
-        ])
-
-        const statusData = await statusRes.json()
-        const facesData = await facesRes.json()
-        const statsData = await statsRes.json()
-
-        if (active) {
-          if (statusData.success) {
-            setTrackingState(statusData.data)
-            if (statusData.data.mode) setSelectedMode(statusData.data.mode)
-          }
-          if (facesData.success) setFaceDatabase(facesData.data.faces || [])
-          if (statsData.success) setStats(statsData.data)
-        }
-
-        // Try to detect faces
-        try {
-          const detectRes = await fetch('/api/face-tracking?action=detect')
-          const detectData = await detectRes.json()
-          if (active && detectData.success) setDetectedFaces(detectData.data.faces || [])
-        } catch {
-          // detection may fail if tracking not running
-        }
-      } catch (err) {
-        console.error('Failed to fetch face tracking data:', err)
-        if (active) {
-          setError('Gagal memuat data face tracking. Periksa koneksi server.')
-          toast.error('Gagal memuat data face tracking')
-        }
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    load()
+    setLoading(true)
+    fetchAllData().finally(() => setLoading(false))
 
     // Poll for updates when tracking is running
     const interval = setInterval(async () => {
@@ -234,8 +203,8 @@ export function FaceTrackingTab() {
       }
     }, 3000)
 
-    return () => { active = false; clearInterval(interval) }
-  }, [])
+    return () => { clearInterval(interval) }
+  }, [fetchAllData])
 
   const handleStart = async () => {
     setStarting(true)
@@ -252,8 +221,7 @@ export function FaceTrackingTab() {
       } else {
         toast.error(data.error || 'Gagal memulai tracking')
       }
-    } catch (err) {
-      console.error('Start tracking failed:', err)
+    } catch {
       toast.error('Gagal memulai face tracking')
     } finally {
       setStarting(false)
@@ -276,8 +244,7 @@ export function FaceTrackingTab() {
       } else {
         toast.error(data.error || 'Gagal menghentikan tracking')
       }
-    } catch (err) {
-      console.error('Stop tracking failed:', err)
+    } catch {
       toast.error('Gagal menghentikan face tracking')
     } finally {
       setStopping(false)
@@ -291,7 +258,8 @@ export function FaceTrackingTab() {
     }
     setRegistering(true)
     try {
-      // Use a simulated face for registration
+      // NOTE: This uses SIMULATED bounding box data, not actual camera input.
+      // Face registration with real camera input is not yet implemented.
       const res = await fetch('/api/face-tracking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -316,8 +284,7 @@ export function FaceTrackingTab() {
       } else {
         toast.error(data.error || 'Gagal mendaftarkan wajah')
       }
-    } catch (err) {
-      console.error('Register face failed:', err)
+    } catch {
       toast.error('Gagal mendaftarkan wajah')
     } finally {
       setRegistering(false)
@@ -339,8 +306,7 @@ export function FaceTrackingTab() {
       } else {
         toast.error(data.error || 'Gagal menghapus profil wajah')
       }
-    } catch (err) {
-      console.error('Delete face failed:', err)
+    } catch {
       toast.error('Gagal menghapus profil wajah')
     } finally {
       setDeletingFace(null)
@@ -362,8 +328,7 @@ export function FaceTrackingTab() {
       } else {
         toast.error(data.error || 'Gagal mengupdate konfigurasi')
       }
-    } catch (err) {
-      console.error('Update config failed:', err)
+    } catch {
       toast.error('Gagal mengupdate konfigurasi')
     } finally {
       setUpdatingConfig(false)
@@ -636,19 +601,36 @@ export function FaceTrackingTab() {
                         <Badge variant="outline" className="text-[9px] border-slate-600 text-slate-400">
                           {(face.confidence * 100).toFixed(0)}%
                         </Badge>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 text-slate-500 hover:text-red-400"
-                          onClick={() => handleDeleteFace(face.id)}
-                          disabled={deletingFace === face.id}
-                        >
-                          {deletingFace === face.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-3 h-3" />
-                          )}
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 text-slate-500 hover:text-red-400"
+                              disabled={deletingFace === face.id}
+                            >
+                              {deletingFace === face.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3 h-3" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-slate-900 border-slate-700">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-white">Delete Face Profile</AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-400">
+                                Are you sure you want to delete the face profile for &quot;{face.name}&quot;? This will permanently remove their facial encoding and sighting history. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-slate-700 text-slate-300">Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteFace(face.id)} className="bg-rose-600 hover:bg-rose-700 text-white">
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -739,6 +721,13 @@ export function FaceTrackingTab() {
           <CardDescription>Daftarkan wajah baru ke database</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* Simulated Data Warning */}
+          <div className="p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20 flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-amber-300">
+              <strong>Simulated Data:</strong> Face registration currently uses simulated bounding box data instead of actual camera input. The registered face profile will not contain real facial encoding from a camera feed.
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] text-slate-400 mb-1 block">Nama</label>

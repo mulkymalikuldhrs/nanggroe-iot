@@ -197,7 +197,7 @@ export function MobileLayout() {
   const currentLabel =
     PRIMARY_NAV.find((i) => i.id === activeTab)?.label ||
     SECONDARY_NAV.find((i) => i.id === activeTab)?.label ||
-    'Nanggroe OS AI'
+    'Nanggroe IoT'
 
   return (
     <div

@@ -59,35 +59,16 @@ export function CommsTab() {
       const res = await fetch('/api/comms')
       const data = await res.json()
       if (data.success) setChannels(data.data)
-    } catch (err) {
-      console.error('Failed to fetch channels:', err)
+    } catch {
       setError('Gagal memuat channel komunikasi. Periksa koneksi server.')
       toast.error('Gagal memuat channel komunikasi')
     }
   }, [])
 
   useEffect(() => {
-    let active = true
-    const load = async () => {
-      setLoading(true)
-      try {
-        setError(null)
-        const res = await fetch('/api/comms')
-        const data = await res.json()
-        if (active && data.success) setChannels(data.data)
-      } catch (err) {
-        console.error('Failed to fetch channels:', err)
-        if (active) {
-          setError('Gagal memuat channel komunikasi. Periksa koneksi server.')
-          toast.error('Gagal memuat channel komunikasi')
-        }
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    load()
-    return () => { active = false }
-  }, [])
+    setLoading(true)
+    fetchChannels().finally(() => setLoading(false))
+  }, [fetchChannels])
 
   const toggleChannel = async (channelId: string, enable: boolean) => {
     try {
@@ -98,8 +79,7 @@ export function CommsTab() {
       })
       toast.success(enable ? 'Channel diaktifkan' : 'Channel dinonaktifkan')
       fetchChannels()
-    } catch (err) {
-      console.error('Failed to toggle channel:', err)
+    } catch {
       toast.error('Gagal mengubah status channel')
     }
   }
@@ -113,8 +93,7 @@ export function CommsTab() {
       })
       toast.success('Channel berhasil terhubung')
       fetchChannels()
-    } catch (err) {
-      console.error('Failed to connect channel:', err)
+    } catch {
       toast.error('Gagal menghubungkan channel')
     }
   }
@@ -128,8 +107,7 @@ export function CommsTab() {
       })
       toast.success('Channel terputus')
       fetchChannels()
-    } catch (err) {
-      console.error('Failed to disconnect channel:', err)
+    } catch {
       toast.error('Gagal memutuskan channel')
     }
   }
@@ -156,8 +134,7 @@ export function CommsTab() {
       } else {
         toast.error(data.error || 'Gagal mengirim perintah')
       }
-    } catch (err) {
-      console.error('Telegram command failed:', err)
+    } catch {
       toast.error('Gagal mengirim perintah Telegram')
     } finally {
       setSendingTelegram(false)
@@ -185,8 +162,7 @@ export function CommsTab() {
       } else {
         toast.error(data.error || 'Gagal mengirim perintah suara')
       }
-    } catch (err) {
-      console.error('Voice command failed:', err)
+    } catch {
       toast.error('Gagal mengirim perintah suara')
     } finally {
       setSendingVoice(false)
@@ -202,8 +178,7 @@ export function CommsTab() {
         body: JSON.stringify({ pattern }),
       })
       toast.success(`Beep "${pattern}" terkirim`)
-    } catch (err) {
-      console.error('Beep failed:', err)
+    } catch {
       toast.error(`Gagal mengirim beep "${pattern}"`)
     } finally {
       setTimeout(() => setBeepLoading(null), 300)

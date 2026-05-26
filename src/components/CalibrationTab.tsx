@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   RefreshCw,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface CalibrationRecord {
   id: string
@@ -109,6 +110,7 @@ export function CalibrationTab() {
   const [startingCal, setStartingCal] = useState<CalDeviceType | null>(null)
   const [progressMap, setProgressMap] = useState<Record<CalDeviceType, number>>({} as Record<CalDeviceType, number>)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
@@ -124,8 +126,8 @@ export function CalibrationTab() {
           setCalibrations(json.data.calibrations)
           setStats(json.data.stats)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load calibration data: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (mounted) setLoading(false)
     }
@@ -208,8 +210,8 @@ export function CalibrationTab() {
         // Refresh to get updated data
         setTimeout(() => refresh(), 500)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to start calibration: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
 
     setStartingCal(null)

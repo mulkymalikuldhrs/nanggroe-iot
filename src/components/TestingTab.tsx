@@ -26,6 +26,7 @@ import {
   PlayCircle,
   FlaskConical,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 // ---- Types ----
 type TestCategory = 'unit' | 'integration' | 'hardware' | 'firmware' | 'e2e' | 'safety'
@@ -141,6 +142,7 @@ export function TestingTab() {
   const [verifyResult, setVerifyResult] = useState<TestResult | null>(null)
   const [expandedSuite, setExpandedSuite] = useState<string | null>(null)
   const [expandedTest, setExpandedTest] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const fetchAll = useCallback(async () => {
     try {
@@ -156,8 +158,8 @@ export function TestingTab() {
       if (overviewJson.success) setOverview(overviewJson.data)
       if (suitesJson.success) setSuites(suitesJson.data)
       if (resultsJson.success) setResultsData(resultsJson.data)
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch test data: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setLoading(false)
   }, [])
@@ -180,8 +182,8 @@ export function TestingTab() {
           if (suitesJson.success) setSuites(suitesJson.data)
           if (resultsJson.success) setResultsData(resultsJson.data)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load test data: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (!cancelled) setLoading(false)
     }
@@ -199,8 +201,8 @@ export function TestingTab() {
         body: JSON.stringify({ action: 'generate', target: generateTarget.trim(), category: generateCategory }),
       })
       await fetchAll()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to generate tests: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setGenerateLoading(false)
   }
@@ -214,8 +216,8 @@ export function TestingTab() {
         body: JSON.stringify({ action, ...extra }),
       })
       await fetchAll()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to generate quick tests: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setQuickLoading(null)
   }
@@ -229,8 +231,8 @@ export function TestingTab() {
         body: JSON.stringify({ action: 'run_suite', suiteId }),
       })
       await fetchAll()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run test suite: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setRunLoading(null)
   }
@@ -244,8 +246,8 @@ export function TestingTab() {
         body: JSON.stringify({ action: 'run_all' }),
       })
       await fetchAll()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run all tests: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setRunLoading(null)
   }
@@ -263,8 +265,8 @@ export function TestingTab() {
       if (json.success && json.data?.result) {
         setVerifyResult(json.data.result)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run verification: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setVerifyLoading(null)
   }

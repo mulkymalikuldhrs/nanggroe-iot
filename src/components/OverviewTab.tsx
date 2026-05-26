@@ -25,6 +25,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { BootFlowPanel } from './BootFlowPanel'
+import { useToast } from '@/hooks/use-toast'
 
 interface SystemData {
   name: string
@@ -97,6 +98,7 @@ export function OverviewTab() {
   const [alerts, setAlerts] = useState<AlertData[]>([])
   const [loading, setLoading] = useState(true)
   const [liveConnected, setLiveConnected] = useState(false)
+  const { toast } = useToast()
 
   // SSE real-time telemetry stream
   const { connected: sseConnected } = useSSE<{
@@ -124,8 +126,8 @@ export function OverviewTab() {
       const res = await fetch('/api/system')
       const json = await res.json()
       if (json.success) setSystem(json.data)
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch system data: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }, [])
 
@@ -136,8 +138,8 @@ export function OverviewTab() {
       if (json.success && json.data.snapshot) {
         setTelemetry(json.data.snapshot)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch telemetry: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }, [])
 
@@ -146,8 +148,8 @@ export function OverviewTab() {
       const res = await fetch('/api/alerts?limit=5')
       const json = await res.json()
       if (json.success) setAlerts(json.data.alerts)
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch alerts: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }, [])
 
@@ -161,8 +163,8 @@ export function OverviewTab() {
       fetchSystem()
       fetchTelemetry()
       fetchAlerts()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to seed database: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 

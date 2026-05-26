@@ -28,6 +28,7 @@ import {
   Battery,
   CircuitBoard,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 // ---- Types ----
 type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error'
@@ -99,6 +100,7 @@ export function DriversTab() {
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({})
   const [healthResults, setHealthResults] = useState<Record<string, HealthCheckResult>>({})
   const [healthCheckAllLoading, setHealthCheckAllLoading] = useState(false)
+  const { toast } = useToast()
 
   const fetchDrivers = useCallback(async () => {
     try {
@@ -107,29 +109,15 @@ export function DriversTab() {
       if (json.success) {
         setData(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to fetch drivers: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      try {
-        const res = await fetch('/api/drivers')
-        const json = await res.json()
-        if (!cancelled && json.success) {
-          setData(json.data)
-        }
-      } catch {
-        // silent
-      }
-      if (!cancelled) setLoading(false)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [])
+    fetchDrivers()
+  }, [fetchDrivers])
 
   const handleConnect = async (deviceType: string) => {
     setActionLoading(prev => ({ ...prev, [deviceType]: true }))
@@ -143,10 +131,11 @@ export function DriversTab() {
       if (json.success) {
         await fetchDrivers()
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to connect driver: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [deviceType]: false }))
     }
-    setActionLoading(prev => ({ ...prev, [deviceType]: false }))
   }
 
   const handleDisconnect = async (deviceType: string) => {
@@ -154,10 +143,11 @@ export function DriversTab() {
     try {
       await fetch(`/api/drivers?deviceType=${deviceType}`, { method: 'DELETE' })
       await fetchDrivers()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to disconnect driver: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [deviceType]: false }))
     }
-    setActionLoading(prev => ({ ...prev, [deviceType]: false }))
   }
 
   const handleHealthCheck = async (deviceType: string) => {
@@ -173,10 +163,11 @@ export function DriversTab() {
         setHealthResults(prev => ({ ...prev, [deviceType]: json.data.result }))
       }
       await fetchDrivers()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run health check: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setActionLoading(prev => ({ ...prev, [`hc_${deviceType}`]: false }))
     }
-    setActionLoading(prev => ({ ...prev, [`hc_${deviceType}`]: false }))
   }
 
   const handleHealthCheckAll = async () => {
@@ -192,10 +183,11 @@ export function DriversTab() {
         setHealthResults(json.data)
       }
       await fetchDrivers()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run health check all: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setHealthCheckAllLoading(false)
     }
-    setHealthCheckAllLoading(false)
   }
 
   const toggleExpand = (deviceType: string) => {
@@ -214,7 +206,22 @@ export function DriversTab() {
     )
   }
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <div className="p-4 md:p-6">
+        <Card className="bg-slate-900 border-white/5">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
+            <HardDrive className="w-10 h-10 mb-3 text-slate-600" />
+            <p className="text-sm">Failed to load driver data</p>
+            <p className="text-xs text-slate-600 mt-1">The driver service may be unavailable</p>
+            <Button size="sm" variant="outline" onClick={fetchDrivers} className="mt-3 border-white/10 text-slate-400">
+              <RefreshCw className="w-3 h-3 mr-1" /> Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-4">

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Communication Service
+// NANGGROE IOT - Communication Service
 // Telegram bot (real Bot API), Voice/TTS (z-ai-web-dev-sdk),
 // GSM (SIM800L AT commands via serial), Beep (GPIO/hardware bridge)
 // ============================================================
@@ -269,7 +269,7 @@ export class CommunicationService {
           case 'android':
             config = JSON.stringify({
               deviceId: '',
-              appName: 'Nanggroe OS Remote',
+              appName: 'Nanggroe IoT Remote',
               connectionType: 'wifi',
               ip: '',
               port: 3001,
@@ -514,7 +514,6 @@ export class CommunicationService {
       if (config.webhookUrl) {
         const webhookResult = await this.telegramSetWebhook(botToken, config.webhookUrl as string)
         if (!webhookResult) {
-          console.warn('[CommunicationService] Webhook setup failed, falling back to polling mode')
         }
       }
 
@@ -553,13 +552,11 @@ export class CommunicationService {
       const data = await response.json()
 
       if (!data.ok) {
-        console.error('[CommunicationService] Telegram getMe failed:', data.description)
         return null
       }
 
       return data.result as TelegramBotInfo
     } catch (error) {
-      console.error('[CommunicationService] Telegram getMe error:', error)
       return null
     }
   }
@@ -577,7 +574,6 @@ export class CommunicationService {
       const data = await response.json()
       return data.ok === true
     } catch (error) {
-      console.error('[CommunicationService] Telegram setWebhook error:', error)
       return false
     }
   }
@@ -683,8 +679,8 @@ export class CommunicationService {
       // Use the ZAI SDK to generate a real response
       const zai = await this.getZAI()
       const agentRole = agent === 'picoclaw'
-        ? 'You are PicoClaw, the tactical real-time safety agent for NANGGROE OS AI. You handle safety-critical commands like RTH, land, and disarm. Respond concisely with safety assessment and action taken. Always prioritize safety.'
-        : 'You are Hermes, the strategic planning agent for NANGGROE OS AI. You handle mission planning, status queries, and general commands. Provide clear, actionable responses in both English and Bahasa Indonesia when relevant.'
+        ? 'You are PicoClaw, the tactical real-time safety agent for NANGGROE IOT. You handle safety-critical commands like RTH, land, and disarm. Respond concisely with safety assessment and action taken. Always prioritize safety.'
+        : 'You are Hermes, the strategic planning agent for NANGGROE IOT. You handle mission planning, status queries, and general commands. Provide clear, actionable responses in both English and Bahasa Indonesia when relevant.'
 
       const llmResponse = await zai.chat.completions.create({
         model: 'default',
@@ -718,7 +714,6 @@ export class CommunicationService {
         if (botToken && chatId && telegramChannel.status === 'connected') {
           const sendResult = await this.sendTelegramMessage(botToken, chatId, response)
           if (!sendResult.success) {
-            console.error('[CommunicationService] Failed to send Telegram reply:', sendResult.error)
           }
         }
       }
@@ -741,7 +736,6 @@ export class CommunicationService {
         })
       } catch {
         // Non-critical: just log
-        console.warn('[CommunicationService] Failed to store agent message')
       }
 
       return { response, agent }
@@ -1088,7 +1082,7 @@ export class CommunicationService {
         messages: [
           {
             role: 'system',
-            content: `You are Hermes, the voice assistant for NANGGROE OS AI — an autonomous robotics OS for a tricopter amphibious drone in Aceh Utara, Indonesia.
+            content: `You are Hermes, the voice assistant for NANGGROE IOT — an autonomous robotics OS for a tricopter amphibious drone in Aceh Utara, Indonesia.
 You respond to voice commands with concise, actionable information. The user speaks ${language === 'id' ? 'Bahasa Indonesia' : 'English'}.
 Respond in the same language as the user. Keep responses under 100 words for voice output.
 
@@ -1262,7 +1256,7 @@ ${systemContext}`,
       await db.communicationChannel.update({ where: { id: channelId }, data: { status: 'error' } })
       return {
         success: false,
-        message: 'Android IP address not configured. Open Nanggroe OS Remote app on Android and enter the IP.',
+        message: 'Android IP address not configured. Open Nanggroe IoT Remote app on Android and enter the IP.',
       }
     }
 
@@ -1453,7 +1447,6 @@ ${systemContext}`,
       }
 
       // GPIO failed, fall through to simulation
-      console.warn('[CommunicationService] GPIO beep failed, falling back to simulation:', bridgeResult.error)
     }
 
     // Simulation mode (not on Pi, or GPIO unavailable)
