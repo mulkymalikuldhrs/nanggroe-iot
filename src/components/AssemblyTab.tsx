@@ -31,6 +31,7 @@ import {
   ShieldAlert,
   CircleDot,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 // ---- Types ----
 interface CommonError {
@@ -98,6 +99,7 @@ export function AssemblyTab() {
   const [troubleshooting, setTroubleshooting] = useState<TroubleshootingResult | null>(null)
   const [templates, setTemplates] = useState<TemplateOption[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
+  const { toast } = useToast()
 
   // Load templates list for dropdown
   useEffect(() => {
@@ -133,8 +135,8 @@ export function AssemblyTab() {
         if (!cancelled && json.success) {
           setAssemblyData(json.data)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load assembly data: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (!cancelled) setLoading(false)
     }
@@ -181,8 +183,8 @@ export function AssemblyTab() {
       if (json.success) {
         setTroubleshooting(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to diagnose error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setDiagnosing(false)
   }

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - AI-Powered Testing Service
+// NANGGROE IOT - AI-Powered Testing Service
 // Comprehensive test generation, execution, and verification
 // ============================================================
 
@@ -195,7 +195,6 @@ Generate 3-6 relevant test cases. Respond ONLY with the JSON array, no markdown.
 
       return testCases
     } catch (error) {
-      console.error('[TestingService] generateTests error:', error)
       // Fallback: generate basic tests without AI
       return this.generateFallbackTests(target, category)
     }
@@ -1751,7 +1750,7 @@ assert(age < 60000, 'Companion computer should have been seen recently');`,
   }
 
   private buildGenerationPrompt(category: TestCategory): string {
-    const basePrompt = `You are a test generation assistant for NANGGROE OS AI — an autonomous modular robotics operating system for drone tricopter amphibious platforms.
+    const basePrompt = `You are a test generation assistant for NANGGROE IOT — an autonomous modular robotics operating system for drone tricopter amphibious platforms.
 
 The system runs on:
 - Pixhawk 4 (ArduPilot 4.5.7) flight controller

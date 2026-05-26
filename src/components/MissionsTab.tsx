@@ -50,6 +50,17 @@ import {
   Layers,
 } from 'lucide-react'
 import { MISSION_TYPE_LABELS, MISSION_STATUS_LABELS } from '@/lib/constants'
+import { useToast } from '@/hooks/use-toast'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Mission {
   id: string
@@ -118,8 +129,10 @@ export function MissionsTab() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedMission, setSelectedMission] = useState<MissionDetail | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [abortMissionId, setAbortMissionId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   // Form state
   const [formName, setFormName] = useState('')
@@ -139,8 +152,8 @@ export function MissionsTab() {
         const res = await fetch(url)
         const json = await res.json()
         if (mounted && json.success) setMissions(json.data.missions)
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load missions: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (mounted) setLoading(false)
     }
@@ -172,8 +185,8 @@ export function MissionsTab() {
         setFormSpeed('5')
         refresh()
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to create mission: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -189,8 +202,8 @@ export function MissionsTab() {
       if (selectedMission?.id === missionId) {
         fetchMissionDetail(missionId)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to update mission: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setActionLoading(null)
   }
@@ -203,8 +216,8 @@ export function MissionsTab() {
         setSelectedMission(json.data)
         setDetailOpen(true)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to load mission detail: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -266,6 +279,7 @@ export function MissionsTab() {
         <Button
           size="sm"
           onClick={() => setCreateOpen(true)}
+          data-testid="new-mission-btn"
           className="bg-teal-600 hover:bg-teal-700 text-white h-8"
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />
@@ -323,19 +337,51 @@ export function MissionsTab() {
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    {actions.map((a) => (
-                      <Button
-                        key={a.action}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAction(mission.id, a.action)}
-                        disabled={actionLoading === mission.id}
-                        className={`h-7 text-[10px] border ${a.color}`}
-                      >
-                        <a.icon className="w-3 h-3 mr-1" />
-                        {a.label}
-                      </Button>
-                    ))}
+                    {actions.map((a) => {
+                      if (a.action === 'abort') {
+                        return (
+                          <AlertDialog key={a.action} open={abortMissionId === mission.id} onOpenChange={(open) => !open && setAbortMissionId(null)}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className={`h-7 text-[10px] border ${a.color}`}
+                              onClick={() => setAbortMissionId(mission.id)}
+                              disabled={actionLoading === mission.id}
+                            >
+                              <a.icon className="w-3 h-3 mr-1" />
+                              {a.label}
+                            </Button>
+                            <AlertDialogContent className="bg-slate-900 border-slate-700">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-white">Abort Mission</AlertDialogTitle>
+                                <AlertDialogDescription className="text-slate-400">
+                                  Are you sure you want to abort &quot;{mission.name}&quot;? This will immediately stop the mission and mark it as aborted. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="border-slate-700 text-slate-300">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => { setAbortMissionId(null); handleAction(mission.id, 'abort') }} className="bg-rose-600 hover:bg-rose-700 text-white">
+                                  Abort Mission
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )
+                      }
+                      return (
+                        <Button
+                          key={a.action}
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAction(mission.id, a.action)}
+                          disabled={actionLoading === mission.id}
+                          className={`h-7 text-[10px] border ${a.color}`}
+                        >
+                          <a.icon className="w-3 h-3 mr-1" />
+                          {a.label}
+                        </Button>
+                      )
+                    })}
                     <Button
                       size="sm"
                       variant="ghost"
@@ -355,7 +401,7 @@ export function MissionsTab() {
 
       {/* Create Mission Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg">
+        <DialogContent data-testid="create-mission-dialog" className="bg-slate-900 border-white/10 text-white max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">Create Mission</DialogTitle>
             <DialogDescription className="text-slate-400">

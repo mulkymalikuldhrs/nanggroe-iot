@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - AI Chat with Hermes
+// NANGGROE IOT - AI Chat with Hermes
 // POST /api/agents/chat — Send natural language prompt, get Hermes AI response
 // ============================================================
 
@@ -67,23 +67,23 @@ export async function POST(request: NextRequest) {
           }
         }
         latestTelemetry = {
-          battery_voltage: metricMap.battery_voltage || 14.8,
-          gps_lat: metricMap.gps_lat || 4.9125,
-          gps_lng: metricMap.gps_lng || 97.1347,
-          altitude: metricMap.altitude || 0,
-          signal_strength: metricMap.signal_strength || -50,
-          temperature: metricMap.temperature || 29,
-          humidity: metricMap.humidity || 78,
-          pressure: metricMap.pressure || 1010,
-          heading: metricMap.heading || 0,
-          speed: metricMap.speed || 0,
-          roll: metricMap.roll || 0,
-          pitch: metricMap.pitch || 0,
-          yaw: metricMap.yaw || 0,
-          motor_rpm_1: metricMap.motor_rpm_1 || 0,
-          motor_rpm_2: metricMap.motor_rpm_2 || 0,
-          motor_rpm_3: metricMap.motor_rpm_3 || 0,
-          current_draw: metricMap.current_draw || 0,
+          battery_voltage: metricMap.battery_voltage ?? 14.8,
+          gps_lat: metricMap.gps_lat ?? 4.9125,
+          gps_lng: metricMap.gps_lng ?? 97.1347,
+          altitude: metricMap.altitude ?? 0,
+          signal_strength: metricMap.signal_strength ?? -50,
+          temperature: metricMap.temperature ?? 29,
+          humidity: metricMap.humidity ?? 78,
+          pressure: metricMap.pressure ?? 1010,
+          heading: metricMap.heading ?? 0,
+          speed: metricMap.speed ?? 0,
+          roll: metricMap.roll ?? 0,
+          pitch: metricMap.pitch ?? 0,
+          yaw: metricMap.yaw ?? 0,
+          motor_rpm_1: metricMap.motor_rpm_1 ?? 0,
+          motor_rpm_2: metricMap.motor_rpm_2 ?? 0,
+          motor_rpm_3: metricMap.motor_rpm_3 ?? 0,
+          current_draw: metricMap.current_draw ?? 0,
         }
       }
 
@@ -156,18 +156,21 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // If the response is a mission plan, log it
+    // If the response is a mission plan, log it (only when a valid missionId exists)
     if (hermesResponse.type === 'mission_plan' && hermesResponse.data) {
       const missionData = hermesResponse.data as Record<string, unknown>
-      await db.missionLog.create({
-        data: {
-          missionId: missionId || (missionData.missionId as string) || 'unknown',
-          level: 'info',
-          source: 'hermes',
-          message: `Hermes generated mission plan: ${hermesResponse.content.substring(0, 200)}`,
-          data: JSON.stringify(hermesResponse.data),
-        },
-      })
+      const validMissionId = missionId || (missionData.missionId as string)
+      if (validMissionId) {
+        await db.missionLog.create({
+          data: {
+            missionId: validMissionId,
+            level: 'info',
+            source: 'hermes',
+            message: `Hermes generated mission plan: ${hermesResponse.content.substring(0, 200)}`,
+            data: JSON.stringify(hermesResponse.data),
+          },
+        })
+      }
     }
 
     return NextResponse.json({
@@ -183,7 +186,6 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Agents Chat API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to process chat with Hermes' },
       { status: 500 }

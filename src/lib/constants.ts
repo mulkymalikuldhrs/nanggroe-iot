@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Constants
+// NANGGROE IOT - Constants
 // ============================================================
 
 // --- Agent Constants ---
@@ -176,7 +176,7 @@ export const BOOT_STAGE_INFO = {
   },
   system_ready: {
     label: 'System Ready',
-    description: 'All subsystems operational — NANGGROE OS AI ready for commands',
+    description: 'All subsystems operational — NANGGROE IOT ready for commands',
     duration: 1000,
   },
 } as const
@@ -359,7 +359,7 @@ export const DEFAULT_HARDWARE = [
 
 // --- Default System Config ---
 export const DEFAULT_CONFIG = [
-  { key: 'system.name', value: 'NANGGROE OS AI', category: 'general' },
+  { key: 'system.name', value: 'NANGGROE IOT', category: 'general' },
   { key: 'system.version', value: '1.0.0', category: 'general' },
   { key: 'system.mode', value: 'discovery', category: 'general' },
   { key: 'system.region', value: 'Aceh Utara', category: 'general' },
@@ -453,7 +453,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     ],
     requiredFirmware: [
       { target: 'pixhawk', version: 'ArduPilot 4.5.7 Tricopter', url: 'firmware/pixhawk/ardupilot-tri-4.5.7.px4' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
       { target: 'esc', version: 'BLHeli_S 16.7', url: 'firmware/esc/blheli_s-16.7.hex' },
       { target: 'radio', version: 'SiK 2.0', url: 'firmware/radio/sik-2.0.hex' },
     ],
@@ -474,7 +474,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
       { step: 6, title: 'Pasang Sistem Daya', description: 'Hubungkan baterai LiPo ke power distribution board. Pasang solar panel darurat. Hubungkan voltage/current sensor ke Pixhawk.', duration: '1 jam', tools: ['Solder', 'Multimeter'], parts: ['4S LiPo 4000mAh', 'Power distribution board', 'Solar panel 5W', 'XT60 connector'], warnings: ['PERIKSA POLARITAS SEBELUM POWER ON', 'Baterai harus di-charge penuh sebelum test'] },
       { step: 7, title: 'Pasang Sistem Amfibi', description: 'Pasang styrofoam float untuk mengapung di air. Hubungkan servo fin untuk kontrol di air. Pasang roda untuk mode darat.', duration: '1.5 jam', tools: ['Cable ties', 'Waterproof tape'], parts: ['Styrofoam float x2', 'Servo fin x2', 'Wheel x2', 'Wheel motor'], warnings: ['Pastikan semua komponen waterproof', 'Test float di air tenang dulu'] },
       { step: 8, title: 'Pasang Payload & Fitur Tambahan', description: 'Hubungkan servo/relay untuk payload drop mechanism, buzzer untuk alert, dan GSM module untuk komunikasi darurat.', duration: '1 jam', tools: ['Solder', 'Cable ties'], parts: ['Servo MG996R (payload)', 'Buzzer 5V', 'SIM800L GSM module'], warnings: ['Payload drop servo harus di-test di darat dulu', 'GSM module butuh antenna yang benar'] },
-      { step: 9, title: 'Flash Firmware', description: 'Flash ArduPilot ke Pixhawk. Flash Nanggroe OS ke Raspberry Pi. Flash BLHeli_S ke ESC. Flash SiK ke radio.', duration: '1 jam', tools: ['USB cable', 'Computer'], parts: ['MicroSD card reader'], warnings: ['Jangan matikan power saat flashing', 'Backup firmware lama jika ada'] },
+      { step: 9, title: 'Flash Firmware', description: 'Flash ArduPilot ke Pixhawk. Flash Nanggroe IoT ke Raspberry Pi. Flash BLHeli_S ke ESC. Flash SiK ke radio.', duration: '1 jam', tools: ['USB cable', 'Computer'], parts: ['MicroSD card reader'], warnings: ['Jangan matikan power saat flashing', 'Backup firmware lama jika ada'] },
       { step: 10, title: 'Kalibrasi & Test', description: 'Lakukan kalibrasi compass, accelerometer, gyro, ESC, dan radio. Test motor spin, GPS lock, kamera, dan semua sensor.', duration: '2 jam', tools: ['Computer dengan Mission Planner/QGC'], parts: [], warnings: ['LEPAS PROPELLER saat test motor', 'Kalibrasi compass jauh dari logam'] },
     ],
     wiringDiagram: {
@@ -503,7 +503,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     ],
     requiredFirmware: [
       { target: 'pixhawk', version: 'ArduPilot 4.5.7 Rover', url: 'firmware/pixhawk/ardupilot-rover-4.5.7.px4' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
     ],
     capabilities: ['gps_navigation', 'obstacle_avoidance', 'patrol', 'delivery', 'field_mapping', 'android_control', 'ai_assisted', 'beep_alerts'],
     assemblyGuide: [],
@@ -528,7 +528,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     ],
     requiredFirmware: [
       { target: 'pixhawk', version: 'ArduPilot 4.5.7 Boat', url: 'firmware/pixhawk/ardupilot-boat-4.5.7.px4' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
     ],
     capabilities: ['gps_navigation', 'water_survey', 'coastal_mapping', 'amphibious_float', 'solar_charging', 'gsm_connectivity', 'ai_assisted'],
     assemblyGuide: [],
@@ -556,7 +556,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     requiredFirmware: [
       { target: 'arduino', version: 'Nanggroe Arm Controller 1.0.0', url: 'firmware/arduino/arm-controller-1.0.0.ino' },
       { target: 'pca9685', version: 'Adafruit PCA9685 Library 2.2.3', url: 'firmware/lib/adafruit-pca9685-2.2.3.zip' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
     ],
     capabilities: [
       'pick_and_place', 'assembly_assist', 'precise_manipulation',
@@ -604,7 +604,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
       { target: 'arduino', version: 'Nanggroe Hexapod Controller 1.0.0', url: 'firmware/arduino/hexapod-controller-1.0.0.ino' },
       { target: 'pca9685', version: 'Adafruit PCA9685 Library 2.2.3', url: 'firmware/lib/adafruit-pca9685-2.2.3.zip' },
       { target: 'imu', version: 'MPU6050 DMP Firmware 6.1', url: 'firmware/imu/mpu6050-dmp-6.1.hex' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
     ],
     capabilities: [
       'terrain_adaptive_walking', 'omnidirectional_movement',
@@ -731,7 +731,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     ],
     requiredFirmware: [
       { target: 'arduino', version: 'Nanggroe ROV Controller 1.0.0', url: 'firmware/arduino/rov-controller-1.0.0.ino' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
       { target: 'imu', version: 'BNO055 Firmware 3.11', url: 'firmware/imu/bno055-3.11.hex' },
       { target: 'depth', version: 'MS5837 Library 2.0.1', url: 'firmware/lib/ms5837-2.0.1.zip' },
     ],
@@ -783,7 +783,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
     ],
     requiredFirmware: [
       { target: 'pixhawk', version: 'ArduPilot 4.5.7 Copter (Hexa)', url: 'firmware/pixhawk/ardupilot-hexa-4.5.7.px4' },
-      { target: 'companion', version: 'Nanggroe OS 1.2.0', url: 'firmware/companion/nanggroe-os-1.2.0.img' },
+      { target: 'companion', version: 'Nanggroe IoT 1.2.0', url: 'firmware/companion/nanggroe-iot-1.2.0.img' },
       { target: 'esc', version: 'BLHeli_S 16.7', url: 'firmware/esc/blheli_s-16.7.hex' },
       { target: 'radio', version: 'SiK 2.0', url: 'firmware/radio/sik-2.0.hex' },
     ],
@@ -804,7 +804,7 @@ export const BUILTIN_ROBOT_TEMPLATES = [
       { step: 5, title: 'Pasang Companion Computer dan Kamera', description: 'Mount Raspberry Pi 4B di dalam frame. Hubungkan ke Pixhawk via UART. Pasang kamera di bawah frame menghadap ke bawah. Hubungkan kamera ke Pi CSI/USB port.', duration: '1.5 jam', tools: ['USB cable', 'UART cable'], parts: ['Raspberry Pi 4B', 'MicroSD 64GB', 'Pi Camera V2 / Multispectral camera'], warnings: ['Raspberry Pi harus terlindungi dari cairan sprayer', 'Kamera menghadap ke bawah untuk NDVI/mapping', 'Pastikan UART baud rate sama (921600)'] },
       { step: 6, title: 'Pasang Sistem Daya', description: 'Hubungkan 6S LiPo ke power distribution board. Pasang battery monitor ke Pixhawk. Pasang step-down converter 5V untuk Raspberry Pi. Hubungkan pump ke relay yang dikontrol servo/Pi.', duration: '1.5 jam', tools: ['Solder', 'Multimeter'], parts: ['6S LiPo 12000mAh', 'Power distribution board', 'Buck converter 5V 5A', 'Relay module 12V', 'XT90 connector'], warnings: ['PERIKSA POLARITAS SEBELUM POWER ON', '6S voltage bisa berbahaya — hati-hati', 'Pastikan battery strap kuat — LiPo besar bisa lepas'] },
       { step: 7, title: 'Wiring Sprayer Control', description: 'Hubungkan pump relay ke Raspberry Pi GPIO. Hubungkan servo valve ke Pixhawk aux output atau PCA9685. Hubungkan flow meter ke Pi GPIO (pulse counter). Hubungkan nozzle angle servo.', duration: '1.5 jam', tools: ['Solder', 'Jumper wires'], parts: ['Relay module', 'Servo extension cable', 'Flow meter cable', 'PCA9685 (opsional)'], warnings: ['Test relay dan pump secara manual dulu', 'Flow meter pulse harus di-count dengan benar', 'Servo valve harus fail-closed (tutup saat power off)'] },
-      { step: 8, title: 'Flash Firmware, Kalibrasi dan Test', description: 'Flash ArduPilot Copter ke Pixhawk. Flash Nanggroe OS ke Pi. Kalibrasi compass, accelerometer, ESC. Test motor spin (LEPAS PROPELLER). Test sprayer system di darat. Test flight tanpa payload dulu, lalu dengan tanki kosong, lalu dengan air.', duration: '3 jam', tools: ['USB cable', 'Computer dengan Mission Planner'], parts: [], warnings: ['LEPAS PROPELLER saat test motor', 'Test flight bertahap: tanpa tanki → tanki kosong → tanki berisi air', 'Monitor flight time — cairan berat akan memakan baterai cepat', 'JANGAN semprotkan pestisida sungguhan saat test awal — gunakan air'] },
+      { step: 8, title: 'Flash Firmware, Kalibrasi dan Test', description: 'Flash ArduPilot Copter ke Pixhawk. Flash Nanggroe IoT ke Pi. Kalibrasi compass, accelerometer, ESC. Test motor spin (LEPAS PROPELLER). Test sprayer system di darat. Test flight tanpa payload dulu, lalu dengan tanki kosong, lalu dengan air.', duration: '3 jam', tools: ['USB cable', 'Computer dengan Mission Planner'], parts: [], warnings: ['LEPAS PROPELLER saat test motor', 'Test flight bertahap: tanpa tanki → tanki kosong → tanki berisi air', 'Monitor flight time — cairan berat akan memakan baterai cepat', 'JANGAN semprotkan pestisida sungguhan saat test awal — gunakan air'] },
     ],
     wiringDiagram: {
       pixhawk: { uart0: 'Raspberry Pi', uart1: 'GPS NEO-M8N / RTK', uart2: 'SiK Radio', i2c: 'BME280 + MPU6050', pwm_main: 'ESC x6', pwm_aux: 'Servo valve + Servo nozzle angle', adc: 'Voltage/Current Sensor' },

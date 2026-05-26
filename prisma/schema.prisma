@@ -331,6 +331,23 @@ model ExtensionConnection {
   updatedAt       DateTime @updatedAt
 }
 
+// Agent Tasks (orchestrated multi-agent task queue)
+model AgentTaskRecord {
+  id          String   @id @default(cuid())
+  type        String   // safety_check, navigation, communication, data_pipeline, mission_plan
+  agent       String   // sentinel, navigator, comms_guard, data_steward, hermes, picoclaw
+  priority    String   @default("normal") // critical, high, normal, low
+  status      String   @default("pending") // pending, running, completed, failed
+  payload     String   // JSON task data
+  result      String?  // JSON result data
+  error       String?  // Error message if failed
+  missionId   String?  // Optional link to mission
+  projectId   String?  // Optional link to robot project
+  createdAt   DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+}
+
 // Self-Learning Records
 model LearningRecord {
   id            String   @id @default(cuid())

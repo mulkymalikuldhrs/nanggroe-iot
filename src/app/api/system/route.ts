@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - System Status & Config API
+// NANGGROE IOT - System Status & Config API
 // GET  /api/system — Return system status
 // POST /api/system — Update system config
 // ============================================================
@@ -10,11 +10,14 @@ import { seedDatabase } from '@/lib/seed'
 
 export async function GET() {
   try {
-    // Get system config
+    // Get system config, filtering out sensitive keys
     const configs = await db.systemConfig.findMany()
     const configMap: Record<string, string> = {}
+    const SENSITIVE_PATTERNS = ['key', 'token', 'secret', 'password', 'credential']
     for (const c of configs) {
-      configMap[c.key] = c.value
+      const keyLower = c.key.toLowerCase()
+      const isSensitive = SENSITIVE_PATTERNS.some(pattern => keyLower.includes(pattern))
+      configMap[c.key] = isSensitive ? '••••••' : c.value
     }
 
     // Get device counts
@@ -48,7 +51,7 @@ export async function GET() {
       : 0
 
     const status = {
-      name: configMap['system.name'] || 'NANGGROE OS AI',
+      name: configMap['system.name'] || 'NANGGROE IOT',
       version: configMap['system.version'] || '0.1.0-mvp',
       mode: configMap['system.mode'] || 'discovery',
       region: configMap['system.region'] || 'Aceh Utara',
@@ -95,7 +98,6 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: status })
   } catch (error) {
-    console.error('[System API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve system status' },
       { status: 500 }
@@ -147,7 +149,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[System API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to update system config' },
       { status: 500 }

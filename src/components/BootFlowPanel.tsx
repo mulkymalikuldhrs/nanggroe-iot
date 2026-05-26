@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Play, CheckCircle2, Loader2, Circle, Zap } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface BootStageInfo {
   stage: string
@@ -41,6 +42,7 @@ export function BootFlowPanel() {
   const [bootFlow, setBootFlow] = useState<BootFlowData | null>(null)
   const [starting, setStarting] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   const refresh = () => setRefreshKey(k => k + 1)
 
@@ -51,8 +53,8 @@ export function BootFlowPanel() {
         const res = await fetch('/api/bootflow')
         const json = await res.json()
         if (mounted && json.success) setBootFlow(json.data)
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load boot flow: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
     }
     load()
@@ -72,8 +74,8 @@ export function BootFlowPanel() {
         headers: { 'Content-Type': 'application/json' },
       })
       refresh()
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to start boot sequence: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     // Allow boot sequence to run for a bit
     setTimeout(() => setStarting(false), 15000)

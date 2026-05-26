@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Alerts SSE Stream
+// NANGGROE IOT - Alerts SSE Stream
 // GET /api/stream/alerts — Real-time alerts via Server-Sent Events
 // Polls for unread/unresolved alerts every 5 seconds
 // ============================================================

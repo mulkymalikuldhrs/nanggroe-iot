@@ -130,8 +130,7 @@ export function RobotBuilderTab() {
           if (tplData.success) setTemplates(tplData.data)
           if (projData.success) setProjects(projData.data)
         }
-      } catch (err) {
-        console.error('Failed to load data:', err)
+      } catch {
         if (active) {
           setError('Gagal memuat data robot builder. Periksa koneksi server.')
           toast.error('Gagal memuat data robot builder')
@@ -154,8 +153,7 @@ export function RobotBuilderTab() {
       const projData = await projRes.json()
       if (tplData.success) setTemplates(tplData.data)
       if (projData.success) setProjects(projData.data)
-    } catch (err) {
-      console.error('Failed to refresh data:', err)
+    } catch {
       toast.error('Gagal memuat ulang data')
     }
   }
@@ -170,8 +168,7 @@ export function RobotBuilderTab() {
       } else {
         toast.error('Gagal memuat detail template')
       }
-    } catch (err) {
-      console.error('Failed to fetch template detail:', err)
+    } catch {
       toast.error('Gagal memuat detail template')
     }
   }
@@ -201,8 +198,7 @@ export function RobotBuilderTab() {
       } else {
         toast.error(data.error || 'Gagal membuat project')
       }
-    } catch (err) {
-      console.error('Failed to create project:', err)
+    } catch {
       toast.error('Gagal membuat project')
     } finally {
       setCreating(false)
@@ -227,8 +223,7 @@ export function RobotBuilderTab() {
       } else {
         toast.error('Hardware scan gagal')
       }
-    } catch (err) {
-      console.error('Hardware scan failed:', err)
+    } catch {
       toast.error('Hardware scan gagal')
     } finally {
       setScanning(false)

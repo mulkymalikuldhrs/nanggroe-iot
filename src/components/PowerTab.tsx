@@ -59,7 +59,7 @@ export function PowerTab() {
   const [togglingSource, setTogglingSource] = useState<string | null>(null)
   const [sourceEnabledMap, setSourceEnabledMap] = useState<Record<string, boolean>>({})
 
-  const fetchPower = useCallback(async () => {
+  const fetchPower = useCallback(async (initializeEnabledMap = false) => {
     try {
       setError(null)
       const res = await fetch('/api/power')
@@ -67,46 +67,26 @@ export function PowerTab() {
       if (data.success) {
         setSources(data.data.sources)
         setStatus(data.data.status)
-      }
-    } catch (err) {
-      console.error('Failed to fetch power data:', err)
-      setError('Gagal memuat data daya. Periksa koneksi server.')
-      toast.error('Gagal memuat data power')
-    }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    const load = async () => {
-      setLoading(true)
-      try {
-        setError(null)
-        const res = await fetch('/api/power')
-        const data = await res.json()
-        if (!cancelled && data.success) {
-          setSources(data.data.sources)
-          setStatus(data.data.status)
-          // Initialize enabled map — all sources enabled by default
+        if (initializeEnabledMap) {
           const enabledMap: Record<string, boolean> = {}
           data.data.sources.forEach((s: PowerSource) => {
             enabledMap[s.id] = s.status !== 'offline'
           })
           setSourceEnabledMap(enabledMap)
         }
-      } catch (err) {
-        console.error('Failed to fetch power data:', err)
-        if (!cancelled) {
-          setError('Gagal memuat data daya. Periksa koneksi server.')
-          toast.error('Gagal memuat data power')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
       }
+    } catch {
+      setError('Gagal memuat data daya. Periksa koneksi server.')
+      toast.error('Gagal memuat data power')
     }
-    load()
-    const interval = setInterval(fetchPower, 5000)
-    return () => { cancelled = true; clearInterval(interval) }
   }, [])
+
+  useEffect(() => {
+    setLoading(true)
+    fetchPower(true).finally(() => setLoading(false))
+    const interval = setInterval(() => fetchPower(false), 5000)
+    return () => { clearInterval(interval) }
+  }, [fetchPower])
 
   const toggleSource = async (sourceId: string, enable: boolean) => {
     setTogglingSource(sourceId)
@@ -127,8 +107,7 @@ export function PowerTab() {
       } else {
         toast.error('Gagal mengubah status sumber daya')
       }
-    } catch (err) {
-      console.error('Failed to toggle power source:', err)
+    } catch {
       toast.error('Gagal mengubah status sumber daya')
     } finally {
       setTogglingSource(null)
@@ -169,7 +148,7 @@ export function PowerTab() {
           <CardContent className="p-6 flex flex-col items-center gap-3 text-center">
             <AlertTriangle className="w-10 h-10 text-red-400" />
             <p className="text-sm text-red-300">{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchPower} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+            <Button variant="outline" size="sm" onClick={() => fetchPower(false)} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
               <RefreshCw className="w-4 h-4 mr-2" />
               Coba Lagi
             </Button>
@@ -186,7 +165,7 @@ export function PowerTab() {
           <h2 className="text-2xl font-bold text-white">Power Management</h2>
           <p className="text-sm text-slate-400 mt-1">Baterai, Panel Surya, GSM - monitoring daya real-time</p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchPower} className="border-slate-700 text-slate-400">
+        <Button variant="outline" size="sm" onClick={() => fetchPower(false)} data-testid="power-refresh-btn" className="border-slate-700 text-slate-400">
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
         </Button>

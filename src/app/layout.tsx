@@ -14,26 +14,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nanggroe OS AI — Autonomous Robotics Platform",
+  title: "Nanggroe IoT — IoT & Robotics Platform",
   description:
-    "Modular autonomous robotics operating system with AI agents, hardware auto-detection, and multi-project support for Arduino, Raspberry Pi, and more.",
+    "Modular IoT & robotics platform with AI agents, hardware auto-detection, and multi-project support for Arduino, Raspberry Pi, and more.",
   authors: [{ name: "Mulky Malikul Dhaher", url: "mailto:mulkymalikuldhaher@email.com" }],
   creator: "Mulky Malikul Dhaher",
   keywords: [
-    "Nanggroe OS AI",
-    "autonomous robotics",
-    "AI agents",
-    "hardware auto-detection",
-    "Arduino",
-    "Raspberry Pi",
+    "Nanggroe IoT",
+    "iot",
+    "robotics",
+    "embedded",
+    "arduino",
+    "raspberry-pi",
+    "automation",
     "drone",
     "rover",
-    "mission planning",
-    "telemetry",
+    "sensors",
   ],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.svg",
   },
+  openGraph: {
+    title: "Nanggroe IoT — IoT & Robotics Platform",
+    description: "Modular IoT & robotics platform with AI, hardware auto-detect, and multi-project support.",
+    url: "https://github.com/mulkymalikuldhaher/nanggroe-iot",
+    siteName: "Nanggroe IoT",
+    type: "website",
+  },
+  metadataBase: new URL("https://github.com/mulkymalikuldhaher/nanggroe-iot"),
 };
 
 export default function RootLayout({

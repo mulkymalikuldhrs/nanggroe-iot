@@ -30,6 +30,7 @@ import {
   AlertCircle,
   Zap,
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 // ---- Types ----
 interface HealthCheck {
@@ -295,6 +296,7 @@ export function DoctorTab() {
   const [loading, setLoading] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [expandedCard, setExpandedCard] = useState<keyof HealthCheck | null>(null)
+  const { toast } = useToast()
 
   const runDiagnostics = useCallback(async () => {
     setLoading(true)
@@ -304,8 +306,8 @@ export function DoctorTab() {
       if (json.success) {
         setReport(json.data)
       }
-    } catch {
-      // silent
+    } catch (err) {
+      toast.error('Failed to run diagnostics: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
     setLoading(false)
   }, [])
@@ -321,8 +323,8 @@ export function DoctorTab() {
         if (!cancelled && json.success) {
           setReport(json.data)
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to run diagnostics: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
       if (!cancelled) setLoading(false)
     }

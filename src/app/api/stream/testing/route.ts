@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Testing SSE Stream
+// NANGGROE IOT - Testing SSE Stream
 // GET /api/stream/testing — Real-time test execution progress
 // Sends test status updates, results, and progress events
 // ============================================================

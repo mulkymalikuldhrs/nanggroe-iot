@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Hardware Assembly Tutorial & Error Warning API
+// NANGGROE IOT - Hardware Assembly Tutorial & Error Warning API
 // GET  /api/assembly — Returns step-by-step assembly instructions
 // POST /api/assembly — Report a hardware error and get troubleshooting advice
 // ============================================================
@@ -29,7 +29,7 @@ const ASSEMBLY_STEPS: AssemblyStep[] = [
   {
     step: 1,
     title: 'Frame Assembly',
-    description: 'Assemble the tricopter frame with motor mounts. The Nanggroe OS AI uses a tricopter configuration with a yaw servo on the tail motor. Ensure all frame arms are securely fastened and the center plate is level. The frame should be balanced with equal arm lengths (typically 450mm wheelbase).',
+    description: 'Assemble the tricopter frame with motor mounts. The Nanggroe IoT uses a tricopter configuration with a yaw servo on the tail motor. Ensure all frame arms are securely fastened and the center plate is level. The frame should be balanced with equal arm lengths (typically 450mm wheelbase).',
     tools: ['Hex driver set (1.5mm, 2mm, 2.5mm)', 'Phillips screwdriver', 'Loctite 243 (thread lock)', 'Caliper or ruler'],
     parts: ['Tricopter frame kit (450mm)', 'Motor mount brackets (3x)', 'Arm tubes (3x)', 'Center plate (top + bottom)', 'Screw set (M3x8, M3x12)', 'Rubber vibration dampeners (4x)'],
     warnings: [
@@ -202,7 +202,7 @@ const ASSEMBLY_STEPS: AssemblyStep[] = [
   {
     step: 6,
     title: 'Sensor Installation (I2C Bus)',
-    description: 'Connect the BME280 (environmental sensor) and MPU6050 (IMU backup) to the Raspberry Pi I2C bus. These sensors provide supplementary environmental data (temperature, humidity, pressure) and backup attitude reference for the Nanggroe OS AI system. Both sensors share the I2C-1 bus with different addresses.',
+    description: 'Connect the BME280 (environmental sensor) and MPU6050 (IMU backup) to the Raspberry Pi I2C bus. These sensors provide supplementary environmental data (temperature, humidity, pressure) and backup attitude reference for the Nanggroe IoT system. Both sensors share the I2C-1 bus with different addresses.',
     tools: ['Breadboard or protoboard', 'Jumper wires (female-to-female)', 'Soldering iron (if using protoboard)'],
     parts: ['BME280 breakout board (addr 0x76)', 'MPU6050 breakout board (addr 0x68)', '4.7kΩ pull-up resistors (2x for I2C)', 'Jumper wires (6x)'],
     warnings: [
@@ -345,9 +345,9 @@ const ASSEMBLY_STEPS: AssemblyStep[] = [
   {
     step: 10,
     title: 'Software Configuration',
-    description: 'Configure the ArduPilot firmware on Pixhawk and install Nanggroe OS AI software on the Raspberry Pi. This includes MAVLink router setup, agent configuration, and camera capture service. The software stack enables autonomous mapping missions with AI-powered planning and safety monitoring.',
+    description: 'Configure the ArduPilot firmware on Pixhawk and install Nanggroe IoT software on the Raspberry Pi. This includes MAVLink router setup, agent configuration, and camera capture service. The software stack enables autonomous mapping missions with AI-powered planning and safety monitoring.',
     tools: ['Computer with Mission Planner or QGC', 'Internet connection for apt/pip', 'MicroSD card reader'],
-    parts: ['ArduPilot Copter 4.5.7 firmware', 'Raspberry Pi OS 64-bit (Bookworm)', 'Nanggroe OS AI software package'],
+    parts: ['ArduPilot Copter 4.5.7 firmware', 'Raspberry Pi OS 64-bit (Bookworm)', 'Nanggroe IoT software package'],
     warnings: [
       'Back up existing Pixhawk configuration before firmware updates',
       'Do NOT power off Pixhawk during firmware flashing — it can brick the controller',
@@ -381,7 +381,7 @@ export async function GET(request: NextRequest) {
 
     // Try to fetch assembly steps from RobotTemplate DB
     let steps: AssemblyStep[] = ASSEMBLY_STEPS
-    let droneModel = 'Nanggroe OS AI Tricopter'
+    let droneModel = 'Nanggroe IoT Tricopter'
     let source = 'fallback'
 
     try {
@@ -401,7 +401,7 @@ export async function GET(request: NextRequest) {
           }
         }
       } else {
-        // Fetch the official Nanggroe OS AI template or the first available
+        // Fetch the official Nanggroe IoT template or the first available
         const template = await db.robotTemplate.findFirst({
           where: {
             OR: [
@@ -421,7 +421,6 @@ export async function GET(request: NextRequest) {
         }
       }
     } catch (dbError) {
-      console.warn('[Assembly API] Could not fetch from DB, using fallback steps:', dbError)
     }
 
     return NextResponse.json({
@@ -435,7 +434,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Assembly API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve assembly instructions' },
       { status: 500 }
@@ -465,7 +463,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: 'system',
-              content: `You are a senior drone hardware diagnostic engineer for Nanggroe OS AI, an autonomous tricopter drone system for aerial mapping in Aceh Utara, Indonesia. The drone uses: Pixhawk 4 flight controller, Raspberry Pi 4B companion computer, 3x SunnySky V2216 KV900 motors with BLHeli_S 30A ESCs, u-blox NEO-M8N GPS, RPi Camera V2, BME280 and MPU6050 sensors on I2C, SiK 433MHz telemetry radio, and 4S LiPo 4000mAh battery. Running ArduPilot Copter 4.5.7 and Nanggroe OS AI software.
+              content: `You are a senior drone hardware diagnostic engineer for Nanggroe IoT, an autonomous tricopter drone system for aerial mapping in Aceh Utara, Indonesia. The drone uses: Pixhawk 4 flight controller, Raspberry Pi 4B companion computer, 3x SunnySky V2216 KV900 motors with BLHeli_S 30A ESCs, u-blox NEO-M8N GPS, RPi Camera V2, BME280 and MPU6050 sensors on I2C, SiK 433MHz telemetry radio, and 4S LiPo 4000mAh battery. Running ArduPilot Copter 4.5.7 and Nanggroe IoT software.
 
 Provide structured troubleshooting advice with clear steps. Be specific about pin numbers, addresses, voltages, and commands. Format your response as:
 1. **Diagnosis** — what likely caused the error
@@ -476,7 +474,7 @@ Provide structured troubleshooting advice with clear steps. Be specific about pi
             },
             {
               role: 'user',
-              content: `I'm experiencing this hardware error with my Nanggroe OS AI tricopter drone: ${errorDescription}`,
+              content: `I'm experiencing this hardware error with my Nanggroe IoT tricopter drone: ${errorDescription}`,
             },
           ],
         }),
@@ -498,7 +496,6 @@ Provide structured troubleshooting advice with clear steps. Be specific about pi
       },
     })
   } catch (error) {
-    console.error('[Assembly API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to generate troubleshooting advice' },
       { status: 500 }
@@ -591,7 +588,7 @@ function generateFallbackAdvice(errorDescription: string): string {
 **Prevention**: Balance charge always. Store at 15.2V (3.8V/cell). Replace batteries showing puffing or cell imbalance > 0.2V.`
   }
 
-  return `**Diagnosis**: The reported error requires further investigation. Based on the Nanggroe OS AI tricopter system, this could involve multiple subsystems.
+  return `**Diagnosis**: The reported error requires further investigation. Based on the Nanggroe IoT tricopter system, this could involve multiple subsystems.
 
 **Immediate Action**: Ensure drone is powered off and in a safe state. Do not attempt flight until the issue is resolved.
 
@@ -601,7 +598,7 @@ function generateFallbackAdvice(errorDescription: string): string {
 3. Verify power is reaching all components (Pixhawk, RPi, sensors)
 4. Check system logs via Mission Planner or SSH for error messages
 5. Test each subsystem individually before integrating
-6. Run hardware scan from the Nanggroe OS AI dashboard
+6. Run hardware scan from the Nanggroe IoT dashboard
 
 **Verification**: All hardware devices show "active" status. No critical alerts in the system.
 

@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - MCP SSE Transport API Route
+// NANGGROE IOT - MCP SSE Transport API Route
 // GET  /api/mcp/transport — Opens SSE connection for server-to-client messages
 // POST /api/mcp/transport — Handles client-to-server JSON-RPC requests
 // Implements MCP over HTTP+SSE transport (protocol version 2024-11-05)

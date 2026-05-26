@@ -1,7 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-node_modules
+# Dependencies
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,45 +8,119 @@ node_modules
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
+# Misc
 .DS_Store
 *.pem
+Thumbs.db
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
 
-# vercel
+# Vercel
 .vercel
 
-
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
-local-*
-.claude
-.z-ai-config
+
+# Logs
 *.log
 dev.log
 dev.out.log
-test
+server.log
+
+# AI / IDE / Agent config
+.claude
+.z-ai-config
+local-*
 prompt
 
-server.log
 # Skills directory
 /skills/
+
+# Database files
+db/*.db
+db/*.db-journal
+db/*.db-shm
+db/*.db-wal
+
+# Agent context (internal)
+/agent-ctx/
+
+# Download directory (generated output)
+/download/
+
+# Upload directory (user files)
+/upload/
+
+# Worklog (internal)
+worklog.md
+
+# Tauri build output
+src-tauri/target/
+src-tauri/Cargo.lock
+
+# Android build output
+android/app/build/
+android/.gradle/
+android/build/
+android/app/src/main/res/mipmap-*/
+!android/app/src/main/res/mipmap-anydpi-v26/
+android/local.properties
+
+# Capacitor
+android/app/src/main/assets/public/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Prisma
+prisma/migrations/
+
+# Bun
+bun.lock
+
+# Binary/source images (large files)
+android-icon-source.png
+playwright-report/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Prisma DB files
+prisma/db/*.db

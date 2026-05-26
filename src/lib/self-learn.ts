@@ -1,6 +1,6 @@
 // ============================================================
-// NANGGROE OS AI - Self-Learning Service
-// Enables Nanggroe OS to learn from experience and improve over time.
+// NANGGROE IOT - Self-Learning Service
+// Enables Nanggroe IoT to learn from experience and improve over time.
 // Pattern recognition, decision logging, performance tracking,
 // adaptive parameters, knowledge base, and learning reports.
 // ============================================================
@@ -171,7 +171,6 @@ export class SelfLearnService {
     metric?: TelemetryMetric,
     hours: number = 24
   ): Promise<PatternDetection[]> {
-    console.log(`[SelfLearn] Analyzing patterns for ${metric || 'all metrics'} over ${hours}h`)
 
     const patterns: PatternDetection[] = []
     const metricsToAnalyze: TelemetryMetric[] = metric
@@ -210,7 +209,6 @@ export class SelfLearnService {
           patterns.push(thresholdApproach)
         }
       } catch (err) {
-        console.error(`[SelfLearn] Pattern analysis failed for ${m}:`, err)
       }
     }
 
@@ -306,7 +304,6 @@ export class SelfLearnService {
     }
 
     if (!record) {
-      console.warn(`[SelfLearn] Decision ${decisionId} not found for review`)
       return null
     }
 
@@ -445,7 +442,6 @@ export class SelfLearnService {
       this.performanceCache = metrics
       return metrics
     } catch (err) {
-      console.error('[SelfLearn] Performance tracking failed:', err)
 
       // Return cached metrics or defaults
       return this.performanceCache || {
@@ -478,7 +474,6 @@ export class SelfLearnService {
    * Uses AI to analyze current parameters and suggest optimizations.
    */
   async suggestImprovements(): Promise<AdaptiveParameter[]> {
-    console.log('[SelfLearn] Generating improvement suggestions...')
 
     const suggestions: AdaptiveParameter[] = []
 
@@ -533,7 +528,6 @@ export class SelfLearnService {
 
       this.emitEvent('parameter_suggested', { count: suggestions.length, suggestions })
     } catch (err) {
-      console.error('[SelfLearn] Suggestion generation failed:', err)
     }
 
     return suggestions
@@ -553,7 +547,6 @@ export class SelfLearnService {
     const currentValue = config ? parseFloat(config.value) : 0
 
     if (isNaN(currentValue)) {
-      console.warn(`[SelfLearn] Cannot auto-tune non-numeric config: ${key}`)
       return null
     }
 
@@ -625,10 +618,8 @@ export class SelfLearnService {
         0.7,
       )
 
-      console.log(`[SelfLearn] Auto-tuned ${key}: ${currentValue} → ${newValue} (${reason})`)
       return param
     } catch (err) {
-      console.error(`[SelfLearn] Failed to auto-tune ${key}:`, err)
       return null
     }
   }
@@ -650,7 +641,6 @@ export class SelfLearnService {
   async generateLearningReport(
     periodHours: number = 168 // Default: 1 week
   ): Promise<LearningReport> {
-    console.log(`[SelfLearn] Generating learning report for last ${periodHours}h`)
 
     const now = new Date()
     const periodStart = new Date(now.getTime() - periodHours * 60 * 60 * 1000)
@@ -727,7 +717,6 @@ export class SelfLearnService {
 
       return report
     } catch (err) {
-      console.error('[SelfLearn] Report generation failed:', err)
 
       // Return a minimal report on failure
       return {
@@ -758,7 +747,6 @@ export class SelfLearnService {
     transferred: number
     failed: number
   }> {
-    console.log(`[SelfLearn] Transferring knowledge from ${transfer.sourceProjectId} to ${transfer.targetProjectId}`)
 
     let transferred = 0
     let failed = 0
@@ -830,7 +818,6 @@ export class SelfLearnService {
       data,
     }
     for (const cb of this.eventListeners) {
-      try { cb(event) } catch (e) { console.error('[SelfLearn] Event listener error:', e) }
     }
   }
 
@@ -1125,7 +1112,7 @@ export class SelfLearnService {
 
     try {
       const zai = await this.getZAI()
-      const prompt = `Analyze the following Nanggroe OS AI system data and suggest parameter adjustments:
+      const prompt = `Analyze the following Nanggroe IoT system data and suggest parameter adjustments:
 
 Performance:
 - Mission success rate: ${performance.missionSuccessRate}%
@@ -1181,7 +1168,6 @@ Only suggest parameters that would genuinely improve safety or performance. Maxi
         }
       }
     } catch (err) {
-      console.error('[SelfLearn] AI suggestion generation failed:', err)
     }
 
     return suggestions
@@ -1200,7 +1186,7 @@ Only suggest parameters that would genuinely improve safety or performance. Maxi
     try {
       const zai = await this.getZAI()
 
-      const prompt = `Generate a learning report summary for Nanggroe OS AI.
+      const prompt = `Generate a learning report summary for Nanggroe IoT.
 
 Period: Last ${periodHours} hours
 
@@ -1251,7 +1237,6 @@ Respond with JSON:
         }
       }
     } catch (err) {
-      console.error('[SelfLearn] AI insights generation failed:', err)
     }
 
     // Fallback: generate basic insights without AI

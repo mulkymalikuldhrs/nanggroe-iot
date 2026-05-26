@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Single Mission Operations API
+// NANGGROE IOT - Single Mission Operations API
 // GET    /api/missions/[id] — Get mission details with logs & messages
 // PATCH  /api/missions/[id] — Update mission fields
 // ============================================================
@@ -48,7 +48,6 @@ export async function GET(
       data: parsedMission,
     })
   } catch (error) {
-    console.error('[Mission Detail API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve mission details' },
       { status: 500 }
@@ -84,6 +83,30 @@ export async function PATCH(
         { success: false, error: 'Mission not found' },
         { status: 404 }
       )
+    }
+
+    // Validate status transitions using the same state machine as PUT /api/missions
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      draft: ['planned'],
+      planned: ['active'],
+      active: ['paused', 'completed', 'failed', 'aborted'],
+      paused: ['active', 'completed', 'failed', 'aborted'],
+      completed: [],
+      failed: [],
+      aborted: [],
+    }
+
+    if (status !== undefined && status !== mission.status) {
+      const allowedNext = VALID_TRANSITIONS[mission.status] || []
+      if (!allowedNext.includes(status)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Invalid status transition from "${mission.status}" to "${status}". Allowed transitions: ${JSON.stringify(VALID_TRANSITIONS[mission.status])}`,
+          },
+          { status: 400 }
+        )
+      }
     }
 
     const updateData: Record<string, unknown> = {}
@@ -130,7 +153,6 @@ export async function PATCH(
       message: 'Mission updated successfully',
     })
   } catch (error) {
-    console.error('[Mission Detail API] PATCH error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to update mission' },
       { status: 500 }

@@ -1,6 +1,6 @@
-# Contributing to Nanggroe OS AI
+# Contributing to Nanggroe IoT
 
-Thank you for your interest in contributing to **Nanggroe OS AI** — the Modular Autonomous Robotics Operating System Platform! We welcome contributions from developers, roboticists, and AI enthusiasts of all skill levels.
+Thank you for your interest in contributing to **Nanggroe IoT** — the Modular IoT & Robotics Platform! We welcome contributions from developers, roboticists, and AI enthusiasts of all skill levels.
 
 ## Table of Contents
 
@@ -24,8 +24,8 @@ Be respectful, inclusive, and constructive. We are building robotics software fo
 1. **Fork** the repository on GitHub
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/nanggroe-os-ai.git
-   cd nanggroe-os-ai
+   git clone https://github.com/YOUR_USERNAME/nanggroe-iot.git
+   cd nanggroe-iot
    ```
 3. **Install** dependencies:
    ```bash
@@ -56,11 +56,11 @@ Be respectful, inclusive, and constructive. We are building robotics software fo
 - **Robot templates** — Create project templates for new robot types
 - **Documentation** — Improve guides, API docs, and inline comments
 - **Testing** — Write and improve tests for better reliability
-- **Translations** — Help make Nanggroe OS AI accessible in more languages
+- **Translations** — Help make Nanggroe IoT accessible in more languages
 
 ### Suggested Workflow
 
-1. Check existing [Issues](https://github.com/mulkymalikuldhaher/nanggroe-os-ai/issues) for something to work on
+1. Check existing [Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) for something to work on
 2. If no issue exists, create one to discuss your proposed change
 3. Create a feature branch from `main`:
    ```bash
@@ -172,7 +172,7 @@ refactor(agents): simplify Hermes command dispatcher
 
 ## Reporting Bugs
 
-1. Check if the bug is already reported in [Issues](https://github.com/mulkymalikuldhaher/nanggroe-os-ai/issues)
+1. Check if the bug is already reported in [Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues)
 2. If not, create a new issue with:
    - **Clear title** summarizing the problem
    - **Steps to reproduce** the bug
@@ -182,16 +182,16 @@ refactor(agents): simplify Hermes command dispatcher
 
 ## Feature Requests
 
-1. Open a [new issue](https://github.com/mulkymalikuldhaher/nanggroe-os-ai/issues/new) with the label `enhancement`
+1. Open a [new issue](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues/new) with the label `enhancement`
 2. Describe the feature and the use case it solves
-3. Explain why it fits the Nanggroe OS AI platform vision
+3. Explain why it fits the Nanggroe IoT platform vision
 4. Optionally, propose an implementation approach
 
 ## Contact
 
 - **Creator & Lead Developer**: Mulky Malikul Dhaher — mulkymalikuldhaher@email.com
-- **Issues**: [GitHub Issues](https://github.com/mulkymalikuldhaher/nanggroe-os-ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues)
 
 ---
 
-*Thank you for helping build the future of autonomous robotics with Nanggroe OS AI!*
+*Thank you for helping build the future of autonomous robotics with Nanggroe IoT!*

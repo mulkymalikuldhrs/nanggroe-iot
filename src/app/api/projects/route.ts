@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    if (!body.name) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required field: name' },
+        { status: 400 }
+      )
+    }
+
     const service = RobotTemplateService.getInstance()
 
     let project

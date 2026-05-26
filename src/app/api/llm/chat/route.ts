@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - LLM Chat Stream API Route
+// NANGGROE IOT - LLM Chat Stream API Route
 // POST /api/llm/chat — Streaming & non-streaming chat with AI
 // Supports tool calling (Hermes tools, MCP tools), conversation
 // memory, and SSE streaming output
@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
       try {
         systemContext = await llm.buildSystemContext(body.missionId)
       } catch (error) {
-        console.error('[LLM Chat API] Failed to build system context:', error)
         // Continue without context
       }
     }
@@ -100,7 +99,6 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[LLM Chat API] POST error:', error)
 
     if (error instanceof Error && error.message.includes('Rate limit')) {
       return NextResponse.json(

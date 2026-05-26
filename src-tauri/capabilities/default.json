@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "enables the default permissions for Nanggroe OS AI",
+  "description": "enables the default permissions for Nanggroe IoT",
   "windows": [
     "main"
   ],

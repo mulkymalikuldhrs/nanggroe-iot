@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Agent Communication API
+// NANGGROE IOT - Agent Communication API
 // GET  /api/agents — Get agent messages
 // POST /api/agents — Send message to agent
 // ============================================================
@@ -28,19 +28,29 @@ export async function GET(request: NextRequest) {
       take: limit,
     })
 
-    // Get agent status summary
+    // Get agent status from SystemConfig in database
+    const agentConfigs = await db.systemConfig.findMany({
+      where: {
+        key: { in: ['hermes.enabled', 'hermes.status', 'picoclaw.enabled', 'picoclaw.status'] },
+      },
+    })
+    const agentConfigMap: Record<string, string> = {}
+    for (const c of agentConfigs) {
+      agentConfigMap[c.key] = c.value
+    }
+
     const agentStatus = {
       hermes: {
-        enabled: true,
-        status: 'online',
+        enabled: agentConfigMap['hermes.enabled'] !== 'false',
+        status: agentConfigMap['hermes.status'] || (agentConfigMap['hermes.enabled'] === 'false' ? 'offline' : 'online'),
         lastMessage: await db.agentMessage.findFirst({
           where: { agent: 'hermes' },
           orderBy: { timestamp: 'desc' },
         }),
       },
       picoclaw: {
-        enabled: true,
-        status: 'online',
+        enabled: agentConfigMap['picoclaw.enabled'] !== 'false',
+        status: agentConfigMap['picoclaw.status'] || (agentConfigMap['picoclaw.enabled'] === 'false' ? 'offline' : 'online'),
         lastMessage: await db.agentMessage.findFirst({
           where: { agent: 'picoclaw' },
           orderBy: { timestamp: 'desc' },
@@ -56,7 +66,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Agents API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve agent messages' },
       { status: 500 }
@@ -142,7 +151,6 @@ export async function POST(request: NextRequest) {
       message: 'Message sent to agent',
     })
   } catch (error) {
-    console.error('[Agents API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to send agent message' },
       { status: 500 }

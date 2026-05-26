@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding NANGGROE OS AI v1.0.0 database...");
+  console.log("🌱 Seeding NANGGROE IOT v1.0.0 database...");
 
   // Seed default system configuration
   const systemConfigs = [
     {
       key: "system.name",
-      value: "NANGGROE OS AI",
+      value: "NANGGROE IOT",
       category: "general",
     },
     {
@@ -24,7 +24,7 @@ async function main() {
     },
     {
       key: "system.description",
-      value: "Modular Autonomous Robotics Operating System Platform",
+      value: "Modular IoT & Robotics Platform",
       category: "general",
     },
     {
@@ -73,7 +73,7 @@ async function main() {
   }
 
   console.log(`✅ Seeded ${systemConfigs.length} system configurations`);
-  console.log("🎉 NANGGROE OS AI seed complete!");
+  console.log("🎉 NANGGROE IOT seed complete!");
 }
 
 main()

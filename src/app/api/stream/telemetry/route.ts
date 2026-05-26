@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Telemetry SSE Stream
+// NANGGROE IOT - Telemetry SSE Stream
 // GET /api/stream/telemetry — Real-time telemetry via Server-Sent Events
 // Sends telemetry snapshot + PicoClaw safety check every 2 seconds
 // ============================================================

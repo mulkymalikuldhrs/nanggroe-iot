@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Drivers API
+// NANGGROE IOT - Drivers API
 // GET    /api/drivers — List all registered drivers and states
 // POST   /api/drivers — Connect a specific driver
 // PUT    /api/drivers — Execute driver commands (health check, read, write)
@@ -27,7 +27,6 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[Drivers API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve driver information' },
       { status: 500 }
@@ -92,7 +91,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Drivers API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to connect driver' },
       { status: 500 }
@@ -173,7 +171,7 @@ export async function PUT(request: NextRequest) {
               driverState: driver.getState(),
             },
             message: writeResult.message,
-          })
+          }, { status: writeResult.success ? 200 : 400 })
         }
 
         case 'executeCommand': {
@@ -193,7 +191,7 @@ export async function PUT(request: NextRequest) {
               driverState: driver.getState(),
             },
             message: execResult.message,
-          })
+          }, { status: execResult.success ? 200 : 400 })
         }
 
         default:
@@ -209,7 +207,6 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[Drivers API] PUT error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to execute driver command' },
       { status: 500 }
@@ -249,7 +246,6 @@ export async function DELETE(request: NextRequest) {
       message: `Driver for ${deviceType} disconnected`,
     })
   } catch (error) {
-    console.error('[Drivers API] DELETE error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to disconnect driver' },
       { status: 500 }

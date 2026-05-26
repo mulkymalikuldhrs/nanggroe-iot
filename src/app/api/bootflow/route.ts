@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Boot Flow API
+// NANGGROE IOT - Boot Flow API
 // GET  /api/bootflow — Get current boot flow status
 // POST /api/bootflow — Trigger boot sequence
 // ============================================================
@@ -30,7 +30,6 @@ export async function GET() {
       data: bootFlowState,
     })
   } catch (error) {
-    console.error('[BootFlow API] GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to retrieve boot flow status' },
       { status: 500 }
@@ -60,7 +59,6 @@ export async function POST() {
 
     // Execute boot sequence asynchronously
     executeBootSequence(stages, startTime).catch(err => {
-      console.error('[BootFlow] Boot sequence error:', err)
     })
 
     return NextResponse.json({
@@ -69,7 +67,6 @@ export async function POST() {
       message: 'Boot sequence initiated',
     })
   } catch (error) {
-    console.error('[BootFlow API] POST error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to initiate boot sequence' },
       { status: 500 }
@@ -102,7 +99,7 @@ async function executeBootSequence(stages: BootStageInfo[], startTime: Date): Pr
     let stageDetails: string | undefined
     switch (stageKey) {
       case 'power_on':
-        stageDetails = 'Power rails stabilized. Core voltage: 5.0V, 3.3V nominal.'
+        stageDetails = await performPowerOn()
         break
       case 'hardware_detection':
         stageDetails = await performHardwareDetection()
@@ -114,7 +111,7 @@ async function executeBootSequence(stages: BootStageInfo[], startTime: Date): Pr
         stageDetails = await performAgentStartup()
         break
       case 'system_ready':
-        stageDetails = 'All subsystems operational. NANGGROE OS AI ready for commands.'
+        stageDetails = await performSystemReady()
         break
     }
 
@@ -156,7 +153,7 @@ async function executeBootSequence(stages: BootStageInfo[], startTime: Date): Pr
       level: 'info',
       source: 'system',
       title: 'Boot Sequence Complete',
-      message: `NANGGROE OS AI boot completed in ${endTime.getTime() - startTime.getTime()}ms. All ${stages.length} stages passed.`,
+      message: `NANGGROE IOT boot completed in ${endTime.getTime() - startTime.getTime()}ms. All ${stages.length} stages passed.`,
       category: 'system',
       isRead: false,
     },
@@ -170,7 +167,6 @@ async function executeBootSequence(stages: BootStageInfo[], startTime: Date): Pr
       await seedDatabase()
     }
   } catch (seedError) {
-    console.error('[BootFlow] Seed error:', seedError)
   }
 }
 
@@ -198,6 +194,38 @@ async function performHalInitialization(): Promise<string> {
 
   const adapterList = profiles.map(p => `${p.adapterName} → ${p.device.name}`).join(', ')
   return `Loaded ${profiles.length} HAL adapters: ${adapterList}`
+}
+
+async function performPowerOn(): Promise<string> {
+  // Read actual power/voltage config from database
+  const powerConfig = await db.systemConfig.findMany({
+    where: { key: { in: ['hardware.core_voltage', 'hardware.power_state'] } },
+  })
+  const configMap: Record<string, string> = {}
+  for (const c of powerConfig) {
+    configMap[c.key] = c.value
+  }
+  const coreVoltage = configMap['hardware.core_voltage'] || '5.0V'
+  const powerState = configMap['hardware.power_state'] || 'nominal'
+  return `Power rails stabilized. Core voltage: ${coreVoltage}, 3.3V ${powerState}.`
+}
+
+async function performSystemReady(): Promise<string> {
+  // Read actual system state from database
+  const deviceCount = await db.hardwareDevice.count({ where: { status: 'active' } })
+  const activeMission = await db.mission.findFirst({ where: { status: 'active' } })
+  const agentConfigs = await db.systemConfig.findMany({
+    where: { key: { in: ['agent.hermes.enabled', 'agent.picoclaw.enabled'] } },
+  })
+  const agentMap: Record<string, string> = {}
+  for (const c of agentConfigs) {
+    agentMap[c.key] = c.value
+  }
+  const hermesOnline = agentMap['agent.hermes.enabled'] !== 'false'
+  const picoclawOnline = agentMap['agent.picoclaw.enabled'] !== 'false'
+  const activeAgents = [hermesOnline && 'Hermes', picoclawOnline && 'PicoClaw'].filter(Boolean).join(', ')
+  const missionStatus = activeMission ? `Mission "${activeMission.name}" active` : 'No active mission'
+  return `${deviceCount} devices active. Agents: ${activeAgents || 'none'}. ${missionStatus}. NANGGROE IOT ready for commands.`
 }
 
 async function performAgentStartup(): Promise<string> {

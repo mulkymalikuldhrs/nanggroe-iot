@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Database Seed (Initial Setup Only)
+// NANGGROE IOT - Database Seed (Initial Setup Only)
 // Populates the database with initial system configuration,
 // default hardware devices, and an initial session.
 // This is NOT mock/simulated data — it represents the actual
@@ -27,7 +27,6 @@ export async function seedDatabase(): Promise<{
   powerSources: number
   session: string
 }> {
-  console.log('[Seed] Starting NANGGROE OS AI database seeding...')
 
   // 1. Seed system configuration
   let configCount = 0
@@ -44,7 +43,6 @@ export async function seedDatabase(): Promise<{
       configCount++
     }
   }
-  console.log(`[Seed] Created ${configCount} system config entries`)
 
   // 2. Seed default hardware devices
   let deviceCount = 0
@@ -93,7 +91,6 @@ export async function seedDatabase(): Promise<{
       deviceCount++
     }
   }
-  console.log(`[Seed] Created ${deviceCount} hardware devices`)
 
   // 3. Seed robot templates from BUILTIN_ROBOT_TEMPLATES
   let templateCount = 0
@@ -123,7 +120,6 @@ export async function seedDatabase(): Promise<{
       templateCount++
     }
   }
-  console.log(`[Seed] Created ${templateCount} robot templates`)
 
   // 4. Seed default communication channels
   let channelCount = 0
@@ -152,7 +148,6 @@ export async function seedDatabase(): Promise<{
       channelCount++
     }
   }
-  console.log(`[Seed] Created ${channelCount} communication channels`)
 
   // 5. Seed default power sources
   let powerSourceCount = 0
@@ -185,7 +180,6 @@ export async function seedDatabase(): Promise<{
       powerSourceCount++
     }
   }
-  console.log(`[Seed] Created ${powerSourceCount} power sources`)
 
   // 6. Create initial session
   const existingSession = await db.session.findFirst({ where: { status: 'active' } })
@@ -204,10 +198,8 @@ export async function seedDatabase(): Promise<{
       },
     })
     sessionId = session.id
-    console.log(`[Seed] Created initial session: ${session.id}`)
   } else {
     sessionId = existingSession.id
-    console.log(`[Seed] Active session already exists: ${existingSession.id}`)
   }
 
   // 7. Create initial system alerts
@@ -219,7 +211,7 @@ export async function seedDatabase(): Promise<{
           level: 'info',
           source: 'system',
           title: 'System Initialized',
-          message: 'NANGGROE OS AI has been initialized. All subsystems nominal.',
+          message: 'NANGGROE IOT has been initialized. All subsystems nominal.',
           category: 'system',
           isRead: false,
         },
@@ -241,10 +233,8 @@ export async function seedDatabase(): Promise<{
         },
       ],
     })
-    console.log('[Seed] Created initial system alerts')
   }
 
-  console.log('[Seed] Seeding complete!')
   return {
     configs: configCount,
     devices: deviceCount,

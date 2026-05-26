@@ -156,50 +156,16 @@ export function SelfLearnTab() {
       if (patternsData.success) setPatterns(patternsData.data.patterns || [])
       if (perfData.success) setPerformance(perfData.data)
       if (suggestionsData.success) setSuggestions(suggestionsData.data.suggestions || [])
-    } catch (err) {
-      console.error('Failed to fetch self-learn data:', err)
+    } catch {
       setError('Gagal memuat data self-learning. Periksa koneksi server.')
       toast.error('Gagal memuat data self-learning')
     }
   }, [])
 
   useEffect(() => {
-    let active = true
-    const load = async () => {
-      setLoading(true)
-      try {
-        setError(null)
-        const [statusRes, patternsRes, perfRes, suggestionsRes] = await Promise.all([
-          fetch('/api/self-learn?action=status'),
-          fetch('/api/self-learn?action=patterns'),
-          fetch('/api/self-learn?action=performance'),
-          fetch('/api/self-learn?action=suggestions'),
-        ])
-
-        const statusData = await statusRes.json()
-        const patternsData = await patternsRes.json()
-        const perfData = await perfRes.json()
-        const suggestionsData = await suggestionsRes.json()
-
-        if (active) {
-          if (statusData.success) setStats(statusData.data)
-          if (patternsData.success) setPatterns(patternsData.data.patterns || [])
-          if (perfData.success) setPerformance(perfData.data)
-          if (suggestionsData.success) setSuggestions(suggestionsData.data.suggestions || [])
-        }
-      } catch (err) {
-        console.error('Failed to fetch self-learn data:', err)
-        if (active) {
-          setError('Gagal memuat data self-learning. Periksa koneksi server.')
-          toast.error('Gagal memuat data self-learning')
-        }
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    load()
-    return () => { active = false }
-  }, [])
+    setLoading(true)
+    fetchAllData().finally(() => setLoading(false))
+  }, [fetchAllData])
 
   const handleAnalyze = async () => {
     setAnalyzing(true)
@@ -216,8 +182,7 @@ export function SelfLearnTab() {
       } else {
         toast.error(data.error || 'Analisis gagal')
       }
-    } catch (err) {
-      console.error('Analysis failed:', err)
+    } catch {
       toast.error('Analisis gagal')
     } finally {
       setAnalyzing(false)
@@ -239,8 +204,7 @@ export function SelfLearnTab() {
       } else {
         toast.error(data.error || 'Gagal membuat laporan')
       }
-    } catch (err) {
-      console.error('Report generation failed:', err)
+    } catch {
       toast.error('Gagal membuat laporan')
     } finally {
       setGeneratingReport(false)
@@ -267,8 +231,7 @@ export function SelfLearnTab() {
       } else {
         toast.error(data.error || 'Gagal menerapkan saran')
       }
-    } catch (err) {
-      console.error('Apply suggestion failed:', err)
+    } catch {
       toast.error('Gagal menerapkan saran')
     } finally {
       setApplyingSuggestion(null)
@@ -301,8 +264,7 @@ export function SelfLearnTab() {
       } else {
         toast.error(data.error || 'Gagal transfer knowledge')
       }
-    } catch (err) {
-      console.error('Knowledge transfer failed:', err)
+    } catch {
       toast.error('Gagal transfer knowledge')
     } finally {
       setTransferring(false)

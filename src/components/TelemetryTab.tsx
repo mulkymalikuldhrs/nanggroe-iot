@@ -25,6 +25,7 @@ import {
   Radio,
 } from 'lucide-react'
 import { TELEMETRY_LABELS, TELEMETRY_UNITS, SAFETY_THRESHOLDS } from '@/lib/constants'
+import { useToast } from '@/hooks/use-toast'
 
 interface TelemetrySnapshot {
   battery_voltage: number
@@ -191,6 +192,7 @@ export function TelemetryTab() {
   const [refreshing, setRefreshing] = useState(false)
   const prevRef = useRef<TelemetrySnapshot | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const { toast } = useToast()
 
   const refresh = () => setRefreshKey(k => k + 1)
 
@@ -201,18 +203,23 @@ export function TelemetryTab() {
         const res = await fetch('/api/telemetry?snapshot=true&safety=true')
         const json = await res.json()
         if (mounted && json.success && json.data.snapshot) {
-          prevRef.current = telemetry
-          setPrevTelemetry(telemetry)
+          // Use prevRef which always holds the actual previous telemetry value
+          setPrevTelemetry(prevRef.current)
           setTelemetry(json.data.snapshot)
           setLastUpdate(new Date().toLocaleTimeString())
         }
-      } catch {
-        // silent
+      } catch (err) {
+        toast.error('Failed to load telemetry: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
     }
     load()
     return () => { mounted = false }
-  }, [refreshKey])
+  }, [refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep prevRef in sync with current telemetry after each render
+  useEffect(() => {
+    prevRef.current = telemetry
+  }, [telemetry])
 
   useEffect(() => {
     if (!autoRefresh) return

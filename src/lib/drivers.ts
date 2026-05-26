@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Device Driver Abstraction Layer
+// NANGGROE IOT - Device Driver Abstraction Layer
 // Production-grade driver registry with lifecycle management,
 // health checks, real DB-backed telemetry, event emission,
 // and HardwareBridge pattern for real/simulated hardware.
@@ -621,21 +621,18 @@ function loadNativeModules(): NativeModules {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     serialport = require('serialport')
   } catch {
-    console.warn('[HardwareBridge] serialport not available — serial communication disabled')
   }
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     i2cBus = require('i2c-bus')
   } catch {
-    console.warn('[HardwareBridge] i2c-bus not available — I2C communication disabled')
   }
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     rpiGpio = require('rpi-gpio')
   } catch {
-    console.warn('[HardwareBridge] rpi-gpio not available — GPIO communication disabled')
   }
 
   nativeModules = { serialport, i2cBus, rpiGpio }
@@ -909,7 +906,6 @@ export class RealHardwareBridge implements HardwareBridge {
     this.adcChannels.clear()
 
     if (errors.length > 0) {
-      console.warn('[RealHardwareBridge] Errors during closeAll:', errors)
     }
   }
 }
@@ -964,7 +960,6 @@ export class HardwareBridgeManager {
    */
   async setRealMode(): Promise<{ mode: BridgeMode; message: string }> {
     if (!this.isRealHardwareAvailable()) {
-      console.warn('[HardwareBridgeManager] Native hardware modules not available, staying in simulation mode')
       this.currentMode = 'simulation'
       return {
         mode: 'simulation',
@@ -979,7 +974,6 @@ export class HardwareBridgeManager {
       this.currentMode = 'real'
       return { mode: 'real', message: 'Switched to real hardware mode' }
     } catch (err) {
-      console.error('[HardwareBridgeManager] Failed to initialize real hardware bridge:', err)
       this.currentMode = 'simulation'
       return {
         mode: 'simulation',
@@ -1165,7 +1159,6 @@ export abstract class DeviceDriver {
       data,
     }
     for (const cb of this.eventListeners) {
-      try { cb(event) } catch (e) { console.error(`[Driver Event] Error in listener:`, e) }
     }
   }
 
@@ -1308,7 +1301,6 @@ export class PixhawkDriver extends DeviceDriver {
         })
       } catch (bridgeErr) {
         // Bridge open failed — but we can still track the device in DB
-        console.warn(`[PixhawkDriver] Bridge open failed for ${port}: ${bridgeErr instanceof Error ? bridgeErr.message : bridgeErr}`)
       }
 
       await this.updateDeviceStatus(deviceId, 'active')
@@ -1916,7 +1908,6 @@ export class GPSDriver extends DeviceDriver {
           baudRate: baudRate as number,
         })
       } catch (bridgeErr) {
-        console.warn(`[GPSDriver] Bridge open failed for ${port}: ${bridgeErr instanceof Error ? bridgeErr.message : bridgeErr}`)
       }
 
       await this.updateDeviceStatus(deviceId, 'active')
@@ -2374,7 +2365,6 @@ export class I2CSensorDriver extends DeviceDriver {
       try {
         await this.getBridgeManager().getBridge().openI2C({ busNumber: bus as number, address })
       } catch (bridgeErr) {
-        console.warn(`[I2CSensorDriver] Bridge open failed: ${bridgeErr instanceof Error ? bridgeErr.message : bridgeErr}`)
       }
 
       await this.updateDeviceStatus(deviceId, 'active')
@@ -2659,7 +2649,6 @@ export class RadioDriver extends DeviceDriver {
           baudRate: baudRate as number,
         })
       } catch (bridgeErr) {
-        console.warn(`[RadioDriver] Bridge open failed for ${port}: ${bridgeErr instanceof Error ? bridgeErr.message : bridgeErr}`)
       }
 
       await this.updateDeviceStatus(deviceId, 'active')
@@ -2910,7 +2899,6 @@ export class BatteryDriver extends DeviceDriver {
           voltageRef: 3.3,
         })
       } catch (bridgeErr) {
-        console.warn(`[BatteryDriver] Bridge open failed: ${bridgeErr instanceof Error ? bridgeErr.message : bridgeErr}`)
       }
 
       // In simulation, initialize the battery model
@@ -3164,7 +3152,6 @@ export class DriverRegistry {
     // Forward driver events to global listeners
     driver.onEvent((event) => {
       for (const cb of this.globalEventListeners) {
-        try { cb(event) } catch (e) { console.error('[DriverRegistry] Global event listener error:', e) }
       }
     })
   }

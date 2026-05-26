@@ -13,6 +13,17 @@ import {
   Play, Ruler, Loader2, AlertCircle, RefreshCw,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface NavPlan {
   id: string
@@ -67,48 +78,35 @@ export function NavigationTab() {
       const res = await fetch('/api/navigation')
       const data = await res.json()
       if (data.success) setPlans(data.data)
-    } catch (err) {
-      console.error('Failed to fetch plans:', err)
+    } catch {
       setError('Gagal memuat navigation plans. Periksa koneksi server.')
       toast.error('Gagal memuat navigation plans')
     }
   }, [])
 
   useEffect(() => {
-    let active = true
-    const load = async () => {
-      setLoading(true)
-      try {
-        setError(null)
-        const res = await fetch('/api/navigation')
-        const data = await res.json()
-        if (active && data.success) setPlans(data.data)
-      } catch (err) {
-        console.error('Failed to fetch plans:', err)
-        if (active) {
-          setError('Gagal memuat navigation plans. Periksa koneksi server.')
-          toast.error('Gagal memuat navigation plans')
-        }
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    load()
-    return () => { active = false }
-  }, [])
+    setLoading(true)
+    fetchPlans().finally(() => setLoading(false))
+  }, [fetchPlans])
 
   const executeRTH = async () => {
     setRthLoading(true)
     try {
-      await fetch('/api/navigation', {
+      const res = await fetch('/api/navigation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'rth' }),
       })
-      toast.success('Return-to-Home berhasil diaktifkan')
+      const data = await res.json()
+      if (data.simulated) {
+        toast.success('⚠️ SIMULATED: Return-to-Home — no real command was sent to the drone', { duration: 8000 })
+      } else if (data.success) {
+        toast.success('Return-to-Home berhasil diaktifkan')
+      } else {
+        toast.error('RTH gagal: ' + (data.warning || data.error || 'Unknown error'))
+      }
       fetchPlans()
-    } catch (err) {
-      console.error('RTH failed:', err)
+    } catch {
       toast.error('RTH gagal diaktifkan')
     } finally {
       setRthLoading(false)
@@ -135,8 +133,7 @@ export function NavigationTab() {
       } else {
         toast.error(data.error || 'Gagal membuat autopilot plan')
       }
-    } catch (err) {
-      console.error('Autopilot plan failed:', err)
+    } catch {
       toast.error('Gagal membuat autopilot plan')
     } finally {
       setSubmitting(null)
@@ -163,8 +160,7 @@ export function NavigationTab() {
       } else {
         toast.error(data.error || 'Gagal membuat survey plan')
       }
-    } catch (err) {
-      console.error('Survey plan failed:', err)
+    } catch {
       toast.error('Gagal membuat survey plan')
     } finally {
       setSubmitting(null)
@@ -207,8 +203,7 @@ export function NavigationTab() {
       } else {
         toast.error(data.error || 'Gagal membuat plan mapping')
       }
-    } catch (err) {
-      console.error('Field mapping failed:', err)
+    } catch {
       toast.error('Gagal membuat plan mapping')
     } finally {
       setSubmitting(null)
@@ -216,7 +211,29 @@ export function NavigationTab() {
   }
 
   const createDeliveryPlan = async () => {
-    if (!deliveryName || !pickupLat || !dropLat) return
+    if (!deliveryName) {
+      toast.error('Nama misi pengiriman wajib diisi')
+      return
+    }
+
+    const pLat = parseFloat(pickupLat)
+    const pLng = parseFloat(pickupLng)
+    const dLat = parseFloat(dropLat)
+    const dLng = parseFloat(dropLng)
+
+    const isValidCoord = (lat: number, lng: number) =>
+      !isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng) &&
+      lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+
+    if (!isValidCoord(pLat, pLng)) {
+      toast.error('Koordinat pickup tidak valid. Latitude harus -90 s/d 90, Longitude harus -180 s/d 180')
+      return
+    }
+    if (!isValidCoord(dLat, dLng)) {
+      toast.error('Koordinat drop tidak valid. Latitude harus -90 s/d 90, Longitude harus -180 s/d 180')
+      return
+    }
+
     setSubmitting('delivery')
     try {
       const res = await fetch('/api/navigation', {
@@ -226,8 +243,8 @@ export function NavigationTab() {
           action: 'delivery',
           name: deliveryName,
           task: {
-            pickupPoint: { lat: parseFloat(pickupLat), lng: parseFloat(pickupLng), alt: 0 },
-            dropPoint: { lat: parseFloat(dropLat), lng: parseFloat(dropLng), alt: 0 },
+            pickupPoint: { lat: pLat, lng: pLng, alt: 0 },
+            dropPoint: { lat: dLat, lng: dLng, alt: 0 },
             payloadWeight: 0.5,
             dropCommand: 'servo',
           },
@@ -237,12 +254,15 @@ export function NavigationTab() {
       if (data.success) {
         toast.success('Plan delivery berhasil dibuat')
         setDeliveryName('')
+        setPickupLat('')
+        setPickupLng('')
+        setDropLat('')
+        setDropLng('')
         fetchPlans()
       } else {
         toast.error(data.error || 'Gagal membuat plan delivery')
       }
-    } catch (err) {
-      console.error('Delivery plan failed:', err)
+    } catch {
       toast.error('Gagal membuat plan delivery')
     } finally {
       setSubmitting(null)
@@ -259,8 +279,7 @@ export function NavigationTab() {
       })
       toast.success('Plan berhasil diaktifkan')
       fetchPlans()
-    } catch (err) {
-      console.error('Activate plan failed:', err)
+    } catch {
       toast.error('Gagal mengaktifkan plan')
     } finally {
       setActivatingPlanId(null)
@@ -324,10 +343,28 @@ export function NavigationTab() {
           <h2 className="text-2xl font-bold text-white">Navigation</h2>
           <p className="text-sm text-slate-400 mt-1">GPS, Autopilot, Return-to-Home, Field Mapping, Delivery</p>
         </div>
-        <Button className="bg-red-600 hover:bg-red-700" onClick={executeRTH} disabled={rthLoading}>
-          {rthLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Home className="w-4 h-4 mr-2" />}
-          RTH Emergency
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button data-testid="rth-emergency-btn" className="bg-red-600 hover:bg-red-700" disabled={rthLoading}>
+              {rthLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Home className="w-4 h-4 mr-2" />}
+              RTH Emergency
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="bg-slate-900 border-slate-700">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">Confirm RTH Emergency</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-400">
+                This will immediately trigger Return-to-Home. The drone will abort its current mission and navigate back to the home position. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-slate-700 text-slate-300">Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={executeRTH} className="bg-red-600 hover:bg-red-700 text-white">
+                Confirm RTH
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Quick Actions */}
@@ -443,7 +480,7 @@ export function NavigationTab() {
             </div>
             <Button
               onClick={createDeliveryPlan}
-              disabled={!deliveryName || submitting === 'delivery'}
+              disabled={!deliveryName || !pickupLat || !pickupLng || !dropLat || !dropLng || submitting === 'delivery'}
               className="bg-teal-600 hover:bg-teal-700 w-full"
             >
               {submitting === 'delivery' ? (

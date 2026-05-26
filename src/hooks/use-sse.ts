@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Server-Sent Events Hook
+// NANGGROE IOT - Server-Sent Events Hook
 // React hook for consuming SSE streams with auto-reconnect
 // ============================================================
 

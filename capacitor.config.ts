@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.nanggroe.osai',
-  appName: 'Nanggroe OS AI',
+  appId: 'com.nanggroe.iot',
+  appName: 'Nanggroe IoT',
   webDir: 'out',
   server: {
     // For development, point to local Next.js server

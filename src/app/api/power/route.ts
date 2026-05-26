@@ -21,6 +21,14 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
+
+    if (!body.sourceId) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required field: sourceId' },
+        { status: 400 }
+      )
+    }
+
     const service = PowerService.getInstance()
     const source = await service.updateReading(body.sourceId, body.reading)
     return NextResponse.json({ success: true, data: source })

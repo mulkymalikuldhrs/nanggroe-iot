@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - Hardware Bridge API Route
+// NANGGROE IOT - Hardware Bridge API Route
 // GET    /api/hardware-bridge — Get bridge mode, detected hardware, active connections, health
 // POST   /api/hardware-bridge — Open serial/I2C/SPI/GPIO connections, send commands
 // ============================================================
@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[HardwareBridge API] GET error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to get hardware bridge data' },
       { status: 500 }
@@ -184,7 +183,6 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('[HardwareBridge API] POST error:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to process hardware bridge action' },
       { status: 500 }

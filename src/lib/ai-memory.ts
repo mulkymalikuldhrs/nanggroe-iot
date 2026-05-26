@@ -1,5 +1,5 @@
 // ============================================================
-// NANGGROE OS AI - AI Memory & Sync Service
+// NANGGROE IOT - AI Memory & Sync Service
 // Offline-first memory for AI agents, sync when online
 //
 // Improvements over stub version:
@@ -399,14 +399,12 @@ export class AiMemoryService {
           // Invalidate cache for this entry
           this.localCache.delete(`${remote.category}:${remote.key}`)
         } catch (err) {
-          console.error('[AiMemory] Error applying remote entry:', err)
           errors++
         }
       }
 
       return { pulled, conflicts, errors }
     } catch (err) {
-      console.error('[AiMemory] pullFromCloud failed:', err)
       return { pulled: 0, conflicts: 0, errors: 1 }
     } finally {
       this.pullInProgress = false
@@ -586,7 +584,6 @@ export class AiMemoryService {
 
       return { success: false }
     } catch (err) {
-      console.error(`[AiMemory] Cloud sync request failed (${path}):`, err)
       return { success: false }
     }
   }

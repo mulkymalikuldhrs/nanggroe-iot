@@ -123,7 +123,7 @@ export function Dashboard() {
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-white/5 shrink-0">
+      <aside data-testid="sidebar" className="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-white/5 shrink-0">
         {/* Brand */}
         <div className="p-5 border-b border-white/5">
           <div className="flex items-center gap-3">
@@ -131,7 +131,7 @@ export function Dashboard() {
               <Zap className="w-5 h-5 text-teal-400" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-white tracking-wide">NANGGROE OS AI</h1>
+              <h1 data-testid="brand-title" className="text-sm font-bold text-white tracking-wide">NANGGROE IOT</h1>
               <p className="text-[10px] text-slate-400 font-mono">v2.0.0</p>
             </div>
           </div>
@@ -144,6 +144,7 @@ export function Dashboard() {
             return (
               <button
                 key={item.id}
+                data-testid={`nav-tab-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                   isActive
@@ -162,8 +163,8 @@ export function Dashboard() {
         {/* Footer */}
         <div className="p-4 border-t border-white/5">
           <div className="flex items-center gap-2 text-xs text-slate-500">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot" />
-            <span>Aceh Utara Region</span>
+            <div data-testid="system-online-dot" className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot" />
+            <span data-testid="region-info">Aceh Utara Region</span>
           </div>
           <p className="text-[10px] text-slate-600 mt-1 font-mono">4.9125°N, 97.1347°E</p>
         </div>
@@ -172,34 +173,35 @@ export function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-12 bg-slate-900/60 border-b border-white/5 flex items-center px-4 shrink-0">
+        <header data-testid="top-bar" className="h-12 bg-slate-900/60 border-b border-white/5 flex items-center px-4 shrink-0">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-teal-500 md:hidden" />
-            <h2 className="text-sm font-semibold text-white">
+            <h2 data-testid="active-tab-title" className="text-sm font-semibold text-white">
               {NAV_ITEMS.find((i) => i.id === activeTab)?.label}
             </h2>
           </div>
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />
-              <span>System Online</span>
+              <span data-testid="system-online">System Online</span>
             </div>
           </div>
         </header>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div data-testid="tab-content" className="flex-1 overflow-y-auto">
           {renderTab()}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden flex bg-slate-900 border-t border-white/5 shrink-0">
+      <nav data-testid="mobile-nav" className="md:hidden flex bg-slate-900 border-t border-white/5 shrink-0">
         {NAV_ITEMS.map((item) => {
           const isActive = activeTab === item.id
           return (
             <button
               key={item.id}
+              data-testid={`mobile-nav-tab-${item.id}`}
               onClick={() => setActiveTab(item.id)}
               className={`flex-1 flex flex-col items-center justify-center py-2.5 text-[10px] font-medium transition-colors ${
                 isActive ? 'text-teal-400' : 'text-slate-500'
