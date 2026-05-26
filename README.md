@@ -8,7 +8,7 @@
 
 *Sistem Operasi Robotika Otonom Modular — Dari Aceh Untuk Dunia*
 
-[![Version](https://img.shields.io/badge/version-2.0.0-teal.svg)](https://github.com/mulkymalikuldhaher/nanggroe-iot)
+[![Version](https://img.shields.io/badge/version-2.0.0-teal.svg)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-orange.svg)](https://tauri.app)
@@ -16,7 +16,7 @@
 [![Capacitor](https://img.shields.io/badge/Capacitor-6-purple.svg)](https://capacitorjs.com)
 [![Tests](https://img.shields.io/badge/E2E%20Tests-183-teal.svg)](./e2e)
 
-[Report Bug](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) · [Request Feature](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) · [Security](SECURITY.md)
+[Report Bug](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues) · [Request Feature](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues) · [Security](SECURITY.md)
 
 </div>
 
@@ -155,7 +155,7 @@ Nanggroe IoT is a modular autonomous robotics operating system designed to build
 
 ```bash
 # Clone the repository
-git clone https://github.com/mulkymalikuldhaher/nanggroe-iot.git
+git clone https://github.com/mulkymalikuldhrs/nanggroe-iot.git
 cd nanggroe-iot
 
 # Install dependencies
