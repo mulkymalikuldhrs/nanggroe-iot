@@ -60,7 +60,7 @@ Be respectful, inclusive, and constructive. We are building robotics software fo
 
 ### Suggested Workflow
 
-1. Check existing [Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues) for something to work on
+1. Check existing [Issues](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues) for something to work on
 2. If no issue exists, create one to discuss your proposed change
 3. Create a feature branch from `main`:
    ```bash
@@ -172,7 +172,7 @@ refactor(agents): simplify Hermes command dispatcher
 
 ## Reporting Bugs
 
-1. Check if the bug is already reported in [Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues)
+1. Check if the bug is already reported in [Issues](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues)
 2. If not, create a new issue with:
    - **Clear title** summarizing the problem
    - **Steps to reproduce** the bug
@@ -182,7 +182,7 @@ refactor(agents): simplify Hermes command dispatcher
 
 ## Feature Requests
 
-1. Open a [new issue](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues/new) with the label `enhancement`
+1. Open a [new issue](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues/new) with the label `enhancement`
 2. Describe the feature and the use case it solves
 3. Explain why it fits the Nanggroe IoT platform vision
 4. Optionally, propose an implementation approach
@@ -190,7 +190,7 @@ refactor(agents): simplify Hermes command dispatcher
 ## Contact
 
 - **Creator & Lead Developer**: Mulky Malikul Dhaher — mulkymalikuldhaher@email.com
-- **Issues**: [GitHub Issues](https://github.com/mulkymalikuldhaher/nanggroe-iot/issues)
+- **Issues**: [GitHub Issues](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues)
 
 ---
 

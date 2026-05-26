@@ -5,13 +5,13 @@
   "description": "Nanggroe IoT — Modular IoT & Robotics Platform",
   "author": "Mulky Malikul Dhaher <mulkymalikuldhaher@email.com>",
   "license": "MIT",
-  "homepage": "https://github.com/mulkymalikuldhaher/nanggroe-iot#readme",
+  "homepage": "https://github.com/mulkymalikuldhrs/nanggroe-iot#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mulkymalikuldhaher/nanggroe-iot.git"
+    "url": "https://github.com/mulkymalikuldhrs/nanggroe-iot.git"
   },
   "bugs": {
-    "url": "https://github.com/mulkymalikuldhaher/nanggroe-iot/issues"
+    "url": "https://github.com/mulkymalikuldhrs/nanggroe-iot/issues"
   },
   "keywords": [
     "iot",

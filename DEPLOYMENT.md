@@ -283,7 +283,7 @@ curl -fsSL https://bun.sh/install | bash
 source ~/.bashrc
 
 # Clone repository
-git clone https://github.com/mulkymalikuldhaher/nanggroe-iot.git
+git clone https://github.com/mulkymalikuldhrs/nanggroe-iot.git
 cd nanggroe-iot
 
 # Install dependencies

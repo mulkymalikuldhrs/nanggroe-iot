@@ -37,11 +37,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Nanggroe IoT — IoT & Robotics Platform",
     description: "Modular IoT & robotics platform with AI, hardware auto-detect, and multi-project support.",
-    url: "https://github.com/mulkymalikuldhaher/nanggroe-iot",
+    url: "https://github.com/mulkymalikuldhrs/nanggroe-iot",
     siteName: "Nanggroe IoT",
     type: "website",
   },
-  metadataBase: new URL("https://github.com/mulkymalikuldhaher/nanggroe-iot"),
+  metadataBase: new URL("https://github.com/mulkymalikuldhrs/nanggroe-iot"),
 };
 
 export default function RootLayout({
