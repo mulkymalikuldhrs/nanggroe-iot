@@ -7,9 +7,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { hermesRespond } from '@/lib/agents'
 import { validateApiKey } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 import type { SystemContext, TelemetrySnapshot, MissionType, MissionStatus } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 20 })
+  if (rateLimitError) return rateLimitError
+
   const authError = validateApiKey(request)
   if (authError) return authError
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { lazy, Suspense, ComponentType } from 'react'
 import {
   LayoutDashboard,
   Activity,
@@ -24,26 +24,36 @@ import {
   Brain,
   Eye,
 } from 'lucide-react'
-import { OverviewTab } from './OverviewTab'
-import { TelemetryTab } from './TelemetryTab'
-import { MissionsTab } from './MissionsTab'
-import { HardwareTab } from './HardwareTab'
-import { AgentsTab } from './AgentsTab'
-import { LogsTab } from './LogsTab'
-import { McpTab } from './McpTab'
-import { CalibrationTab } from './CalibrationTab'
-import { DoctorTab } from './DoctorTab'
-import { AssemblyTab } from './AssemblyTab'
-import { DriversTab } from './DriversTab'
-import { FlashTab } from './FlashTab'
-import { TestingTab } from './TestingTab'
-import { ExtensionTab } from './ExtensionTab'
-import { RobotBuilderTab } from './RobotBuilderTab'
-import { CommsTab } from './CommsTab'
-import { NavigationTab } from './NavigationTab'
-import { PowerTab } from './PowerTab'
-import { SelfLearnTab } from './SelfLearnTab'
-import { FaceTrackingTab } from './FaceTrackingTab'
+import { useDashboardStore } from '@/lib/store'
+
+const OverviewTab = lazy(() => import('./OverviewTab').then(m => ({ default: m.OverviewTab })))
+const TelemetryTab = lazy(() => import('./TelemetryTab').then(m => ({ default: m.TelemetryTab })))
+const MissionsTab = lazy(() => import('./MissionsTab').then(m => ({ default: m.MissionsTab })))
+const HardwareTab = lazy(() => import('./HardwareTab').then(m => ({ default: m.HardwareTab })))
+const AgentsTab = lazy(() => import('./AgentsTab').then(m => ({ default: m.AgentsTab })))
+const LogsTab = lazy(() => import('./LogsTab').then(m => ({ default: m.LogsTab })))
+const McpTab = lazy(() => import('./McpTab').then(m => ({ default: m.McpTab })))
+const CalibrationTab = lazy(() => import('./CalibrationTab').then(m => ({ default: m.CalibrationTab })))
+const DoctorTab = lazy(() => import('./DoctorTab').then(m => ({ default: m.DoctorTab })))
+const AssemblyTab = lazy(() => import('./AssemblyTab').then(m => ({ default: m.AssemblyTab })))
+const DriversTab = lazy(() => import('./DriversTab').then(m => ({ default: m.DriversTab })))
+const FlashTab = lazy(() => import('./FlashTab').then(m => ({ default: m.FlashTab })))
+const TestingTab = lazy(() => import('./TestingTab').then(m => ({ default: m.TestingTab })))
+const ExtensionTab = lazy(() => import('./ExtensionTab').then(m => ({ default: m.ExtensionTab })))
+const RobotBuilderTab = lazy(() => import('./RobotBuilderTab').then(m => ({ default: m.RobotBuilderTab })))
+const CommsTab = lazy(() => import('./CommsTab').then(m => ({ default: m.CommsTab })))
+const NavigationTab = lazy(() => import('./NavigationTab').then(m => ({ default: m.NavigationTab })))
+const PowerTab = lazy(() => import('./PowerTab').then(m => ({ default: m.PowerTab })))
+const SelfLearnTab = lazy(() => import('./SelfLearnTab').then(m => ({ default: m.SelfLearnTab })))
+const FaceTrackingTab = lazy(() => import('./FaceTrackingTab').then(m => ({ default: m.FaceTrackingTab })))
+
+function TabLoading() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 const NAV_ITEMS = [
   { id: 'overview' as const, label: 'Overview', icon: LayoutDashboard },
@@ -70,54 +80,44 @@ const NAV_ITEMS = [
 
 type TabId = (typeof NAV_ITEMS)[number]['id']
 
+const TAB_COMPONENTS: Record<TabId, ComponentType> = {
+  'overview': OverviewTab,
+  'telemetry': TelemetryTab,
+  'missions': MissionsTab,
+  'hardware': HardwareTab,
+  'agents': AgentsTab,
+  'mcp': McpTab,
+  'calibration': CalibrationTab,
+  'logs': LogsTab,
+  'doctor': DoctorTab,
+  'assembly': AssemblyTab,
+  'drivers': DriversTab,
+  'flash': FlashTab,
+  'testing': TestingTab,
+  'extension': ExtensionTab,
+  'robot-builder': RobotBuilderTab,
+  'comms': CommsTab,
+  'navigation': NavigationTab,
+  'power': PowerTab,
+  'self-learn': SelfLearnTab,
+  'face-tracking': FaceTrackingTab,
+}
+
 export function Dashboard() {
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const activeTab = useDashboardStore((s) => s.activeTab as TabId)
+  const setActiveTab = useDashboardStore((s) => s.setActiveTab)
+
+  const getTabComponent = (): ComponentType => {
+    return TAB_COMPONENTS[activeTab] ?? OverviewTab
+  }
 
   const renderTab = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <OverviewTab />
-      case 'telemetry':
-        return <TelemetryTab />
-      case 'missions':
-        return <MissionsTab />
-      case 'hardware':
-        return <HardwareTab />
-      case 'agents':
-        return <AgentsTab />
-      case 'mcp':
-        return <McpTab />
-      case 'calibration':
-        return <CalibrationTab />
-      case 'logs':
-        return <LogsTab />
-      case 'doctor':
-        return <DoctorTab />
-      case 'assembly':
-        return <AssemblyTab />
-      case 'drivers':
-        return <DriversTab />
-      case 'flash':
-        return <FlashTab />
-      case 'testing':
-        return <TestingTab />
-      case 'extension':
-        return <ExtensionTab />
-      case 'robot-builder':
-        return <RobotBuilderTab />
-      case 'comms':
-        return <CommsTab />
-      case 'navigation':
-        return <NavigationTab />
-      case 'power':
-        return <PowerTab />
-      case 'self-learn':
-        return <SelfLearnTab />
-      case 'face-tracking':
-        return <FaceTrackingTab />
-      default:
-        return <OverviewTab />
-    }
+    const TabComponent = getTabComponent()
+    return (
+      <Suspense fallback={<TabLoading />}>
+        <TabComponent />
+      </Suspense>
+    )
   }
 
   return (

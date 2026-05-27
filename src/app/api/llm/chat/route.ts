@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getLLMService } from '@/lib/llm'
 import { validateApiKey } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 import type { ChatMessage, ChatParams } from '@/lib/llm'
 import type { AgentName } from '@/lib/types'
 
@@ -30,6 +31,9 @@ interface ChatRequestBody {
 // ============================================================
 
 export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 20 })
+  if (rateLimitError) return rateLimitError
+
   const authError = validateApiKey(request)
   if (authError) return authError
 
