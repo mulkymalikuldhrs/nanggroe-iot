@@ -8,8 +8,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { seedDatabase } from '@/lib/seed'
 import { validateApiKey } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 30 })
+  if (rateLimitError) return rateLimitError
+
   try {
     // Get system config, filtering out sensitive keys
     const configs = await db.systemConfig.findMany()
@@ -107,6 +111,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 30 })
+  if (rateLimitError) return rateLimitError
+
   const authError = validateApiKey(request)
   if (authError) return authError
 

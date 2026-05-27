@@ -8,9 +8,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
 import { picoclawCheck } from '@/lib/agents'
+import { rateLimit } from '@/lib/rate-limit'
 import type { PicoClawCheckResult } from '@/lib/types'
 
 export async function GET(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 120 })
+  if (rateLimitError) return rateLimitError
+
   try {
     const { searchParams } = new URL(request.url)
     const deviceId = searchParams.get('deviceId')
@@ -80,6 +84,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 120 })
+  if (rateLimitError) return rateLimitError
+
   try {
     const body = await request.json()
     const { readings } = body as {

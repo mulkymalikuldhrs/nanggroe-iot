@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { picoclawCheck } from '@/lib/agents'
 import { validateApiKey } from '@/lib/auth'
+import { rateLimit } from '@/lib/rate-limit'
 import { getLatestTelemetrySnapshot } from '@/lib/telemetry'
 import { executeCalibration } from '@/lib/calibration'
 import ZAI from 'z-ai-web-dev-sdk'
@@ -179,7 +180,9 @@ const MCP_TOOLS = [
 ]
 
 // --- GET: List MCP tools ---
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 30 })
+  if (rateLimitError) return rateLimitError
   try {
     // Check tool availability by querying the database
     const toolStatuses = await Promise.all(
@@ -235,6 +238,9 @@ export async function GET() {
 
 // --- POST: Execute MCP tool ---
 export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 30 })
+  if (rateLimitError) return rateLimitError
+
   const authError = validateApiKey(request)
   if (authError) return authError
 

@@ -7,8 +7,12 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 60 })
+  if (rateLimitError) return rateLimitError
+
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -55,7 +59,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 60 })
+  if (rateLimitError) return rateLimitError
+
   try {
     // Real hardware detection: query the database for existing devices
     // and check their last-seen timestamps to determine current status.
@@ -154,6 +161,9 @@ export async function POST() {
 }
 
 export async function PUT(request: NextRequest) {
+  const rateLimitError = rateLimit(request, { windowMs: 60000, maxRequests: 60 })
+  if (rateLimitError) return rateLimitError
+
   try {
     const body = await request.json()
     const { deviceId, status, profileId, profileConfig, name, deviceType } = body as {

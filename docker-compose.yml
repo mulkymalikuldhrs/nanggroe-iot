@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  nanggroe-iot:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:./db/nanggroe-iot.db
+      - NODE_ENV=production
+    volumes:
+      - iot-data:/app/db
+      - iot-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  iot-data:
+  iot-uploads:
