@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, Suspense, ComponentType } from 'react'
+import { lazy, Suspense, ComponentType, useCallback, useRef } from 'react'
 import {
   LayoutDashboard,
   Activity,
@@ -106,6 +106,38 @@ const TAB_COMPONENTS: Record<TabId, ComponentType> = {
 export function Dashboard() {
   const activeTab = useDashboardStore((s) => s.activeTab as TabId)
   const setActiveTab = useDashboardStore((s) => s.setActiveTab)
+  const navRef = useRef<HTMLElement>(null)
+  const mobileNavRef = useRef<HTMLElement>(null)
+
+  const handleNavKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const currentIndex = NAV_ITEMS.findIndex((item) => item.id === activeTab)
+    let newIndex = currentIndex
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault()
+      newIndex = (currentIndex + 1) % NAV_ITEMS.length
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault()
+      newIndex = (currentIndex - 1 + NAV_ITEMS.length) % NAV_ITEMS.length
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      newIndex = 0
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      newIndex = NAV_ITEMS.length - 1
+    } else {
+      return
+    }
+
+    const newTabId = NAV_ITEMS[newIndex].id
+    setActiveTab(newTabId)
+    // Focus the newly active tab button
+    requestAnimationFrame(() => {
+      const activeBtn = navRef.current?.querySelector(`[data-tab-id="${newTabId}"]`) as HTMLElement
+        || mobileNavRef.current?.querySelector(`[data-tab-id="${newTabId}"]`) as HTMLElement
+      activeBtn?.focus()
+    })
+  }, [activeTab, setActiveTab])
 
   const getTabComponent = (): ComponentType => {
     return TAB_COMPONENTS[activeTab] ?? OverviewTab
@@ -123,7 +155,7 @@ export function Dashboard() {
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside data-testid="sidebar" className="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-white/5 shrink-0">
+      <aside data-testid="sidebar" role="navigation" aria-label="Main navigation" className="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-white/5 shrink-0">
         {/* Brand */}
         <div className="p-5 border-b border-white/5">
           <div className="flex items-center gap-3">
@@ -138,13 +170,19 @@ export function Dashboard() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav ref={navRef} role="tablist" className="flex-1 p-3 space-y-1" onKeyDown={handleNavKeyDown}>
           {NAV_ITEMS.map((item) => {
             const isActive = activeTab === item.id
             return (
               <button
                 key={item.id}
                 data-testid={`nav-tab-${item.id}`}
+                data-tab-id={item.id}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`tabpanel-${item.id}`}
+                aria-current={isActive ? 'page' : undefined}
+                tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                   isActive
@@ -171,7 +209,7 @@ export function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main aria-label="Content area" className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
         <header data-testid="top-bar" className="h-12 bg-slate-900/60 border-b border-white/5 flex items-center px-4 shrink-0">
           <div className="flex items-center gap-2">
@@ -189,19 +227,25 @@ export function Dashboard() {
         </header>
 
         {/* Tab Content */}
-        <div data-testid="tab-content" className="flex-1 overflow-y-auto">
+        <div data-testid="tab-content" id={`tabpanel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`} className="flex-1 overflow-y-auto">
           {renderTab()}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav data-testid="mobile-nav" className="md:hidden flex bg-slate-900 border-t border-white/5 shrink-0">
+      <nav ref={mobileNavRef} data-testid="mobile-nav" role="tablist" aria-label="Main navigation" className="md:hidden flex bg-slate-900 border-t border-white/5 shrink-0" onKeyDown={handleNavKeyDown}>
         {NAV_ITEMS.map((item) => {
           const isActive = activeTab === item.id
           return (
             <button
               key={item.id}
               data-testid={`mobile-nav-tab-${item.id}`}
+              data-tab-id={item.id}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`tabpanel-${item.id}`}
+              aria-current={isActive ? 'page' : undefined}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(item.id)}
               className={`flex-1 flex flex-col items-center justify-center py-2.5 text-[10px] font-medium transition-colors ${
                 isActive ? 'text-teal-400' : 'text-slate-500'

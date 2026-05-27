@@ -39,6 +39,9 @@
   "exclude": [
     "node_modules",
     "examples",
-    "skills"
+    "skills",
+    "src/lib/__tests__",
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ]
 }

@@ -224,7 +224,7 @@ export function OverviewTab() {
       {/* System Mode + Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* System Mode */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="System mode status" className="bg-slate-900 border-white/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-400 uppercase tracking-wider">System Mode</span>
@@ -242,7 +242,7 @@ export function OverviewTab() {
         </Card>
 
         {/* Battery */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Battery level" className="bg-slate-900 border-white/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-400 uppercase tracking-wider">Battery</span>
@@ -251,13 +251,13 @@ export function OverviewTab() {
             <p className={`text-2xl font-bold font-mono ${batteryPct > 30 ? 'text-emerald-400' : batteryPct > 15 ? 'text-amber-400' : 'text-rose-400'}`}>
               {telemetry ? telemetry.battery_voltage.toFixed(1) : '—'}V
             </p>
-            <Progress value={batteryPct} className="h-1.5 mt-2 bg-white/5 [&>div]:bg-emerald-500" />
+            <Progress value={batteryPct} role="progressbar" aria-valuenow={Math.round(batteryPct)} aria-valuemin={0} aria-valuemax={100} aria-label={`Battery level: ${batteryPct.toFixed(0)}%`} className="h-1.5 mt-2 bg-white/5 [&>div]:bg-emerald-500" />
             <p className="text-[10px] text-slate-500 mt-1">{batteryPct.toFixed(0)}% remaining</p>
           </CardContent>
         </Card>
 
         {/* Altitude */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Altitude reading" className="bg-slate-900 border-white/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-400 uppercase tracking-wider">Altitude</span>
@@ -267,12 +267,12 @@ export function OverviewTab() {
               {telemetry ? telemetry.altitude.toFixed(1) : '—'}
               <span className="text-sm text-slate-500 ml-1">m</span>
             </p>
-            <p className="text-[10px] text-slate-500 mt-2">Max: 120m</p>
+            <p role="status" aria-live="polite" className="text-[10px] text-slate-500 mt-2">Max: 120m</p>
           </CardContent>
         </Card>
 
         {/* Signal */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Signal strength" className="bg-slate-900 border-white/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-slate-400 uppercase tracking-wider">Signal</span>
@@ -282,7 +282,7 @@ export function OverviewTab() {
               {telemetry ? telemetry.signal_strength : '—'}
               <span className="text-sm text-slate-500 ml-1">dBm</span>
             </p>
-            <p className="text-[10px] text-slate-500 mt-2">
+            <p role="status" aria-live="polite" className="text-[10px] text-slate-500 mt-2">
               {(telemetry?.signal_strength || 0) > -60 ? 'Strong' : (telemetry?.signal_strength || 0) > -75 ? 'Fair' : 'Weak'}
             </p>
           </CardContent>
@@ -292,7 +292,7 @@ export function OverviewTab() {
       {/* Agents + Mission + GPS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Agent Status */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="AI agent status" aria-live="polite" className="bg-slate-900 border-white/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-slate-200">AI Agents</CardTitle>
             <CardDescription className="text-xs">Multi-agent intelligence status</CardDescription>
@@ -334,7 +334,7 @@ export function OverviewTab() {
         </Card>
 
         {/* Active Mission */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Active mission status" className="bg-slate-900 border-white/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-slate-200">Active Mission</CardTitle>
             <CardDescription className="text-xs">Current operation status</CardDescription>
@@ -366,7 +366,7 @@ export function OverviewTab() {
         </Card>
 
         {/* GPS + Devices */}
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Position and devices" className="bg-slate-900 border-white/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-slate-200">Position & Devices</CardTitle>
             <CardDescription className="text-xs">GPS fix & hardware summary</CardDescription>
@@ -400,7 +400,7 @@ export function OverviewTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <BootFlowPanel />
 
-        <Card className="bg-slate-900 border-white/5">
+        <Card aria-label="Recent alerts" aria-live="polite" className="bg-slate-900 border-white/5">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>

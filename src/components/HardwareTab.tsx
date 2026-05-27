@@ -221,7 +221,7 @@ export function HardwareTab() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div role="list" aria-label="Device list" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {devices.map((device) => {
             const DeviceIcon = DEVICE_ICONS[device.deviceType] || Cpu
             const isExpanded = expandedDevice === device.id
@@ -232,6 +232,8 @@ export function HardwareTab() {
             return (
               <Card
                 key={device.id}
+                role="listitem"
+                aria-label={`${device.name} - ${device.status}`}
                 className={`bg-slate-900 border-white/5 hover:border-white/10 transition-colors ${
                   device.status === 'error' ? 'border-rose-500/30' : ''
                 }`}

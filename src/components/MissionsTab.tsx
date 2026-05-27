@@ -302,7 +302,7 @@ export function MissionsTab() {
             const TypeIcon = TYPE_ICONS[mission.type] || Map
             const actions = getMissionActions(mission.status)
             return (
-              <Card key={mission.id} className="bg-slate-900 border-white/5 hover:border-white/10 transition-colors">
+              <Card key={mission.id} aria-label={`Mission: ${mission.name} - ${mission.status}`} className="bg-slate-900 border-white/5 hover:border-white/10 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2.5">
@@ -351,10 +351,10 @@ export function MissionsTab() {
                               <a.icon className="w-3 h-3 mr-1" />
                               {a.label}
                             </Button>
-                            <AlertDialogContent className="bg-slate-900 border-slate-700">
+                            <AlertDialogContent role="dialog" aria-describedby="abort-description" className="bg-slate-900 border-slate-700">
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="text-white">Abort Mission</AlertDialogTitle>
-                                <AlertDialogDescription className="text-slate-400">
+                                <AlertDialogDescription id="abort-description" className="text-slate-400">
                                   Are you sure you want to abort &quot;{mission.name}&quot;? This will immediately stop the mission and mark it as aborted. This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>

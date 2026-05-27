@@ -320,7 +320,7 @@ export function FlashTab() {
                   ) : firmwareList.length === 0 ? (
                     <p className="text-[11px] text-slate-600">No firmware available for this target</p>
                   ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2 max-h-48 overflow-y-auto" aria-label="Firmware list">
                       {firmwareList.map((fw) => (
                         <button
                           key={fw.version}
@@ -518,7 +518,7 @@ export function FlashTab() {
                       </div>
 
                       <div className="flex items-center gap-3 mb-2">
-                        <Progress value={op.progress} className="h-1.5 bg-white/5 [&>div]:bg-teal-500 flex-1" />
+                        <Progress value={op.progress} role="progressbar" aria-valuenow={op.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Flash progress: ${op.progress}%`} aria-busy={op.status === 'flashing' || op.status === 'preparing' || op.status === 'verifying'} className="h-1.5 bg-white/5 [&>div]:bg-teal-500 flex-1" />
                         <span className="text-xs text-slate-400 font-mono w-10 text-right">{op.progress}%</span>
                       </div>
 
