@@ -419,7 +419,7 @@ export function AgentsTab() {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col min-h-0 p-4 pt-0">
               <ScrollArea className="flex-1" ref={scrollRef}>
-                <div className="space-y-3 max-h-[35vh] lg:max-h-[40vh] overflow-y-auto pr-2">
+                <div role="log" aria-label="Chat messages" className="space-y-3 max-h-[35vh] lg:max-h-[40vh] overflow-y-auto pr-2">
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="w-5 h-5 text-teal-400 animate-spin" />
@@ -435,7 +435,7 @@ export function AgentsTab() {
                       const style = getAgentStyle(msg.agent)
                       const IconComponent = getAgentIcon(msg.agent)
                       return (
-                        <div key={msg.id} className={`flex gap-2.5 ${msg.agent === 'operator' ? 'flex-row-reverse' : ''}`}>
+                        <div key={msg.id} aria-live="polite" className={`flex gap-2.5 ${msg.agent === 'operator' ? 'flex-row-reverse' : ''}`}>
                           <div className={`w-7 h-7 rounded-lg ${style.bg} border ${style.border} flex items-center justify-center shrink-0`}>
                             <IconComponent className={`w-3.5 h-3.5 ${style.icon}`} />
                           </div>
@@ -476,6 +476,7 @@ export function AgentsTab() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Send command to Hermes..."
+              aria-label="Chat input"
               className="bg-slate-900 border-white/10 text-white placeholder:text-slate-600"
               disabled={sending}
             />
@@ -483,6 +484,7 @@ export function AgentsTab() {
               size="sm"
               onClick={() => handleSend()}
               disabled={sending || !inputText.trim()}
+              aria-label="Send message"
               className="bg-teal-600 hover:bg-teal-700 text-white h-9 px-4"
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

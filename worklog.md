@@ -1,52 +1,56 @@
-# Worklog — Task 13-17: CI/CD, Docker, and Environment Validation
+# Worklog — Task ID: 22-23-25
 
-## Summary
-Added CI/CD pipeline, Docker configuration, environment validation, and rate limiting to the Nanggroe IoT project.
+## OpenAPI/Swagger, Sentry Error Monitoring, and SEO
 
-## Files Created
+**Date:** 2025-07-31
+**Author:** Z.ai Code Agent
 
-1. **`.github/workflows/ci.yml`** — Replaced existing CI pipeline with structured 3-job workflow:
-   - `lint-and-typecheck`: Lint + TypeScript check
-   - `build`: Generate Prisma + build Next.js (depends on lint-and-typecheck)
-   - `e2e-tests`: Playwright E2E tests with test database (depends on build)
+---
 
-2. **`Dockerfile`** — Multi-stage production build:
-   - Stage 1 (deps): Install dependencies with bun, generate Prisma client
-   - Stage 2 (builder): Build Next.js with standalone output
-   - Stage 3 (runner): Slim node:20-alpine production image, non-root user, exposes port 3000
+### Summary
 
-3. **`docker-compose.yml`** — Single service with:
-   - Port 3000 mapping
-   - DATABASE_URL and NODE_ENV environment
-   - Persistent volumes for `iot-data` (db) and `iot-uploads`
-   - `unless-stopped` restart policy
+Added three major features to the Nanggroe IoT platform:
 
-4. **`.dockerignore`** — Excludes node_modules, .next, db/, .git, skills/, examples/, download/, upload/, agent-ctx/
+1. **OpenAPI/Swagger API Documentation** — Full OpenAPI 3.0.3 spec served at `/api/docs` with a Swagger UI page
+2. **Sentry-style Error Monitoring** — Custom `ErrorReporter` class that queues and flushes errors to the Alert DB model
+3. **SEO** — Dynamic `sitemap.xml`, `robots.txt`, and `manifest.json` via Next.js convention files
 
-5. **`src/lib/env.ts`** — Zod-based environment validation:
-   - DATABASE_URL (required), NODE_ENV, PORT
-   - NANGGROE_API_KEY, ZAI_API_KEY, TELEGRAM_BOT_TOKEN (optional)
-   - SERIAL_PORT, SERIAL_BAUD_RATE, MCP_PORT, EXTENSION_WS_PORT
-   - HARDWARE_BRIDGE_MODE (simulation|real)
-   - Helper functions: `getEnv()`, `isProduction()`, `isDevelopment()`
+---
 
-6. **`src/lib/rate-limit.ts`** — In-memory rate limiter:
-   - IP + pathname based rate limiting
-   - Configurable window (ms) and max requests
-   - Automatic cleanup of expired entries every 60s
-   - Returns 429 with Retry-After header when exceeded
+### Files Created
 
-## Files Modified (Rate Limiting Added)
+| File | Description |
+|------|-------------|
+| `src/app/api/docs/route.ts` | OpenAPI 3.0.3 spec as JSON, covering all 35+ API endpoints with schemas |
+| `src/app/api/docs/page.tsx` | Swagger UI page loading external swagger-ui-dist with spec URL pointing to `/api/docs` |
+| `src/lib/sentry.ts` | `ErrorReporter` class with queue-based error capture, 30s flush interval, DB persistence to Alert model |
+| `src/app/global-error.tsx` | Root-level error boundary that reports to `/api/system` and displays a styled error page |
+| `src/app/sitemap.ts` | Dynamic sitemap.xml generation via Next.js MetadataRoute |
+| `src/app/robots.ts` | Dynamic robots.txt — allows `/`, disallows `/api/` |
+| `src/app/manifest.ts` | PWA manifest with Nanggroe IoT branding (teal theme, dark background) |
 
-7. **`src/app/api/agents/chat/route.ts`** — POST: 20 req/min
-8. **`src/app/api/llm/chat/route.ts`** — POST: 20 req/min
-9. **`src/app/api/mcp/route.ts`** — GET: 30 req/min, POST: 30 req/min
-10. **`src/app/api/hardware/route.ts`** — GET: 60 req/min, POST: 60 req/min, PUT: 60 req/min
-11. **`src/app/api/missions/route.ts`** — GET: 60 req/min, POST: 60 req/min, PUT: 60 req/min
-12. **`src/app/api/telemetry/route.ts`** — GET: 120 req/min, POST: 120 req/min
-13. **`src/app/api/system/route.ts`** — GET: 30 req/min, POST: 30 req/min
+---
 
-## Verification
-- TypeScript check (`npx tsc --noEmit`): **0 errors** in src/
-- Dev server: Running normally, API routes responding correctly
-- Lint: Only pre-existing errors (unrelated to this task)
+### Key Decisions
+
+- **OpenAPI Spec**: Chose dynamic generation in `route.ts` so the spec can be extended programmatically. All endpoints from the existing API routes are documented with operation IDs, tags, request bodies, and response schemas. Schemas include: `HardwareDevice`, `Mission`, `TelemetryReading`, `Alert`, `AgentMessage`, `PowerSource`, and their input variants.
+- **Sentry Integration**: Used `ReturnType<typeof setInterval>` instead of `NodeJS.Timer` for better TypeScript compatibility. The `ErrorReporter` singleton pattern allows import from any server-side module via `getErrorReporter()`. Errors are stored as Alert records in the database with appropriate severity mapping.
+- **Global Error Page**: Uses inline styles (required for `global-error.tsx` since it renders outside the root layout). Reports errors client-side via fetch to `/api/system`.
+- **Swagger UI**: Added `eslint-disable` for `@next/next/no-sync-scripts` since Swagger UI requires synchronous script loading to initialize properly.
+- **robots.txt**: The dynamic `src/app/robots.ts` takes precedence over the static `public/robots.txt`. The dynamic version properly disallows `/api/` to prevent search engines from indexing API endpoints.
+
+---
+
+### Verification
+
+- **TypeScript**: `npx tsc --noEmit` — 0 errors in non-test source files (all `src/` errors are pre-existing in `__tests__` directories)
+- **ESLint**: All new files pass lint with 0 errors/warnings
+- **Dev Server**: Running successfully, all existing routes continue to function
+
+---
+
+### Task IDs
+
+- **22**: OpenAPI/Swagger API Documentation ✅
+- **23**: Sentry Error Monitoring ✅
+- **25**: SEO (sitemap.xml, robots.txt, manifest.json) ✅

@@ -186,7 +186,7 @@ export function PowerTab() {
 
       {/* Main Battery Status */}
       {status && (
-        <Card className="bg-slate-900/50 border-slate-700/50">
+        <Card aria-label="Main battery status" className="bg-slate-900/50 border-slate-700/50">
           <CardHeader>
             <CardTitle className="text-sm text-white flex items-center gap-2">
               <Battery className="w-4 h-4 text-teal-400" />
@@ -205,7 +205,7 @@ export function PowerTab() {
                   {STATUS_LABELS[status.mainBattery.status] || status.mainBattery.status}
                 </Badge>
               </div>
-              <Progress value={status.mainBattery.percentage} className="h-3" />
+              <Progress value={status.mainBattery.percentage} role="progressbar" aria-valuenow={status.mainBattery.percentage} aria-valuemin={0} aria-valuemax={100} aria-label={`Battery level: ${status.mainBattery.percentage}%`} className="h-3" />
               <div className="flex justify-between text-xs text-slate-400">
                 <span>{status.mainBattery.percentage}%</span>
                 <span>Est. {status.mainBattery.estimatedMinutes} menit tersisa</span>
@@ -222,7 +222,7 @@ export function PowerTab() {
           const isEnabled = sourceEnabledMap[source.id] !== false
           const isToggling = togglingSource === source.id
           return (
-            <Card key={source.id} className={`bg-slate-900/50 border-slate-700/50 transition-opacity ${!isEnabled ? 'opacity-60' : ''}`}>
+            <Card key={source.id} aria-label={`Power source: ${source.name}`} className={`bg-slate-900/50 border-slate-700/50 transition-opacity ${!isEnabled ? 'opacity-60' : ''}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

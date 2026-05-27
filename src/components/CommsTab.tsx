@@ -245,7 +245,7 @@ export function CommsTab() {
         {channels.map((channel) => {
           const IconComp = CHANNEL_ICONS[channel.type] || MessageSquare
           return (
-            <Card key={channel.id} className="bg-slate-900/50 border-slate-700/50">
+            <Card key={channel.id} aria-label={`Communication channel: ${channel.name} - ${channel.status}`} className="bg-slate-900/50 border-slate-700/50">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -253,10 +253,12 @@ export function CommsTab() {
                     <CardTitle className="text-sm text-white">{channel.name}</CardTitle>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[channel.status] || 'bg-slate-500'}`} />
+                    <div className={`w-2 h-2 rounded-full ${STATUS_COLORS[channel.status] || 'bg-slate-500'}`} aria-label={`Channel status: ${channel.status}`} />
                     <Switch
                       checked={channel.isEnabled}
                       onCheckedChange={(checked) => toggleChannel(channel.id, checked)}
+                      role="switch"
+                      aria-label={`${channel.isEnabled ? 'Disable' : 'Enable'} ${channel.name}`}
                     />
                   </div>
                 </div>

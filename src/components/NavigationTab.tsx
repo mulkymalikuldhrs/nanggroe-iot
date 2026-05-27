@@ -350,10 +350,10 @@ export function NavigationTab() {
               RTH Emergency
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-slate-900 border-slate-700">
+          <AlertDialogContent role="alertdialog" aria-describedby="rth-description" className="bg-slate-900 border-slate-700">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-white">Confirm RTH Emergency</AlertDialogTitle>
-              <AlertDialogDescription className="text-slate-400">
+              <AlertDialogDescription id="rth-description" className="text-slate-400">
                 This will immediately trigger Return-to-Home. The drone will abort its current mission and navigate back to the home position. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -407,6 +407,8 @@ export function NavigationTab() {
               placeholder="Nama misi (contoh: Pemetaan Sawah Pak Ahmad)"
               value={mappingName}
               onChange={(e) => setMappingName(e.target.value)}
+              aria-label="Mapping mission name"
+              aria-required="true"
               className="bg-slate-800 border-slate-700 text-white"
             />
             <div>
@@ -415,6 +417,8 @@ export function NavigationTab() {
                 placeholder={"4.9125, 97.1347\n4.9135, 97.1347\n4.9135, 97.1357\n4.9125, 97.1357"}
                 value={mappingCoords}
                 onChange={(e) => setMappingCoords(e.target.value)}
+                aria-label="GPS coordinates for mapping area"
+                aria-required="true"
                 className="w-full h-24 bg-slate-800 border border-slate-700 text-white text-xs rounded-md p-2 font-mono"
               />
             </div>
@@ -454,27 +458,33 @@ export function NavigationTab() {
               placeholder="Nama misi pengiriman"
               value={deliveryName}
               onChange={(e) => setDeliveryName(e.target.value)}
+              aria-label="Delivery mission name"
+              aria-required="true"
               className="bg-slate-800 border-slate-700 text-white"
             />
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs text-slate-400">Pickup Lat</label>
                 <Input placeholder="4.9125" value={pickupLat} onChange={(e) => setPickupLat(e.target.value)}
+                  aria-label="Pickup latitude" aria-required="true"
                   className="bg-slate-800 border-slate-700 text-white text-xs" />
               </div>
               <div>
                 <label className="text-xs text-slate-400">Pickup Lng</label>
                 <Input placeholder="97.1347" value={pickupLng} onChange={(e) => setPickupLng(e.target.value)}
+                  aria-label="Pickup longitude" aria-required="true"
                   className="bg-slate-800 border-slate-700 text-white text-xs" />
               </div>
               <div>
                 <label className="text-xs text-slate-400">Drop Lat</label>
                 <Input placeholder="4.9145" value={dropLat} onChange={(e) => setDropLat(e.target.value)}
+                  aria-label="Drop latitude" aria-required="true"
                   className="bg-slate-800 border-slate-700 text-white text-xs" />
               </div>
               <div>
                 <label className="text-xs text-slate-400">Drop Lng</label>
                 <Input placeholder="97.1367" value={dropLng} onChange={(e) => setDropLng(e.target.value)}
+                  aria-label="Drop longitude" aria-required="true"
                   className="bg-slate-800 border-slate-700 text-white text-xs" />
               </div>
             </div>
