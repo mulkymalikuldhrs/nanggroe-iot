@@ -124,3 +124,9 @@ playwright-report/
 
 # Prisma DB files
 prisma/db/*.db
+.env.production
+dist/
+.next/
+.vercel/
+venv/
+__pycache__/
