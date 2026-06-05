@@ -35,7 +35,7 @@ export default function GlobalError({
           backgroundColor: '#0f172a',
           color: '#fff',
           fontFamily: 'system-ui, sans-serif',
-        }}>
+        }} role="alert" aria-label="Application error">
           <div style={{ textAlign: 'center', padding: '2rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f87171', marginBottom: '1rem' }}>
               Something went wrong
@@ -45,6 +45,7 @@ export default function GlobalError({
             </p>
             <button
               onClick={reset}
+              aria-label="Try again"
               style={{
                 padding: '0.5rem 1.5rem',
                 backgroundColor: '#14b8a6',
