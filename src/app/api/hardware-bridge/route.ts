@@ -42,13 +42,18 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Failed to get hardware bridge data' },
+      { success: false, error: 'Failed to get hardware bridge data' },
       { status: 500 }
     )
   }
 }
 
 export async function POST(request: NextRequest) {
+  // Hardware bridge write operations require API key auth
+  const { validateApiKey } = await import('@/lib/auth')
+  const authError = validateApiKey(request)
+  if (authError) return authError
+
   try {
     const body = await request.json()
     const bridge = await getHardwareBridge()
@@ -184,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Failed to process hardware bridge action' },
+      { success: false, error: 'Failed to process hardware bridge action' },
       { status: 500 }
     )
   }

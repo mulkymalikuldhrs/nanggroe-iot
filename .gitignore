@@ -132,3 +132,22 @@ dist/
 venv/
 __pycache__/
 .replit
+
+# Flash work directory (firmware downloads/backups)
+.flash-work/
+
+# Coverage
+coverage/
+
+# MyPy / Python caches (if any Python tooling used)
+.mypy_cache/
+*.egg-info/
+
+# Security / cert files
+*.crt
+*.key
+*.p12
+*.jks
+
+# Package lock (use bun.lock instead)
+package-lock.json

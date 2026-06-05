@@ -87,6 +87,7 @@ Nanggroe IoT uses API key authentication to protect critical routes. The `NANGGR
 - Validates `x-api-key` header
 - Validates `Authorization: Bearer` header
 - Validates `api_key` query parameter
+- Uses **timing-safe comparison** (`crypto.timingSafeEqual`) to prevent timing attacks
 - In development without key: requests are allowed (for convenience)
 - In production without key: returns `401 Unauthorized`
 
@@ -94,7 +95,9 @@ Nanggroe IoT uses API key authentication to protect critical routes. The `NANGGR
 - `POST /api/mcp` — MCP tool execution
 - `POST /api/system` — System configuration updates
 - `POST /api/flash` — Firmware flashing
+- `PUT /api/flash` — Flash operation cancel/verify
 - `POST /api/hardware-bridge` — Hardware bus operations
+- `POST /api/agents/chat` — AI agent chat
 
 **Setup**:
 ```bash
@@ -171,12 +174,21 @@ Nanggroe IoT uses Prisma ORM with parameterized queries:
 - Input validation prevents script injection in stored data
 - `dangerouslySetInnerHTML` is not used in the codebase
 
+### System Configuration Protection
+
+The `/api/system` POST endpoint has mass assignment prevention:
+- **Key format validation** — Config keys must match `^[a-z0-9._-]+$` (no special chars)
+- **Sensitive key blocking** — Keys containing `key`, `token`, `secret`, `password`, `credential`, or `private` are silently rejected
+- **Category whitelist** — Only `general`, `hardware`, `agent`, `mission`, `network` categories are accepted
+
 ### Error Handling
 
 - React error boundaries catch component crashes gracefully
-- API routes return structured error responses without stack traces in production
+- **Error messages are hidden in production** — only shown in development mode
+- API routes return structured error responses without internal details or stack traces
 - Database errors are caught and return generic error messages
 - No sensitive information is leaked in error responses
+- Global error boundary logs to console only (does not POST error data to API)
 
 ---
 
@@ -214,6 +226,14 @@ When deploying Nanggroe IoT:
 - **Directory protection** — Ensure the `db/` directory is not web-accessible
 - **Backup encryption** — Encrypt database backups if they contain sensitive data
 - **WAL mode** — SQLite WAL mode is used for concurrent read/write performance
+
+### Known Limitations
+
+- **In-memory rate limiter** — Rate limiting is stored in-process memory; it will not work in multi-instance deployments (use Caddy/Nginx rate limiting for production)
+- **Single API key** — All authenticated routes share one API key; no per-user or per-role access control
+- **No user authentication** — The system uses a single API key, not individual user accounts
+- **API key in query parameter** — The `api_key` query parameter may be logged in server access logs and browser history; prefer `x-api-key` header or `Authorization: Bearer` header
+- **No encrypted database** — SQLite database is not encrypted at rest; protect via file permissions
 
 ---
 

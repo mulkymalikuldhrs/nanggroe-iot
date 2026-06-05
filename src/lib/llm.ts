@@ -612,6 +612,24 @@ class RateLimiter {
   private readonly maxRequests = 30
   private readonly windowMs = 60_000
 
+  constructor() {
+    // Clean up expired entries every 60 seconds to prevent memory leak
+    if (typeof setInterval !== 'undefined') {
+      setInterval(() => {
+        const now = Date.now()
+        const windowStart = now - this.windowMs
+        for (const [key, timestamps] of this.requests) {
+          const recent = timestamps.filter(t => t > windowStart)
+          if (recent.length === 0) {
+            this.requests.delete(key)
+          } else {
+            this.requests.set(key, recent)
+          }
+        }
+      }, 60000)
+    }
+  }
+
   isAllowed(key: string): boolean {
     const now = Date.now()
     const windowStart = now - this.windowMs

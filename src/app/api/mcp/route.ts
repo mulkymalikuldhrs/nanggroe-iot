@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Tool execution failed' },
+      { success: false, error: 'Tool execution failed' },
       { status: 500 }
     )
   }

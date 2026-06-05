@@ -134,16 +134,34 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update config entries
+    // Update config entries (whitelist only allowed keys to prevent mass assignment)
     if (configs && Array.isArray(configs)) {
+      const ALLOWED_CATEGORIES = ['general', 'hardware', 'agent', 'mission', 'network']
+      const BLOCKED_KEY_PATTERNS = ['key', 'token', 'secret', 'password', 'credential', 'private']
+
       for (const config of configs) {
+        // Validate key format (must be dot-separated, no special chars)
+        if (!config.key || typeof config.key !== 'string' || !/^[a-z0-9._-]+$/i.test(config.key)) {
+          continue
+        }
+        // Block sensitive keys from being set via API
+        const keyLower = config.key.toLowerCase()
+        if (BLOCKED_KEY_PATTERNS.some(pattern => keyLower.includes(pattern))) {
+          continue
+        }
+        // Validate category
+        const category = config.category || 'general'
+        if (!ALLOWED_CATEGORIES.includes(category)) {
+          continue
+        }
+
         await db.systemConfig.upsert({
           where: { key: config.key },
-          update: { value: config.value, category: config.category || 'general' },
+          update: { value: config.value, category },
           create: {
             key: config.key,
             value: config.value,
-            category: config.category || 'general',
+            category,
           },
         })
       }

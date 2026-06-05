@@ -7,22 +7,22 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  // Report to error monitoring
+  // Report to error monitoring — only log to console, don't POST to API
+  // (avoid sending error details to system config endpoint without auth)
   if (typeof window !== 'undefined') {
-    fetch('/api/system', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: 'error_report',
-        value: JSON.stringify({
-          message: error.message,
-          digest: error.digest,
-          url: window.location.href,
-          timestamp: new Date().toISOString(),
-        }),
-      }),
-    }).catch(() => {})
+    console.error('[GlobalError]', {
+      message: error.message,
+      digest: error.digest,
+      url: window.location.href,
+      timestamp: new Date().toISOString(),
+    })
   }
+
+  // Only expose error details in development — never in production
+  const isDev = typeof window !== 'undefined' && process.env.NODE_ENV === 'development'
+  const displayMessage = isDev
+    ? (error.message || 'An unexpected error occurred')
+    : 'An unexpected error occurred. Please try again.'
 
   return (
     <html lang="en">
@@ -41,7 +41,7 @@ export default function GlobalError({
               Something went wrong
             </h2>
             <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
-              {error.message || 'An unexpected error occurred'}
+              {displayMessage}
             </p>
             <button
               onClick={reset}
