@@ -405,7 +405,7 @@ sudo udevadm trigger
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `DATABASE_URL` | SQLite database path | `file:./db/nanggroe-iot.db` |
-| `NANGGROE_API_KEY` | API authentication key | `nanggroe-iot-prod-key-2025` |
+| `NANGGROE_API_KEY` | API authentication key | `generate-with-openssl-rand-hex-32` |
 
 ### Optional
 

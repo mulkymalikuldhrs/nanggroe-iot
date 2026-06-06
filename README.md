@@ -650,16 +650,15 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 For security vulnerabilities, please **do not** open public issues. See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
 
-**Contact**: mulkymalikuldhaher@email.com
+**Contact**: [mulkymalikudhr@mail.com](mailto:mulkymalikudhr@mail.com)
 
 ---
 
-## Author
+## 👤 Author
 
 **Mulky Malikul Dhaher**
-
-- Email: mulkymalikuldhaher@email.com
-- GitHub: [@mulkymalikuldhaher](https://github.com/mulkymalikuldhaher)
+- Email: [mulkymalikudhr@mail.com](mailto:mulkymalikudhr@mail.com)
+- GitHub: [mulkymalikuldhrs](https://github.com/mulkymalikuldhrs)
 
 ---
 
@@ -690,6 +689,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+---
+
+## ⚠️ Disclaimer
+
+**For Education Purpose Only**
+
+This project is provided strictly for educational and research purposes. The authors and contributors assume **no responsibility or liability** for any damages, losses, or risks arising from the use of this software. **We do not bear any responsibility or risk** for how this software is used.
+
+**Contact:** Mulky Malikul Dhaher | mulkymalikudhr@mail.com
 
 ---
 
