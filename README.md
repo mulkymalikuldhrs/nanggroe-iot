@@ -1,22 +1,24 @@
+<a href="https://github.com/mulkymalikuldhrs/nanggroe-iot">
+  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0a1a0a,50:0d2a0d,100:103a10&height=200&section=header&text=Nanggroe%20IoT&fontSize=42&fontColor=22c55e&animation=fadeIn&fontAlignY=30&desc=Modular%20IoT%20%26%20Robotics%20Platform&descSize=16&descColor=a3e635&descAlignY=50" />
+</a>
+
 <div align="center">
 
-# Nanggroe IoT
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&duration=3000&pause=1000&color=22c55e&center=true&vCenter=true&width=700&lines=Modular+IoT+%2B+Robotics+Platform;Real-Time+Hardware+Control+%26+Monitoring;TypeScript-Powered+Device+Orchestration;WebSocket-Driven+Live+Data+Streaming)](https://git.io/typing-svg)
 
-### Modular IoT & Robotics Platform
+<br/>
 
-**Nanggroe IoT — Modular IoT & Robotics Platform**
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
+[![IoT](https://img.shields.io/badge/IoT-Platform-22c55e?style=for-the-badge&logo=iot&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
+[![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-ffa500?style=for-the-badge&logo=websocket&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
+[![Version](https://img.shields.io/badge/Version-1.0.0-22c55e?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-*Sistem Operasi Robotika Otonom Modular — Dari Aceh Untuk Dunia*
+<br/>
 
-[![Version](https://img.shields.io/badge/version-2.0.0-teal.svg)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org)
-[![Tauri](https://img.shields.io/badge/Tauri-v2-orange.svg)](https://tauri.app)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://typescriptlang.org)
-[![Capacitor](https://img.shields.io/badge/Capacitor-6-purple.svg)](https://capacitorjs.com)
-[![Tests](https://img.shields.io/badge/E2E%20Tests-183-teal.svg)](./e2e)
-
-[Report Bug](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues) · [Request Feature](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues) · [Security](SECURITY.md)
+[![GitHub Stars](https://img.shields.io/github/stars/mulkymalikuldhrs/nanggroe-iot?style=for-the-badge&logo=github&color=gold)](https://github.com/mulkymalikuldhrs/nanggroe-iot/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/mulkymalikuldhrs/nanggroe-iot?style=for-the-badge&logo=github&color=blue)](https://github.com/mulkymalikuldhrs/nanggroe-iot/fork)
+[![GitHub Issues](https://img.shields.io/github/issues/mulkymalikulhrs/nanggroe-iot?style=for-the-badge&logo=github&color=red)](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues)
 
 </div>
 
@@ -24,134 +26,70 @@
 
 ## Overview
 
-Nanggroe IoT is a modular autonomous robotics operating system designed to build, control, and manage many types of robots — drones, rovers, boats, amphibious vehicles, robotic arms, and custom Arduino projects — with integrated AI. Built with modern web technologies, runs on Raspberry Pi, supports full offline operation, and packages as native desktop (Linux/Windows) and mobile (Android) apps.
+Nanggroe IoT is a modular IoT and robotics platform with real-time hardware control and monitoring. Built with TypeScript, it provides a unified dashboard for managing IoT devices, streaming sensor data, and controlling hardware components through a responsive web interface. The platform leverages WebSocket connections for bi-directional, low-latency communication between devices and the control plane, enabling instant command dispatch and live telemetry visualization.
 
-### Key Highlights
-
-- **6 AI Agents** — Hermes, PicoClaw, Sentinel, Navigator, CommsGuard, DataSteward with Agent Orchestrator
-- **Multi-Robot Support** — 9 built-in templates for drones, rovers, boats, arms, blimps, and custom projects
-- **183 Playwright E2E Tests** — 8 spec files covering dashboard, API, agents, hardware, missions, navigation, flash, and power
-- **API Key Authentication** — Secure access to critical routes via `NANGGROE_API_KEY`
-- **Hardware Auto-Detect** — Serial, I2C, SPI, GPIO scanning with automatic driver loading
-- **Offline-First** — Local LLM, SQLite database, memory sync queue for disconnected operation
-- **Cross-Platform** — Web dashboard, Linux desktop (DEB/AppImage), Windows (MSI/NSIS), Android (APK)
-- **Real-Time** — Server-Sent Events telemetry streaming, WebSocket extension bridge
-- **Production-Ready** — 22 Prisma models, 42+ API routes, 20 dashboard tabs, database indexes, error boundaries
-
----
+Whether you're orchestrating a fleet of sensors, controlling robotic actuators, or building a smart-environment dashboard — Nanggroe IoT provides the modular foundation to connect, monitor, and command your hardware with precision.
 
 ## Features
 
-### Multi-Agent System
+- **Device Management** — Register, configure, and monitor IoT devices from a central dashboard with auto-discovery support
+- **Real-Time Control** — Send commands to hardware components via WebSocket connections with sub-second latency and guaranteed delivery acknowledgment
+- **Sensor Dashboard** — Visualize sensor data with real-time charts, configurable alert thresholds, and historical trend analysis
+- **Modular Architecture** — Plugin-based system that allows you to add new device drivers, protocols, and UI widgets without touching the core
+- **Robotics Integration** — Control servo motors, actuators, and robotic arms with precision command scheduling and state feedback loops
+- **Alert & Automation Engine** — Define rule-based triggers that automatically respond to sensor threshold breaches with configurable actions
 
-| Agent | Type | Role |
-|-------|------|------|
-| **Hermes** | LLM | Strategic planning, mission design, natural language chat |
-| **PicoClaw** | Rule | Tactical safety monitoring, failsafe execution |
-| **Sentinel** | Rule | Continuous telemetry monitoring, emergency action trigger |
-| **Navigator** | Hybrid | Route planning, obstacle avoidance, dynamic rerouting |
-| **CommsGuard** | Rule | Communication link monitoring, failover management |
-| **DataSteward** | Rule | Data pipeline health, anomaly detection, cleanup |
+## Architecture
 
-**Agent Orchestrator** — Singleton coordinator that manages task queue, inter-agent messaging, auto-recovery, and DB-backed task persistence.
-
-### Robot Platform
-
-| Feature | Description |
-|---------|-------------|
-| Robot Builder | Step-by-step project creation from templates with assembly guides |
-| 9 Templates | Tricopter, Quadcopter, Rover, Boat, Amphibious, Arm, Blimp, Hexacopter, Custom |
-| Hardware Auto-Detect | USB VID/PID scanning, serial port enumeration, I2C/SPI bus probing |
-| Firmware Flasher | Upload firmware to Arduino/Pixhawk with verification |
-| Calibration | Compass, accelerometer, gyro, ESC, radio calibration flows |
-| Assembly Guide | Step-by-step instructions with progress tracking |
-
-### AI & Intelligence
-
-| Feature | Description |
-|---------|-------------|
-| LLM Engine | Cloud + local models (TinyLlama, Phi-2, Llama-3.2, Gemma-2, Qwen2.5) |
-| 6-Agent System | Hermes + PicoClaw + Sentinel + Navigator + CommsGuard + DataSteward |
-| Agent Orchestrator | Task queue, priority scheduling, inter-agent communication, auto-recovery |
-| Self-Learning | Pattern detection, auto-tuning, knowledge transfer between projects |
-| AI Memory | Persistent memory with confidence scores and sync queue |
-| AI Testing | Automated test generation and coverage analysis |
-| Face Tracking | Detection, recognition database, servo tracking control |
-
-### Navigation & Mission
-
-| Feature | Description |
-|---------|-------------|
-| Mission Planner | Waypoint creation, area polygons, overlap/speed/altitude config |
-| GPS Tracking | Real-time position tracking via serial GPS |
-| Autopilot | Autonomous waypoint navigation with geofence |
-| RTH | Return-To-Home with configurable failsafe |
-| Field Mapping | Automated area survey with photo capture planning |
-| Delivery Routes | Point-to-point delivery with obstacle avoidance |
-
-### Communications
-
-| Feature | Description |
-|---------|-------------|
-| Telegram Bot | Hermes agent integration for remote control |
-| Voice/TTS | Speech input and text-to-speech output |
-| Beep Alerts | Configurable alert patterns via buzzer |
-| GSM Module | Cellular connectivity for remote areas |
-| Extension Bridge | WebSocket for VSCode, Cursor, Neovim, JetBrains |
-
-### Power & Infrastructure
-
-| Feature | Description |
-|---------|-------------|
-| Battery Monitor | Voltage, current, temperature tracking with alerts |
-| Solar Panel | Charge monitoring and power optimization |
-| System Doctor | Health checks, diagnostics, and auto-repair |
-| MCP Protocol | JSON-RPC 2.0 for external tool integration |
-| Boot Flow | Startup sequence manager with dependency ordering |
-| Sync Queue | Offline-first data sync with retry logic |
-
-### Security & Quality
-
-| Feature | Description |
-|---------|-------------|
-| API Key Auth | `NANGGROE_API_KEY` for critical route protection |
-| Command Injection Protection | Input sanitization on shell-execution routes |
-| CSP Headers | Content Security Policy in Tauri desktop builds |
-| Input Validation | Zod schema validation on critical API routes |
-| Error Boundaries | React error boundaries with graceful fallback UI |
-| Loading States | Skeleton loading patterns across all dashboard tabs |
-| Database Indexes | Performance indexes on key query fields |
-| N+1 Query Fix | Optimized Prisma queries with proper includes |
-
----
-
-## Tech Stack
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Framework | Next.js (App Router) | 16 |
-| Desktop | Tauri | v2 |
-| Mobile | Capacitor | 6 |
-| Language | TypeScript | 5 (strict) |
-| Backend | Rust | 2021 edition |
-| Styling | Tailwind CSS + shadcn/ui | 4 |
-| Database | Prisma ORM (SQLite) | 6 |
-| State | Zustand + TanStack Query | 5 / 5 |
-| AI SDK | z-ai-web-dev-sdk | latest |
-| E2E Testing | Playwright | 1.60 |
-| Serial | serialport | 13 |
-
----
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Nanggroe IoT Platform                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
+│  │   Web Client  │    │  Mobile App  │    │   CLI Tool   │      │
+│  │  (Dashboard)  │    │  (Remote)    │    │  (Terminal)  │      │
+│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘      │
+│         │                   │                   │               │
+│         └───────────────────┼───────────────────┘               │
+│                             │                                   │
+│                    ┌────────▼────────┐                          │
+│                    │   API Gateway   │                          │
+│                    │  (REST + WS)    │                          │
+│                    └────────┬────────┘                          │
+│                             │                                   │
+│         ┌───────────────────┼───────────────────┐               │
+│         │                   │                   │               │
+│  ┌──────▼───────┐  ┌──────▼───────┐  ┌──────▼───────┐        │
+│  │   Device     │  │    Sensor    │  │  Automation  │        │
+│  │  Manager     │  │   Pipeline   │  │   Engine     │        │
+│  │              │  │              │  │              │        │
+│  │ • Register   │  │ • Ingest     │  │ • Rules      │        │
+│  │ • Config     │  │ • Transform  │  │ • Triggers   │        │
+│  │ • Monitor    │  │ • Store      │  │ • Actions    │        │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
+│         │                  │                  │                │
+│         └──────────────────┼──────────────────┘                │
+│                            │                                    │
+│                   ┌────────▼────────┐                          │
+│                   │  Protocol Layer │                          │
+│                   │                 │                          │
+│                   │ • MQTT  • CoAP  │                          │
+│                   │ • HTTP  • WS    │                          │
+│                   │ • Serial • BLE  │                          │
+│                   └────────┬────────┘                          │
+│                            │                                    │
+│              ┌─────────────┼─────────────┐                     │
+│              │             │             │                     │
+│       ┌──────▼──┐   ┌────▼────┐   ┌────▼────┐               │
+│       │ Sensor  │   │ Actuator│   │ Robot   │               │
+│       │ Nodes   │   │ Modules │   │ Arms    │               │
+│       └─────────┘   └─────────┘   └─────────┘               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Quick Start
-
-### Prerequisites
-
-- **Bun** >= 1.0 ([install](https://bun.sh))
-- **Node.js** >= 18 (for compatibility)
-- **Git** for version control
-
-### Installation
 
 ```bash
 # Clone the repository
@@ -159,553 +97,49 @@ git clone https://github.com/mulkymalikuldhrs/nanggroe-iot.git
 cd nanggroe-iot
 
 # Install dependencies
-bun install
+npm install
 
-# Set up environment
+# Configure environment
 cp .env.example .env
-# Edit .env with your configuration (add NANGGROE_API_KEY for production)
-
-# Initialize database
-bun run db:push
-bun run db:generate
 
 # Start development server
-bun run dev
-
-# Open in browser at http://localhost:3000
+npm run dev
 ```
 
-### Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start Next.js development server on port 3000 |
-| `bun run build` | Build for production |
-| `bun run start` | Start production server |
-| `bun run lint` | Run ESLint checks |
-| `bun run db:push` | Push Prisma schema to database |
-| `bun run db:generate` | Generate Prisma client |
-| `bun run db:migrate` | Run database migrations |
-| `bun run db:reset` | Reset database with seed data |
-| `bun run test:e2e` | Run Playwright E2E tests |
-| `bun run test:e2e:ui` | Run E2E tests with Playwright UI |
-| `bun run tauri:dev` | Start Tauri desktop dev mode |
-| `bun run tauri:build` | Build desktop app for current platform |
-| `bun run tauri:build:linux` | Build Linux DEB + AppImage |
-| `bun run tauri:build:windows` | Build Windows MSI + NSIS |
-| `bun run android:sync` | Sync web assets to Android project |
-| `bun run android:open` | Open Android project in Android Studio |
-| `bun run android:build` | Build web + sync to Android |
-
----
-
-## Desktop App (Tauri v2)
-
-Build Nanggroe IoT as a native desktop application for **Linux** and **Windows**.
-
-### Linux Prerequisites (Debian/Ubuntu)
-
-```bash
-sudo apt update
-sudo apt install -y libwebkit2gtk-4.1-dev \
-  libgtk-3-dev libayatana-appindicator3-dev \
-  librsvg2-dev libssl-dev libclang-dev \
-  build-essential pkg-config
-
-# Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
-```
-
-### Windows Prerequisites
-
-```bash
-# Install Visual Studio Build Tools (C++ workload)
-# Download: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-
-# Install Rust
-winget install Rustlang.Rustup
-```
-
-### Build Commands
-
-```bash
-# Development (hot-reload)
-bun run tauri:dev
-
-# Linux packages (DEB + AppImage)
-bun run tauri:build:linux
-
-# Windows installers (MSI + NSIS)
-bun run tauri:build:windows
-```
-
-### Build Output
-
-| Platform | Output Path |
-|----------|------------|
-| Linux DEB | `src-tauri/target/release/bundle/deb/nanggroe-iot_2.0.0_amd64.deb` |
-| Linux AppImage | `src-tauri/target/release/bundle/appimage/nanggroe-iot_2.0.0_amd64.AppImage` |
-| Windows MSI | `src-tauri/target/release/bundle/msi/Nanggroe IoT_2.0.0_x64_en-US.msi` |
-| Windows EXE | `src-tauri/target/release/bundle/nsis/Nanggroe IoT_2.0.0_x64-setup.exe` |
-
-### Tauri Configuration
-
-| Setting | Value |
-|---------|-------|
-| Product Name | Nanggroe IoT |
-| Identifier | com.nanggroe.iot |
-| Window Size | 1440×900 (min: 1024×700) |
-| Window Title | Nanggroe IoT — IoT & Robotics Platform |
-
----
-
-## Android App (Capacitor)
-
-Build Nanggroe IoT as an Android application.
-
-### Prerequisites
-
-- **Android Studio** with SDK 33+
-- **Java Development Kit** (JDK 17)
-
-### Setup & Build
-
-```bash
-# Sync web assets to Android project
-bun run android:sync
-
-# Open in Android Studio for build/run
-bun run android:open
-
-# Or build and run on connected device
-bun run android:run
-```
-
-### Capacitor Configuration
-
-| Setting | Value |
-|---------|-------|
-| App ID | com.nanggroe.iot |
-| App Name | Nanggroe IoT |
-| Web Dir | out |
-| Splash Duration | 2000ms |
-| Status Bar | Dark |
-
----
-
-## Project Architecture
-
-```
-nanggroe-iot/
-├── src/
-│   ├── app/                        # Next.js App Router
-│   │   ├── api/                    # 42+ API endpoints
-│   │   │   ├── agents/             # AI agent chat, management & orchestration
-│   │   │   ├── ai-memory/          # AI memory CRUD
-│   │   │   ├── alerts/             # Alert system
-│   │   │   ├── assembly/           # Robot assembly steps
-│   │   │   ├── auto-detect/        # Hardware auto-detection
-│   │   │   ├── bootflow/           # Boot sequence manager
-│   │   │   ├── calibration/        # Sensor calibration
-│   │   │   ├── comms/              # Communications (Telegram, voice, beep, GSM)
-│   │   │   ├── doctor/             # System health diagnostics
-│   │   │   ├── drivers/            # Hardware driver management
-│   │   │   ├── extension/          # IDE extension bridge
-│   │   │   ├── face-tracking/      # Face detection & tracking
-│   │   │   ├── flash/              # Firmware flashing
-│   │   │   ├── hardware/           # Hardware device CRUD
-│   │   │   ├── hardware-bridge/    # Hardware bus abstraction
-│   │   │   ├── llm/                # LLM chat completions
-│   │   │   ├── mcp/                # MCP protocol transport
-│   │   │   ├── missions/           # Mission planning & execution
-│   │   │   ├── navigation/         # GPS & autopilot routes
-│   │   │   ├── power/              # Power source management
-│   │   │   ├── projects/           # Robot project CRUD
-│   │   │   ├── robot-templates/    # Template library
-│   │   │   ├── self-learn/         # Self-learning engine
-│   │   │   ├── stream/             # SSE telemetry & alerts
-│   │   │   ├── system/             # System configuration
-│   │   │   ├── telemetry/          # Telemetry readings
-│   │   │   └── testing/            # AI-powered testing
-│   │   ├── error.tsx               # Error boundary
-│   │   ├── loading.tsx             # Loading state
-│   │   ├── layout.tsx              # Root layout
-│   │   ├── page.tsx                # Main dashboard page
-│   │   └── globals.css             # Global styles
-│   ├── components/                 # 23 React components
-│   │   ├── ui/                     # 40+ shadcn/ui components
-│   │   ├── Dashboard.tsx           # Main dashboard with 20 tab navigation
-│   │   ├── OverviewTab.tsx         # System overview
-│   │   ├── RobotBuilderTab.tsx     # Robot project builder
-│   │   ├── AgentsTab.tsx           # AI agent management
-│   │   ├── MissionsTab.tsx         # Mission planning
-│   │   ├── NavigationTab.tsx       # GPS & autopilot
-│   │   ├── HardwareTab.tsx         # Hardware devices
-│   │   ├── DriversTab.tsx          # Driver management
-│   │   ├── FlashTab.tsx            # Firmware flasher
-│   │   ├── CalibrationTab.tsx      # Sensor calibration
-│   │   ├── TelemetryTab.tsx        # Real-time data
-│   │   ├── CommsTab.tsx            # Communications
-│   │   ├── PowerTab.tsx            # Power management
-│   │   ├── McpTab.tsx              # MCP protocol
-│   │   ├── ExtensionTab.tsx        # IDE extension
-│   │   ├── DoctorTab.tsx           # System diagnostics
-│   │   ├── AssemblyTab.tsx         # Assembly guide
-│   │   ├── SelfLearnTab.tsx        # Self-learning
-│   │   ├── FaceTrackingTab.tsx     # Face tracking
-│   │   ├── TestingTab.tsx          # AI testing
-│   │   ├── LogsTab.tsx             # System logs
-│   │   ├── BootFlowPanel.tsx       # Boot flow
-│   │   └── MobileLayout.tsx        # Mobile responsive layout
-│   ├── lib/                        # 28 service modules
-│   │   ├── agents.ts               # Hermes + PicoClaw agent logic
-│   │   ├── agent-orchestrator.ts   # Multi-agent coordination
-│   │   ├── agents-sentinel.ts      # Safety monitoring agent
-│   │   ├── agents-navigator.ts     # Route planning agent
-│   │   ├── agents-comms.ts         # Communication guard agent
-│   │   ├── agents-data.ts          # Data steward agent
-│   │   ├── auth.ts                 # API key authentication
-│   │   ├── ai-memory.ts            # AI memory with sync
-│   │   ├── beep-alerts.ts          # Buzzer alert patterns
-│   │   ├── communication.ts        # Telegram, voice, GSM
-│   │   ├── constants.ts            # Platform constants
-│   │   ├── db.ts                   # Prisma client singleton
-│   │   ├── drivers.ts              # Hardware driver registry
-│   │   ├── extension.ts            # IDE extension bridge
-│   │   ├── face-tracking.ts        # Face detection engine
-│   │   ├── flash.ts                # Firmware flasher
-│   │   ├── gsm-module.ts           # GSM connectivity
-│   │   ├── hardware-bridge.ts      # Serial/I2C/SPI/GPIO bridge
-│   │   ├── llm.ts                  # LLM engine (multi-model)
-│   │   ├── mcp.ts                  # MCP JSON-RPC protocol
-│   │   ├── navigation.ts           # GPS, autopilot, RTH
-│   │   ├── power.ts                # Battery, solar, power mgmt
-│   │   ├── robot-templates.ts      # 9 robot templates
-│   │   ├── self-learn.ts           # Self-learning engine
-│   │   ├── sensor-config.ts        # Sensor configuration
-│   │   ├── simulator.ts            # Hardware simulation
-│   │   ├── telemetry.ts            # Telemetry aggregation
-│   │   ├── testing.ts              # AI-powered testing
-│   │   ├── types.ts                # TypeScript type definitions
-│   │   └── utils.ts                # Utility functions
-│   └── hooks/                      # Custom React hooks
-│       ├── use-toast.ts            # Toast notifications
-│       ├── use-mobile.ts           # Mobile detection
-│       ├── usePlatform.ts          # Platform detection (web/Tauri/Capacitor)
-│       └── use-sse.ts              # Server-Sent Events hook
-├── prisma/
-│   ├── schema.prisma               # 22 database models
-│   └── seed.ts                     # Sample data seeder
-├── e2e/                            # Playwright E2E tests
-│   ├── fixtures.ts                 # Test fixtures and mock data
-│   ├── helpers.ts                  # Test helper utilities
-│   ├── dashboard.spec.ts           # Dashboard & navigation tests
-│   ├── api-health.spec.ts          # API endpoint health checks
-│   ├── agents.spec.ts              # AI agent tab tests
-│   ├── hardware.spec.ts            # Hardware tab tests
-│   ├── missions.spec.ts            # Mission planning tests
-│   ├── navigation.spec.ts          # Navigation tab tests
-│   ├── flash.spec.ts               # Firmware flash tests
-│   └── power.spec.ts               # Power management tests
-├── src-tauri/                      # Tauri v2 desktop app
-│   ├── src/
-│   │   ├── main.rs                 # Rust entry point
-│   │   └── lib.rs                  # Tauri app builder
-│   ├── Cargo.toml                  # Rust dependencies
-│   ├── tauri.conf.json             # Tauri configuration
-│   ├── capabilities/default.json   # Permission grants
-│   └── icons/                      # Platform icons (Linux/Windows/macOS)
-├── android/                        # Capacitor Android project
-├── mini-services/                  # Mini service processes
-│   └── extension-ws/               # WebSocket extension bridge
-├── examples/
-│   └── websocket/                  # WebSocket examples
-├── .github/                        # GitHub templates & CI
-│   ├── ISSUE_TEMPLATE/             # Bug, feature, hardware templates
-│   ├── workflows/ci.yml            # CI pipeline (lint + E2E)
-│   ├── dependabot.yml              # Dependency updates
-│   ├── FUNDING.yml                 # Sponsorship
-│   └── PULL_REQUEST_TEMPLATE.md    # PR template
-├── .env.example                    # Environment template
-├── .gitignore                      # Comprehensive ignore rules
-├── ARCHITECTURE.md                 # Architecture documentation
-├── API.md                          # API reference documentation
-├── AGENTS.md                       # Agent system documentation
-├── TESTING.md                      # Testing documentation
-├── DEPLOYMENT.md                   # Deployment guide
-├── AUTHORS.md                      # Contributor credits
-├── CHANGELOG.md                    # Version history
-├── CONTRIBUTING.md                 # Contribution guidelines
-├── LICENSE                         # MIT License
-├── SECURITY.md                     # Security policy
-├── capacitor.config.ts             # Capacitor configuration
-├── next.config.ts                  # Next.js configuration
-├── package.json                    # Project manifest
-├── playwright.config.ts            # Playwright test configuration
-├── tailwind.config.ts              # Tailwind configuration
-└── tsconfig.json                   # TypeScript configuration
-```
-
----
-
-## Database Schema
-
-22 Prisma models covering the full robotics platform:
-
-| Model | Purpose |
-|-------|---------|
-| SystemConfig | Key-value system settings |
-| HardwareDevice | Connected hardware with status tracking |
-| HardwareProfile | HAL adapter configurations per device |
-| TelemetryReading | Time-series sensor/metric data |
-| Mission | Mission plans with waypoints and parameters |
-| MissionLog | Mission execution logs |
-| AgentMessage | Multi-agent communication (Hermes, PicoClaw, Sentinel, etc.) |
-| Session | User sessions with mode tracking |
-| Calibration | Calibration records and results |
-| SyncQueue | Offline-first data sync queue |
-| Alert | Notifications and safety alerts |
-| RobotTemplate | 9 built-in robot project templates |
-| RobotProject | User-created robot projects |
-| CommunicationChannel | Telegram, voice, GSM channels |
-| NavigationPlan | GPS tracks and autopilot routes |
-| PowerSource | Battery, solar, power monitoring |
-| AiMemory | Persistent AI memory with confidence |
-| VoiceLog | Speech transcription logs |
-| FaceProfile | Face recognition database |
-| HardwareBusState | Hardware bus status monitoring |
-| ExtensionConnection | IDE extension connections |
-| AgentTaskRecord | Orchestrated task queue (persistent) |
-| LearningRecord | Self-learning pattern records |
-
-### Performance Indexes
-
-Key database indexes for query performance:
-
-| Model | Indexed Fields |
-|-------|---------------|
-| HardwareDevice | `deviceType`, `status` |
-| TelemetryReading | `deviceId`, `metric`, `timestamp` |
-| Mission | `status`, `type` |
-| AgentMessage | `agent`, `timestamp` |
-| Alert | `isRead`, `level`, `timestamp` |
-| AgentTaskRecord | `agent`, `status`, `priority` |
-
----
-
-## Robot Templates
-
-| Template | Category | Description |
-|----------|----------|-------------|
-| Tricopter Drone | drone | 3-motor UAV for aerial mapping |
-| Quadcopter | drone | 4-motor UAV for photography & survey |
-| Hexacopter | drone | 6-motor heavy-lift UAV |
-| Rover | rover | 4-wheel ground vehicle |
-| Boat / USV | boat | Unmanned surface vessel |
-| Amphibious | amphibious | Land + water hybrid vehicle |
-| Robotic Arm | arm | Multi-DOF manipulator |
-| Blimp / Airship | drone | Lighter-than-air vehicle |
-| Custom | custom | Blank template for any Arduino project |
-
----
-
-## API Reference
-
-All endpoints are under `/api/`. See [API.md](API.md) for comprehensive documentation with request/response formats, authentication, and error codes.
-
-### Quick Reference
-
-#### Core System
-- `GET /api` — Health check
-- `GET/POST /api/system` — System configuration
-- `GET /api/doctor` — System diagnostics
-- `GET/POST /api/bootflow` — Boot sequence management
-
-#### Robots & Projects
-- `GET/POST /api/robot-templates` — List/create templates
-- `GET/PUT/DELETE /api/robot-templates/[id]` — Template CRUD
-- `GET/POST /api/projects` — List/create robot projects
-- `GET/PUT/DELETE /api/projects/[id]` — Project CRUD
-
-#### Hardware
-- `GET/POST /api/hardware` — List/register devices
-- `GET/POST /api/hardware-bridge` — Hardware bus operations
-- `GET/POST /api/drivers` — Driver management
-- `GET/POST /api/auto-detect` — Hardware auto-detection
-- `GET/POST /api/flash` — Firmware flashing
-
-#### AI & Agents
-- `GET/POST /api/agents` — Agent management
-- `POST /api/agents/chat` — Agent chat
-- `GET/POST /api/agents/orchestrate` — Agent orchestrator control
-- `GET/POST /api/agents/sentinel` — Sentinel safety monitoring
-- `POST /api/llm/chat` — LLM completions
-- `GET/POST /api/ai-memory` — AI memory CRUD
-- `GET/POST /api/self-learn` — Self-learning engine
-- `GET/POST /api/face-tracking` — Face tracking operations
-- `GET/POST /api/testing` — AI-powered testing
-
-#### Missions & Navigation
-- `GET/POST /api/missions` — Mission planning
-- `GET/PUT/DELETE /api/missions/[id]` — Mission CRUD
-- `GET/POST /api/navigation` — Navigation plans
-- `GET/PUT/DELETE /api/navigation/[id]` — Navigation CRUD
-
-#### Communications
-- `GET/POST /api/comms` — Communication channels
-- `GET/PUT/DELETE /api/comms/[id]` — Channel CRUD
-- `POST /api/comms/telegram` — Telegram bot
-- `POST /api/comms/voice` — Voice/TTS
-- `POST /api/comms/beep` — Beep alerts
-
-#### Telemetry & Monitoring
-- `GET/POST /api/telemetry` — Telemetry readings
-- `GET/POST /api/power` — Power source monitoring
-- `GET/POST /api/alerts` — Alert management
-- `GET/POST /api/calibration` — Calibration records
-
-#### Streaming (SSE)
-- `GET /api/stream/telemetry` — Real-time telemetry stream
-- `GET /api/stream/alerts` — Real-time alert stream
-- `GET /api/stream/testing` — Testing progress stream
-
-#### Integrations
-- `GET/POST /api/mcp` — MCP protocol
-- `POST /api/mcp/transport` — MCP JSON-RPC transport
-- `GET/POST /api/extension` — IDE extension bridge
-- `GET/POST /api/assembly` — Assembly step management
-
----
-
-## Environment Variables
-
-See [.env.example](.env.example) for a complete list with descriptions.
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | `file:./db/nanggroe-iot.db` | SQLite database path |
-| `NANGGROE_API_KEY` | No (prod: Yes) | — | API key for authenticating critical routes |
-| `ZAI_API_KEY` | No | — | Z-AI SDK key for cloud LLM |
-| `TELEGRAM_BOT_TOKEN` | No | — | Telegram bot token for Hermes |
-| `SERIAL_PORT` | No | `/dev/ttyUSB0` | Default serial port |
-| `SERIAL_BAUD_RATE` | No | `115200` | Serial baud rate |
-| `PORT` | No | `3000` | Server port |
-| `MCP_PORT` | No | `8080` | MCP protocol port |
-| `EXTENSION_WS_PORT` | No | `8081` | Extension WebSocket port |
-
----
-
-## CI/CD
-
-### GitHub Actions
-
-The project includes a CI pipeline (`.github/workflows/ci.yml`) that runs on every push and pull request:
-
-1. **Lint** — ESLint checks (`bun run lint`)
-2. **Type Check** — TypeScript compilation verification
-3. **E2E Tests** — Playwright test suite (`bun run test:e2e`)
-4. **Build** — Production build verification
-
-### Branch Protection
-
-- `main` branch requires passing CI checks
-- Pull requests require at least 1 review
-- Conventional commit messages enforced
-
----
+The dashboard will be available at `http://localhost:3000`. Connect your IoT devices using the provided client libraries or the WebSocket API.
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+Contributions are welcome! Please follow these steps:
 
-### Quick Contribution Steps
+1. **Fork** the repository
+2. Create a **feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. Open a **Pull Request**
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes
-4. Run `bun run lint` and fix any issues
-5. Run `bun run test:e2e` to verify no regressions
-6. Commit with conventional commits: `feat(scope): description`
-7. Push and open a Pull Request
+Please ensure your code passes all linting checks (`npm run lint`) and tests (`npm test`) before submitting.
 
----
+## Disclaimer
 
-## Documentation
+**For Education and Research Purpose Only**
 
-| Document | Description |
-|----------|-------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, data flow, deployment |
-| [API.md](API.md) | Comprehensive API reference (42+ endpoints) |
-| [AGENTS.md](AGENTS.md) | Agent system documentation (6 agents + orchestrator) |
-| [TESTING.md](TESTING.md) | E2E testing guide (183 tests, 8 spec files) |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment guide (Web, Desktop, Android, Raspberry Pi) |
-| [SECURITY.md](SECURITY.md) | Security policy and hardening |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
-
----
-
-## Security
-
-For security vulnerabilities, please **do not** open public issues. See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
-
-**Contact**: [mulkymalikudhr@mail.com](mailto:mulkymalikudhr@mail.com)
-
----
-
-## 👤 Author
-
-**Mulky Malikul Dhaher**
-- Email: [mulkymalikudhr@mail.com](mailto:mulkymalikudhr@mail.com)
-- GitHub: [mulkymalikuldhrs](https://github.com/mulkymalikuldhrs)
-
----
+This project is provided strictly for educational and research purposes. The authors and contributors assume **no responsibility or liability** for any damages, losses, or risks arising from the use of this software. **We do not bear any responsibility or risk** for how this software is used. Improper handling of hardware components through this platform may result in physical damage or injury — always follow proper safety protocols when working with electrical and robotic systems.
 
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
-```
-MIT License
-
-Copyright (c) 2025 Mulky Malikul Dhaher
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+Copyright © 2024-2026 Mulky Malikul Dhaher. All rights reserved.
 
 ---
 
-## ⚠️ Disclaimer
+## Author
 
-**For Education Purpose Only**
+**Mulky Malikul Dhaher**
+- GitHub: [mulkymalikuldhrs](https://github.com/mulkymalikuldhrs)
+- Email: mulkymalikudhr@mail.com
 
-This project is provided strictly for educational and research purposes. The authors and contributors assume **no responsibility or liability** for any damages, losses, or risks arising from the use of this software. **We do not bear any responsibility or risk** for how this software is used.
-
-**Contact:** Mulky Malikul Dhaher | mulkymalikudhr@mail.com
-
----
-
-<div align="center">
-
-**Built with ❤️ in Aceh, Indonesia**
-
-*From Aceh For The World — Dari Aceh Untuk Dunia*
-
-</div>
+<a href="https://github.com/mulkymalikuldhrs/nanggroe-iot">
+  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=100:103a10,50:0d2a0d,0:0a1a0a&height=100&section=footer" />
+</a>
