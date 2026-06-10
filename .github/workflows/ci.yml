@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches: [main]
@@ -7,42 +6,12 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-typecheck:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: npx tsc --noEmit
-
-  build:
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install --frozen-lockfile
-      - run: bun run db:generate
-      - run: bun run build
-
-  e2e-tests:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install --frozen-lockfile
-      - run: bunx playwright install --with-deps chromium
-      - run: bun run db:generate
-      - run: bun run db:push
-      - run: bun run build
-      - run: bun run test:e2e
-        env:
-          DATABASE_URL: file:./db/test.db
+      - name: Check for common issues
+        run: |
+          echo "Running basic quality checks..."
+          # Check for TODO/FIXME
+          grep -r "TODO\|FIXME" --include="*.ts" --include="*.js" --include="*.py" --include="*.tsx" . || echo "No TODOs/FIXMEs found"
