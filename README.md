@@ -1,4 +1,3 @@
-<img src="docs/banner.png" width="100%">
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0a1a0a,50:0d2a0d,100:103a10&height=220&section=header&text=Nanggroe%20IoT&fontSize=42&fontColor=22c55e&animation=fadeIn&fontAlignY=30&desc=Modular%20IoT%20%26%20Robotics%20Platform&descSize=16&descColor=a3e635&descAlignY=50" />
 
