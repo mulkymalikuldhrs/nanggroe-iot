@@ -306,6 +306,13 @@ git clone https://github.com/mulkymalikuldhrs/nanggroe-iot.git
 cd nanggroe-iot
 
 # Install dependencies
+
+<!-- AUTO-PACKAGE-BADGES:START -->
+<!-- Auto-generated package badges -->
+
+![npm version](https://img.shields.io/npm/v/nanggroe-iot?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/nanggroe-iot?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/nanggroe-iot?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.0.0-blue?style=flat-square)](https://www.npmjs.com/package/nanggroe-iot)
+
+<!-- AUTO-PACKAGE-BADGES:END -->
 npm install
 
 # Configure environment
