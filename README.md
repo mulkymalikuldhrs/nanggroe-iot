@@ -1,24 +1,21 @@
-<a href="https://github.com/mulkymalikuldhrs/nanggroe-iot">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0a1a0a,50:0d2a0d,100:103a10&height=200&section=header&text=Nanggroe%20IoT&fontSize=42&fontColor=22c55e&animation=fadeIn&fontAlignY=30&desc=Modular%20IoT%20%26%20Robotics%20Platform&descSize=16&descColor=a3e635&descAlignY=50" />
-</a>
+<img src="docs/banner.png" width="100%">
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:0a1a0a,50:0d2a0d,100:103a10&height=220&section=header&text=Nanggroe%20IoT&fontSize=42&fontColor=22c55e&animation=fadeIn&fontAlignY=30&desc=Modular%20IoT%20%26%20Robotics%20Platform&descSize=16&descColor=a3e635&descAlignY=50" />
+
+<div align="center">
+  <a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&duration=3000&pause=1000&color=22c55e&center=true&vCenter=true&width=700&lines=Modular+IoT+%2B+Robotics+Platform;Real-Time+Hardware+Control+and+Monitoring;TypeScript-Powered+Device+Orchestration;WebSocket-Driven+Live+Data+Streaming" alt="Typing SVG" />
+  </a>
+</div>
+
+<br/>
 
 <div align="center">
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=20&duration=3000&pause=1000&color=22c55e&center=true&vCenter=true&width=700&lines=Modular+IoT+%2B+Robotics+Platform;Real-Time+Hardware+Control+%26+Monitoring;TypeScript-Powered+Device+Orchestration;WebSocket-Driven+Live+Data+Streaming)](https://git.io/typing-svg)
-
-<br/>
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![IoT](https://img.shields.io/badge/IoT-Platform-22c55e?style=for-the-badge&logo=iot&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
-[![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-ffa500?style=for-the-badge&logo=websocket&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
-[![Version](https://img.shields.io/badge/Version-1.0.0-22c55e?style=for-the-badge&logo=semver&logoColor=white)](https://github.com/mulkymalikuldhrs/nanggroe-iot)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
-
-<br/>
-
-[![GitHub Stars](https://img.shields.io/github/stars/mulkymalikuldhrs/nanggroe-iot?style=for-the-badge&logo=github&color=gold)](https://github.com/mulkymalikuldhrs/nanggroe-iot/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/mulkymalikuldhrs/nanggroe-iot?style=for-the-badge&logo=github&color=blue)](https://github.com/mulkymalikuldhrs/nanggroe-iot/fork)
-[![GitHub Issues](https://img.shields.io/github/issues/mulkymalikulhrs/nanggroe-iot?style=for-the-badge&logo=github&color=red)](https://github.com/mulkymalikuldhrs/nanggroe-iot/issues)
+[![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-ffa500?style=for-the-badge&logo=websocket&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
 </div>
 
@@ -26,7 +23,7 @@
 
 ## Overview
 
-Nanggroe IoT is a modular IoT and robotics platform with real-time hardware control and monitoring. Built with TypeScript, it provides a unified dashboard for managing IoT devices, streaming sensor data, and controlling hardware components through a responsive web interface. The platform leverages WebSocket connections for bi-directional, low-latency communication between devices and the control plane, enabling instant command dispatch and live telemetry visualization.
+**Nanggroe IoT** is a modular IoT and robotics platform with real-time hardware control and monitoring. Built with TypeScript, it provides a unified dashboard for managing IoT devices, streaming sensor data, and controlling hardware components through a responsive web interface. The platform leverages WebSocket connections for bi-directional, low-latency communication between devices and the control plane, enabling instant command dispatch and live telemetry visualization.
 
 Whether you're orchestrating a fleet of sensors, controlling robotic actuators, or building a smart-environment dashboard — Nanggroe IoT provides the modular foundation to connect, monitor, and command your hardware with precision.
 
@@ -37,59 +34,9 @@ Whether you're orchestrating a fleet of sensors, controlling robotic actuators, 
 - **Sensor Dashboard** — Visualize sensor data with real-time charts, configurable alert thresholds, and historical trend analysis
 - **Modular Architecture** — Plugin-based system that allows you to add new device drivers, protocols, and UI widgets without touching the core
 - **Robotics Integration** — Control servo motors, actuators, and robotic arms with precision command scheduling and state feedback loops
-- **Alert & Automation Engine** — Define rule-based triggers that automatically respond to sensor threshold breaches with configurable actions
+- **Alert and Automation Engine** — Define rule-based triggers that automatically respond to sensor threshold breaches with configurable actions
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Nanggroe IoT Platform                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │   Web Client  │    │  Mobile App  │    │   CLI Tool   │      │
-│  │  (Dashboard)  │    │  (Remote)    │    │  (Terminal)  │      │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘      │
-│         │                   │                   │               │
-│         └───────────────────┼───────────────────┘               │
-│                             │                                   │
-│                    ┌────────▼────────┐                          │
-│                    │   API Gateway   │                          │
-│                    │  (REST + WS)    │                          │
-│                    └────────┬────────┘                          │
-│                             │                                   │
-│         ┌───────────────────┼───────────────────┐               │
-│         │                   │                   │               │
-│  ┌──────▼───────┐  ┌──────▼───────┐  ┌──────▼───────┐        │
-│  │   Device     │  │    Sensor    │  │  Automation  │        │
-│  │  Manager     │  │   Pipeline   │  │   Engine     │        │
-│  │              │  │              │  │              │        │
-│  │ • Register   │  │ • Ingest     │  │ • Rules      │        │
-│  │ • Config     │  │ • Transform  │  │ • Triggers   │        │
-│  │ • Monitor    │  │ • Store      │  │ • Actions    │        │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘        │
-│         │                  │                  │                │
-│         └──────────────────┼──────────────────┘                │
-│                            │                                    │
-│                   ┌────────▼────────┐                          │
-│                   │  Protocol Layer │                          │
-│                   │                 │                          │
-│                   │ • MQTT  • CoAP  │                          │
-│                   │ • HTTP  • WS    │                          │
-│                   │ • Serial • BLE  │                          │
-│                   └────────┬────────┘                          │
-│                            │                                    │
-│              ┌─────────────┼─────────────┐                     │
-│              │             │             │                     │
-│       ┌──────▼──┐   ┌────▼────┐   ┌────▼────┐               │
-│       │ Sensor  │   │ Actuator│   │ Robot   │               │
-│       │ Nodes   │   │ Modules │   │ Arms    │               │
-│       └─────────┘   └─────────┘   └─────────┘               │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Architecture & Data Flow Visualizations
+## Visual Architecture
 
 ### IoT Hub Architecture — Multi-Protocol Device Layer
 
@@ -104,7 +51,7 @@ graph TB
     subgraph Gateway["API Gateway"]
         REST["REST API<br/>HTTP Endpoints"]
         WS_GW["WebSocket Gateway<br/>Socket.io"]
-        Auth["Auth & Session<br/>JWT Tokens"]
+        Auth["Auth and Session<br/>JWT Tokens"]
     end
 
     subgraph Core["Core Services"]
@@ -342,21 +289,19 @@ flowchart LR
     style Viz fill:#064e3b,stroke:#10b981,color:#d1fae5
 ```
 
-> **Maturity Note**: Nanggroe IoT is under active development. The multi-protocol gateway (MQTT, HTTP, WebSocket) is the most mature layer. CoAP, Serial, and BLE integrations are in progress. The automation engine supports basic trigger/action rules — advanced condition chaining is on the roadmap. The Capacitor (Android) and Tauri (Desktop) builds are functional but may lack some features available in the web dashboard.
+> **Maturity Note:** Nanggroe IoT is under active development. The multi-protocol gateway (MQTT, HTTP, WebSocket) is the most mature layer. CoAP, Serial, and BLE integrations are in progress. The automation engine supports basic trigger/action rules — advanced condition chaining is on the roadmap. The Capacitor (Android) and Tauri (Desktop) builds are functional but may lack some features available in the web dashboard.
 
 ---
 
 ## Quick Start
 
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
+
+### Installation
+
 ```bash
-# Clone the repository
-
-<!-- AUTO-PACKAGE-BADGES:START -->
-<!-- Auto-generated package badges -->
-
-![npm version](https://img.shields.io/npm/v/nanggroe-iot?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/nanggroe-iot?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/nanggroe-iot?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.0.0-blue?style=flat-square)](https://www.npmjs.com/package/nanggroe-iot)
-
-<!-- AUTO-PACKAGE-BADGES:END -->
 git clone https://github.com/mulkymalikuldhrs/nanggroe-iot.git
 cd nanggroe-iot
 
@@ -392,18 +337,21 @@ This project is provided strictly for educational and research purposes. The aut
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 Copyright © 2024-2026 Mulky Malikul Dhaher. All rights reserved.
 
----
-
 ## Author
 
-**Mulky Malikul Dhaher**
-- GitHub: [mulkymalikuldhrs](https://github.com/mulkymalikuldhrs)
-- Email: mulkymalikudhr@mail.com
+<div align="center">
 
-<a href="https://github.com/mulkymalikuldhrs/nanggroe-iot">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=100:103a10,50:0d2a0d,0:0a1a0a&height=100&section=footer" />
-</a>
+**Mulky Malikul Dhaher**
+
+[![GitHub](https://img.shields.io/badge/GitHub-mulkymalikuldhrs-181717?style=flat-square&logo=github)](https://github.com/mulkymalikuldhrs)
+[![Email](https://img.shields.io/badge/Email-mulkymalikudhr@mail.com-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:mulkymalikudhr@mail.com)
+
+</div>
+
+---
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=100:103a10,50:0d2a0d,0:0a1a0a&height=100&section=footer" />
