@@ -89,6 +89,263 @@ Whether you're orchestrating a fleet of sensors, controlling robotic actuators, 
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+## Architecture & Data Flow Visualizations
+
+### IoT Hub Architecture — Multi-Protocol Device Layer
+
+```mermaid
+graph TB
+    subgraph Clients["Client Layer"]
+        Web["Web Dashboard<br/>Next.js 16"]
+        Android["Android App<br/>Capacitor"]
+        Desktop["Desktop App<br/>Tauri"]
+    end
+
+    subgraph Gateway["API Gateway"]
+        REST["REST API<br/>HTTP Endpoints"]
+        WS_GW["WebSocket Gateway<br/>Socket.io"]
+        Auth["Auth & Session<br/>JWT Tokens"]
+    end
+
+    subgraph Core["Core Services"]
+        Device_Mgr["Device Manager<br/>Register / Config"]
+        Sensor_Pipe["Sensor Pipeline<br/>Ingest / Transform"]
+        Auto_Engine["Automation Engine<br/>Rules / Triggers"]
+        Notif["Notification Service<br/>Alerts / Events"]
+    end
+
+    subgraph Protocol["Protocol Layer"]
+        MQTT_Broker["MQTT Broker<br/>Pub/Sub"]
+        CoAP_Server["CoAP Server<br/>Observe/Notify"]
+        HTTP_Endpoint["HTTP Endpoints<br/>REST Polling"]
+        Serial_Port["Serial Port<br/>UART / RS232"]
+        BLE_Gateway["BLE Gateway<br/>GATT Services"]
+    end
+
+    subgraph Devices["Device Layer"]
+        Sensors["Sensor Nodes<br/>Temp / Humidity / Motion"]
+        Actuators["Actuator Modules<br/>Relays / Motors"]
+        Robots["Robot Controllers<br/>Arms / Drones"]
+        Microcontrollers["MCU Boards<br/>ESP32 / Arduino"]
+    end
+
+    Clients --> Gateway
+    REST --> Core
+    WS_GW --> Core
+    Auth --> Core
+    Core --> Protocol
+    Protocol --> Devices
+
+    style Clients fill:#0d2137,stroke:#22d3ee,color:#e0f2fe
+    style Gateway fill:#1a1a2e,stroke:#8b5cf6,color:#e9d5ff
+    style Core fill:#064e3b,stroke:#10b981,color:#d1fae5
+    style Protocol fill:#4a1d0a,stroke:#f59e0b,color:#fef3c7
+    style Devices fill:#1c1917,stroke:#78716c,color:#fef3c7
+```
+
+### Device Communication Flow
+
+```mermaid
+flowchart LR
+    subgraph Device["IoT Device"]
+        Sensor_Read["Sensor Reading<br/>Analog/Digital"]
+        MCU_Process["MCU Processing<br/>Filter / Aggregate"]
+        Pack["Protocol Pack<br/>MQTT / CoAP / HTTP"]
+    end
+
+    subgraph Ingest["Protocol Gateway"]
+        MQTT_In["MQTT Ingest<br/>Topic Subscribe"]
+        CoAP_In["CoAP Ingest<br/>Observe Register"]
+        HTTP_In["HTTP Ingest<br/>POST Polling"]
+        Serial_In["Serial Ingest<br/>Stream Parse"]
+        BLE_In["BLE Ingest<br/>GATT Read"]
+    end
+
+    subgraph Hub["Nanggroe IoT Hub"]
+        Router["Message Router<br/>Protocol Normalizer"]
+        Transform["Data Transform<br/>Unit Conversion"]
+        Validate["Schema Validate<br/>Type Checking"]
+        Store["Time-Series Store<br/>Historical Data"]
+        Emit["Event Emitter<br/>Socket.io Broadcast"]
+    end
+
+    subgraph Dashboard["Dashboard"]
+        Live_Chart["Live Charts<br/>Real-Time Plot"]
+        Alert_Check["Alert Check<br/>Threshold Monitor"]
+        History["History View<br/>Trend Analysis"]
+    end
+
+    Sensor_Read --> MCU_Process --> Pack
+    Pack -->|"MQTT"| MQTT_In
+    Pack -->|"CoAP"| CoAP_In
+    Pack -->|"HTTP"| HTTP_In
+    Pack -->|"Serial"| Serial_In
+    Pack -->|"BLE"| BLE_In
+    MQTT_In --> Router
+    CoAP_In --> Router
+    HTTP_In --> Router
+    Serial_In --> Router
+    BLE_In --> Router
+    Router --> Transform --> Validate --> Store --> Emit
+    Emit --> Live_Chart
+    Emit --> Alert_Check
+    Store --> History
+
+    style Device fill:#1e293b,stroke:#64748b,color:#e2e8f0
+    style Ingest fill:#0f172a,stroke:#f59e0b,color:#fef3c7
+    style Hub fill:#064e3b,stroke:#10b981,color:#d1fae5
+    style Dashboard fill:#1a1a2e,stroke:#8b5cf6,color:#e9d5ff
+```
+
+### Automation Engine — Trigger / Condition / Action Pipeline
+
+```mermaid
+flowchart TD
+    subgraph Triggers["Trigger Sources"]
+        Thresh["Threshold Trigger<br/>Sensor > Limit"]
+        Schedule["Schedule Trigger<br/>Cron / Interval"]
+        Event["Event Trigger<br/>Device Online/Offline"]
+        Manual["Manual Trigger<br/>User Action"]
+    end
+
+    subgraph Conditions["Condition Evaluator"]
+        Logic_AND["AND Logic<br/>All Must Match"]
+        Logic_OR["OR Logic<br/>Any Must Match"]
+        Time_Cond["Time Window<br/>Active Hours"]
+        Value_Comp["Value Compare<br/>GT / LT / EQ"]
+    end
+
+    subgraph Actions["Action Executors"]
+        Send_Cmd["Send Command<br/>Device Control"]
+        Push_Notif["Push Notification<br/>Alert User"]
+        Log_Event["Log Event<br/>Audit Trail"]
+        Webhook["Call Webhook<br/>External API"]
+        Chain["Chain Trigger<br/>Cascade Rules"]
+    end
+
+    Thresh --> Logic_AND
+    Schedule --> Logic_OR
+    Event --> Logic_AND
+    Manual --> Logic_OR
+    Logic_AND --> Time_Cond
+    Logic_OR --> Value_Comp
+    Time_Cond --> Send_Cmd
+    Value_Comp --> Push_Notif
+    Time_Cond --> Log_Event
+    Value_Comp --> Webhook
+    Send_Cmd --> Chain
+    Push_Notif --> Chain
+
+    style Triggers fill:#1e3a5f,stroke:#3b82f6,color:#dbeafe
+    style Conditions fill:#4a1d0a,stroke:#f59e0b,color:#fef3c7
+    style Actions fill:#064e3b,stroke:#10b981,color:#d1fae5
+```
+
+### Multi-Platform Client Architecture
+
+```mermaid
+graph TB
+    subgraph Shared["Shared Codebase"]
+        TS["TypeScript Core<br/>Business Logic"]
+        Components["UI Components<br/>React Components"]
+        API_Client["API Client<br/>HTTP + WebSocket"]
+        State["State Management<br/>Device Tree Store"]
+    end
+
+    subgraph Web["Web — Next.js 16"]
+        SSR["SSR / SSG<br/>Server Rendering"]
+        Web_Runtime["Browser Runtime<br/>Service Worker"]
+    end
+
+    subgraph Mobile["Mobile — Capacitor"]
+        Android_Runtime["Android Runtime<br/>WebView Native"]
+        Native_Plugins["Native Plugins<br/>BLE / Serial"]
+        Push_Mobile["Push Notifications<br/>FCM"]
+    end
+
+    subgraph Desktop["Desktop — Tauri"]
+        Rust_Backend["Rust Backend<br/>System Access"]
+        Serial_Native["Native Serial<br/>Direct UART"]
+        Sys_Tray["System Tray<br/>Background Mode"]
+    end
+
+    TS --> SSR
+    TS --> Web_Runtime
+    TS --> Android_Runtime
+    TS --> Native_Plugins
+    TS --> Rust_Backend
+    TS --> Serial_Native
+    Components --> SSR
+    Components --> Web_Runtime
+    Components --> Android_Runtime
+    API_Client --> Web_Runtime
+    API_Client --> Android_Runtime
+    API_Client --> Rust_Backend
+    State --> Web_Runtime
+    State --> Android_Runtime
+    State --> Rust_Backend
+    Native_Plugins --> Push_Mobile
+
+    style Shared fill:#0f172a,stroke:#8b5cf6,color:#e9d5ff
+    style Web fill:#0d2137,stroke:#22d3ee,color:#e0f2fe
+    style Mobile fill:#064e3b,stroke:#10b981,color:#d1fae5
+    style Desktop fill:#1c1917,stroke:#f59e0b,color:#fef3c7
+```
+
+### Sensor Data Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Source["Data Source"]
+        Raw_Sensor["Raw Sensor<br/>Analog Reading"]
+        Device_Meta["Device Metadata<br/>ID / Type / Location"]
+    end
+
+    subgraph Ingestion["Ingestion Layer"]
+        Collector["Data Collector<br/>Protocol Adapter"]
+        Buffer["Ring Buffer<br/>Batch Window"]
+        Parser["Message Parser<br/>Schema Decode"]
+    end
+
+    subgraph Processing["Processing Layer"]
+        Normalize["Normalize<br/>Unit Conversion"]
+        Filter["Filter<br/>Outlier Removal"]
+        Aggregate["Aggregate<br/>Mean / Max / Min"]
+        Enrich["Enrich<br/>Add Timestamps"]
+    end
+
+    subgraph Storage["Storage"]
+        TimeDB["Time-Series DB<br/>Historical Store"]
+        Cache["Redis Cache<br/>Latest Values"]
+    end
+
+    subgraph Viz["Visualization"]
+        Realtime["Real-Time Charts<br/>Live Streaming"]
+        Timeline["Timeline View<br/>Historical Zoom"]
+        Export["Export<br/>CSV / JSON"]
+    end
+
+    Raw_Sensor --> Collector
+    Device_Meta --> Collector
+    Collector --> Buffer --> Parser
+    Parser --> Normalize --> Filter --> Aggregate --> Enrich
+    Enrich --> TimeDB
+    Enrich --> Cache
+    Cache --> Realtime
+    TimeDB --> Timeline
+    TimeDB --> Export
+
+    style Source fill:#1e293b,stroke:#64748b,color:#e2e8f0
+    style Ingestion fill:#1e3a5f,stroke:#3b82f6,color:#dbeafe
+    style Processing fill:#0f172a,stroke:#8b5cf6,color:#e9d5ff
+    style Storage fill:#4a1d0a,stroke:#f59e0b,color:#fef3c7
+    style Viz fill:#064e3b,stroke:#10b981,color:#d1fae5
+```
+
+> **Maturity Note**: Nanggroe IoT is under active development. The multi-protocol gateway (MQTT, HTTP, WebSocket) is the most mature layer. CoAP, Serial, and BLE integrations are in progress. The automation engine supports basic trigger/action rules — advanced condition chaining is on the roadmap. The Capacitor (Android) and Tauri (Desktop) builds are functional but may lack some features available in the web dashboard.
+
+---
+
 ## Quick Start
 
 ```bash
